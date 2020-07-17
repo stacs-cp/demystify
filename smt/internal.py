@@ -60,6 +60,9 @@ class Solver:
             self._conmap[var] = c
             self._conlits.add(var)
 
+        # Used for tracking in push/pop/addLits
+        self._stackknownlits = []
+        self._knownlits = []
 
     def puzzle(self):
         return self._puzzle
@@ -152,12 +155,25 @@ class Solver:
     def addLit(self, lit, val):
         if val:
             self._solver.add(lit)
+            self._knownlits.append(lit)
         else:
             self._solver.add(z3.Not(lit))
+            self._knownlits.append(z3.Not(lit))
 
     # Storing and restoring assignments
     def push(self):
         self._solver.push()
+        self._stackknownlits.append(copy.deepcopy(self._knownlits))
     
     def pop(self):
         self._solver.pop()
+        self._knownlits = self._stackknownlits.pop()
+
+    
+    def explain(self, var):
+        if var in self._puzlits:
+            return str(self._puzlits)
+        if var in self._conlits:
+            return self._conmap[var].explain([])
+        else:
+            return "???"

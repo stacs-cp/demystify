@@ -7,11 +7,18 @@ class EqVal:
         self.val = val
         self.equal = True
 
+    def __str__(self):
+        return "{} is {}".format(self.var, self.val)
+
 class NeqVal:
     def __init__(self, var, val):
         self.var = var
         self.val = val
         self.equal = False
+
+    def __str__(self):
+        return "{} is not {}".format(self.var, self.val)
+
 
 class Clause:
     def __init__(self, name, clause, clausenames=None):
@@ -27,7 +34,7 @@ class Clause:
         remainingchoices = []
 
         for i in range(len(self._clause)):
-            if -self._clause[i] not in knownvars:
+            if self._clause[i] not in knownvars:
                 remainingchoices.append(self._clausenames[i])
 
         exp = self._name + " (Choices are: " + ", ".join(remainingchoices) + ")"
@@ -85,14 +92,11 @@ from .utils import flatten
 class Var:
     def __init__(self, name, dom):
         self._lits = {k:Bool("{} is {}".format(name,k)) for k in dom}
-        self._name = name
+        self._name = str(name)
     
     def litmap(self):
         return self._lits
     
-
-    def name(self):
-        return self._name
 
     # partial allows some variables to be unassigned
     def modelToAssignment(self, model, partial=False):
@@ -114,6 +118,9 @@ class Var:
             return []
         else:
             return self._lits[assignment]
+
+    def __str__(self):
+        return self._name
 
 class VarMatrix:
     def __init__(self, varname, dim, dom):

@@ -118,13 +118,13 @@ while len(puzlits) > 0:
     if smallest == 2:
         print("Doing some simple deductions: ")
         for p in [k for k in musdict.keys() if len(musdict[k]) == 2]:
-            print("Setting ", p, " is ", fullsolution[p])
+            print("Setting ", p, " is ", fullsolution[p], " because ", [solver.explain(c) for c in musdict[p]])
             solver.addLit(p, fullsolution[p])
             puzlits.remove(p)
     else:
         # Find first thing with smallest value
         p = [k for k in musdict.keys() if len(musdict[k]) == smallest][0]
-        print("Setting ", p, " is ", fullsolution[p], " with complexity ", smallest, ":", musdict[p])
+        print("Setting ", p, " is ", fullsolution[p], " because ", [solver.explain(c) for c in musdict[p]])
         solver.addLit(p, fullsolution[p])
         puzlits.remove(p)
         
