@@ -33,7 +33,7 @@ def NeqVal(var, val: int) -> Lit:
     return Lit(var, val, False)
 
 class Clause:
-    def __init__(self, name:str, clause:list, clausenames=None):
+    def __init__(self, name:str, clause:Sequence[str], clausenames=None):
         self._name = name
         self._clause = clause
         self._clausenames = clausenames
@@ -125,7 +125,6 @@ class Var:
         return lits[0]
 
     def assignmentToModel(self, assignment):
-        print(":", assignment, ":", self._dom)
         if assignment is None:
             return []
         else:

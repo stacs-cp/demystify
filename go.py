@@ -119,16 +119,16 @@ for i in range(3):
             musdict[p] = mus
     smallest = min([len(v) for v in musdict.values()])
     print("Smallest mus size:", smallest)
-    # Every set is always at least 2, because the 'p.neg()' comes first
-    if smallest == 2:
+
+    if smallest == 1:
         print("Doing some simple deductions: ")
-        for p in [k for k in musdict.keys() if len(musdict[k]) == 2]:
+        for p in [k for k in musdict if len(musdict[k]) == 1]:
             print("Setting ", p, " because ", [solver.explain(c) for c in musdict[p]])
             solver.addLit(p)
             puzlits.remove(p)
     else:
         # Find first thing with smallest value
-        p = [k for k in musdict.keys() if len(musdict[k]) == smallest][0]
+        p = [k for k in musdict if len(musdict[k]) == smallest][0]
         print("Setting ", p, " because ", [solver.explain(c) for c in musdict[p]])
         solver.addLit(p)
         puzlits.remove(p)

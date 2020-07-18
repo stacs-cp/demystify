@@ -16,7 +16,6 @@ def buildCage(name, cells, dom):
                         "{} and {} cannot both be {} as they are both in {}".format(
                             c1, c2, v, name
                         ),
-
                         [NeqVal(c1,v),NeqVal(c2,v)],
                     )
                 )
@@ -26,30 +25,31 @@ def buildCage(name, cells, dom):
             Clause(
                 "Some cell in {} must be {}".format(name, v),
                 [EqVal(c,v) for c in cells],
+                [str(c) for c in cells]
             )
         )
 
     return constraints
 
 
-def alldiffRowsCols(vars):
-    (x,y)=vars.dim()
-    dom = vars.domain()
+def alldiffRowsCols(varmat):
+    (x,y)=varmat.dim()
+    dom = varmat.domain()
 
     constraints = []
 
     for col in range(y):
-        constraints += buildCage("column {}".format(col+1), [vars[i][col] for i in range(x)], dom)
+        constraints += buildCage("column {}".format(col+1), [varmat[i][col] for i in range(x)], dom)
 
     for row in range(x):
-        constraints += buildCage("row {}".format(row+1), [vars[row][i] for i in range(y)], dom)
+        constraints += buildCage("row {}".format(row+1), [varmat[row][i] for i in range(y)], dom)
 
 
     return constraints
 
 # This requires a square matrix, of length n*n for some n
-def boxConstraints(vars):
-    (x,y) = vars.dim()
+def boxConstraints(varmat):
+    (x,y) = varmat.dim()
 
     s = math.isqrt(x)
 
@@ -59,15 +59,15 @@ def boxConstraints(vars):
     constraints = []
     for i in range(0, s*s, s):
         for j in range(0, s*s, s):
-            v = [vars[i+x][j+y] for x in range(s) for y in range(s)]
-            constraints += buildCage("the cage starting at top-left position ({},{})".format(i,j), v, vars.domain())
+            v = [varmat[i+x][j+y] for x in range(s) for y in range(s)]
+            constraints += buildCage("the cage starting at top-left position ({},{})".format(i,j), v, varmat.domain())
     
     return constraints
 
-def basicSudoku(vars):
+def basicSudoku(varmat):
     constraints = []
 
-    constraints += alldiffRowsCols(vars)
-    constraints += boxConstraints(vars)
+    constraints += alldiffRowsCols(varmat)
+    constraints += boxConstraints(varmat)
 
     return constraints

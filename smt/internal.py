@@ -10,9 +10,6 @@ from .utils import flatten
 
 from .base import EqVal, NeqVal
 
-def Bool(name):
-    return z3.Bool(name)
-
 # A variable is a dictionary mapping values to their SAT variable
 
 
