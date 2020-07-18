@@ -1,4 +1,5 @@
 import smt
+import smt.internal
 import buildpuz
 
 import copy

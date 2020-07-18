@@ -1,6 +1,7 @@
-from .internal import *
 import itertools
 
+
+# Represent 'var == val'
 class EqVal:
     def __init__(self, var, val):
         self.var = var
@@ -9,7 +10,17 @@ class EqVal:
 
     def __str__(self):
         return "{} is {}".format(self.var, self.val)
+    
+    def __eq__(self, other):
+        return (self.var, self.val, self.equal) == (other.var, other.val, other.equal)
+    
+    def __hash__(self):
+        return (self.var, self.val, self.equal).__hash__()
 
+    def neg(self):
+        return NeqVal(self.var, self.val)
+
+# Represent 'var != val'
 class NeqVal:
     def __init__(self, var, val):
         self.var = var
@@ -18,6 +29,22 @@ class NeqVal:
 
     def __str__(self):
         return "{} is not {}".format(self.var, self.val)
+
+    def __eq__(self, other):
+        return (self.var, self.val, self.equal) == (other.var, other.val, other.equal)
+    
+    def __hash__(self):
+        return (self.var, self.val, self.equal).__hash__()
+
+    def neg(self):
+        return EqVal(self.var, self.val)
+
+# Helper method to create an EqVal or NeqVal, based on a boolean
+def makeLit(var, val, equal):
+    if equal:
+        return EqVal(var, val)
+    else:
+        return NeqVal(var,val)
 
 
 class Clause:
@@ -91,12 +118,16 @@ from .utils import flatten
 
 class Var:
     def __init__(self, name, dom):
-        self._lits = {k:Bool("{} is {}".format(name,k)) for k in dom}
+        self._dom = dom
+        #self._lits = {k:Bool("{} is {}".format(name,k)) for k in dom}
         self._name = str(name)
     
+    def dom(self):
+        return self._dom
+
     # partial allows some variables to be unassigned
     def modelToAssignment(self, model, partial=False):
-        lits = [k for k in self._lits.keys() if model[self._lits[k]]]
+        lits = [k for k in self._dom if EqVal(self, k) in model]
         # Nothing should ever be assigned more than once!
         assert len(lits) <= 1
         if partial:
@@ -110,10 +141,12 @@ class Var:
         return lits[0]
 
     def assignmentToModel(self, assignment):
+        print(":", assignment, ":", self._dom)
+        assert assignment in self._dom
         if assignment is None:
             return []
         else:
-            return self._lits[assignment]
+            return EqVal(self, assignment)
 
     def __str__(self):
         return self._name
