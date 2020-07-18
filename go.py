@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import smt
 import smt.internal
 import buildpuz
@@ -67,9 +69,9 @@ print(puz.modelToAssignment(model, partial=True))
 # Now, let's get an actual Sudoku!
 
 #str = "600120384008459072000006005000264030070080006940003000310000050089700000502000190"
-str = "093004560060003140004608309981345000347286951652070483406002890000400010029800034"
+sudokustr = "093004560060003140004608309981345000347286951652070483406002890000400010029800034"
 
-l = [int(c) for c in str]
+l = [int(c) for c in sudokustr]
 
 sudoku = [l[i:i+9] for i in range(0, len(l), 9)]
 
@@ -90,6 +92,9 @@ sudokumodel = puz.assignmentToModel([sudoku])
 
 fullsolution = solver.solveSingle(sudokumodel)
 
+# The full solution is an extension of sudokumodel to all literals
+assert set(sudokumodel).issubset(set(fullsolution))
+
 print(puz.modelToAssignment(fullsolution))
 
 # Start by 'pushing' the state of the solver. This lets us revert later
@@ -97,36 +102,34 @@ solver.push()
 
 # Then we 'add' all the assignments that we know (this is what we can undo later with a 'pop')
 for s in sudokumodel:
-    solver.addLit(s, True)
+    solver.addLit(s)
 
 # The 'puzlits' are all the booleans we have to solve
-puzlits = solver.puzlits()
-
 # Start by finding the ones which are not part of the known values
-puzlits = [p for p in puzlits if p not in sudokumodel]
+puzlits = [p for p in fullsolution if p not in sudokumodel]
 
 # Now, we need to check each one in turn to see which is 'cheapest'
 #while len(puzlits) > 0:
 for i in range(3):
     musdict = {}
     for p in puzlits:
-        mus = solver.MUS([p != fullsolution[p]], 50)
+        mus = solver.MUS([p.neg()], 50)
         if mus is not None:
             # print(p, ":", len(mus))
             musdict[p] = mus
     smallest = min([len(v) for v in musdict.values()])
     print("Smallest mus size:", smallest)
-    # Every set is always at least 2, because the 'p != fullsolution[p]' comes first
+    # Every set is always at least 2, because the 'p.neg()' comes first
     if smallest == 2:
         print("Doing some simple deductions: ")
         for p in [k for k in musdict.keys() if len(musdict[k]) == 2]:
-            print("Setting ", p, " is ", fullsolution[p], " because ", [solver.explain(c) for c in musdict[p]])
-            solver.addLit(p, fullsolution[p])
+            print("Setting ", p, " because ", [solver.explain(c) for c in musdict[p]])
+            solver.addLit(p)
             puzlits.remove(p)
     else:
         # Find first thing with smallest value
         p = [k for k in musdict.keys() if len(musdict[k]) == smallest][0]
-        print("Setting ", p, " is ", fullsolution[p], " because ", [solver.explain(c) for c in musdict[p]])
-        solver.addLit(p, fullsolution[p])
+        print("Setting ", p, " because ", [solver.explain(c) for c in musdict[p]])
+        solver.addLit(p)
         puzlits.remove(p)
         

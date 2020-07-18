@@ -1,11 +1,14 @@
 # This files includes all code which needs to actually call the SMT solver
 
-import z3
 import random
 import copy
+import types
+
+import z3
+
 from .utils import flatten
 
-from .base import EqVal, NeqVal, makeLit
+from .base import EqVal, NeqVal
 
 def Bool(name):
     return z3.Bool(name)
@@ -82,9 +85,6 @@ class Solver:
     def puzzle(self):
         return self._puzzle
 
-    def puzlits(self):
-        return self._puzlits
-
     def _buildConstraint(self, constraint):
         cs = constraint.clauseset()
         z3clauses = [z3.Or([self._varlit2smtmap[lit] for lit in c]) for c in cs]
@@ -95,7 +95,7 @@ class Solver:
             return z3.And(z3clauses)
     
     # Check if there is a single solution, or return 'None'
-    def _solve(self, smtassume = []):
+    def _solve(self, smtassume = tuple()):
         result = self._solver.check(self._conlits.union(smtassume))
         if result == z3.sat:
             return self._solver.model()
@@ -113,8 +113,8 @@ class Solver:
                 ret.append(self._varsmt2neglitmap[l])
         return ret
 
-    def solve(self, assume = []):
-        smtassume = [self._lit2smtmap[l] for l in assume]
+    def solve(self, assume = tuple()):
+        smtassume = [self._varlit2smtmap[l] for l in assume]
         sol = self._solve(smtassume)
         if sol is None:
             return None
@@ -123,8 +123,8 @@ class Solver:
 
     # This is the same as 'solve', but checks if there are many solutions,
     # returning Solver.Multiple if there is more than one solution
-    def solveSingle(self, assume = []):
-        smtassume = [self._lit2smtmap[l] for l in assume]
+    def solveSingle(self, assume = tuple()):
+        smtassume = [self._varlit2smtmap[l] for l in assume]
         sol = self._solve(smtassume)
         if sol is None:
             return None
@@ -135,7 +135,6 @@ class Solver:
         # At least one variable must take a different variable
         clause = []
         for l in self._varsmt:
-            assert sol[l] == True or sol[l] == False
             clause.append(l != sol[l])
         self._solver.add(z3.Or(clause))
 
@@ -143,10 +142,7 @@ class Solver:
 
         self._solver.pop()
 
-
         if newsol is None:
-            ret = []
-
             return self.var_smt2lits(sol)
         else:
             return self.Multiple
@@ -159,7 +155,7 @@ class Solver:
         return core
 
     def MUS(self, assume = [], earlycutsize = None):
-        smtassume = [self._lit2smtmap[l] for l in assume]
+        smtassume = [self._varlit2smtmap[l] for l in assume]
 
         core = self.basicCore(set(smtassume).union(self._conlits))
         # Should never be satisfiable on the first pass
@@ -197,15 +193,11 @@ class Solver:
                 if newcore is not None:
                     core = newcore
         
-        return [self._conmap(x) for x in core if x in self._conmap]
+        return [self._conmap[x] for x in core if x in self._conmap]
 
-    def addLit(self, lit, val):
-        if val:
-            self._solver.add(lit)
-            self._knownlits.append(lit)
-        else:
-            self._solver.add(z3.Not(lit))
-            self._knownlits.append(z3.Not(lit))
+    def addLit(self, lit):
+        self._solver.add(self._varlit2smtmap[lit])
+        self._knownlits.append(lit)
 
     # Storing and restoring assignments
     def push(self):
@@ -217,10 +209,5 @@ class Solver:
         self._knownlits = self._stackknownlits.pop()
 
     
-    def explain(self, var):
-        if var in self._puzlits:
-            return str(self._puzlits)
-        if var in self._conlits:
-            return self._conmap[var].explain([])
-        else:
-            return "???"
+    def explain(self, c):
+        return c.explain(self._knownlits)

@@ -1,67 +1,52 @@
 import itertools
 
+from typing import Sequence
+
+from .utils import flatten
 
 # Represent 'var == val'
-class EqVal:
-    def __init__(self, var, val):
+class Lit:
+    def __init__(self, var, val: int, equal: bool):
         self.var = var
         self.val = val
-        self.equal = True
+        self.equal = equal
 
-    def __str__(self):
-        return "{} is {}".format(self.var, self.val)
+    def __repr__(self) -> str:
+        if self.equal:
+            return "{} is {}".format(self.var, self.val)
+        else:
+            return "{} is not {}".format(self.var, self.val)
     
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return (self.var, self.val, self.equal) == (other.var, other.val, other.equal)
     
     def __hash__(self):
         return (self.var, self.val, self.equal).__hash__()
 
     def neg(self):
-        return NeqVal(self.var, self.val)
+        return Lit(self.var, self.val, not self.equal)
 
-# Represent 'var != val'
-class NeqVal:
-    def __init__(self, var, val):
-        self.var = var
-        self.val = val
-        self.equal = False
+def EqVal(var, val: int) -> Lit:
+    return Lit(var, val, True)
 
-    def __str__(self):
-        return "{} is not {}".format(self.var, self.val)
-
-    def __eq__(self, other):
-        return (self.var, self.val, self.equal) == (other.var, other.val, other.equal)
-    
-    def __hash__(self):
-        return (self.var, self.val, self.equal).__hash__()
-
-    def neg(self):
-        return EqVal(self.var, self.val)
-
-# Helper method to create an EqVal or NeqVal, based on a boolean
-def makeLit(var, val, equal):
-    if equal:
-        return EqVal(var, val)
-    else:
-        return NeqVal(var,val)
-
+def NeqVal(var, val: int) -> Lit:
+    return Lit(var, val, False)
 
 class Clause:
-    def __init__(self, name, clause, clausenames=None):
+    def __init__(self, name:str, clause:list, clausenames=None):
         self._name = name
         self._clause = clause
         self._clausenames = clausenames
         self._frozen = frozenset([frozenset(self._clause)])
 
     def explain(self, knownvars):
-        if self._clausenames == None:
+        if self._clausenames is None:
             return self._name
 
         remainingchoices = []
 
         for i in range(len(self._clause)):
-            if self._clause[i] not in knownvars:
+            if self._clause[i].neg() not in knownvars:
                 remainingchoices.append(self._clausenames[i])
 
         exp = self._name + " (Choices are: " + ", ".join(remainingchoices) + ")"
@@ -82,7 +67,7 @@ class ClauseList:
         self._name = name
         self._clauses = frozenset([frozenset(c) for c in clauses])
 
-    def explain(self, knownvars):
+    def explain(self, _):
         return self._name
 
     def clauseset(self):
@@ -114,10 +99,9 @@ def cellHasValue(var,dom):
         )
 
     return clauses
-from .utils import flatten
 
 class Var:
-    def __init__(self, name, dom):
+    def __init__(self, name:str, dom:Sequence[int]):
         self._dom = dom
         #self._lits = {k:Bool("{} is {}".format(name,k)) for k in dom}
         self._name = str(name)
@@ -142,13 +126,13 @@ class Var:
 
     def assignmentToModel(self, assignment):
         print(":", assignment, ":", self._dom)
-        assert assignment in self._dom
         if assignment is None:
             return []
         else:
+            assert assignment in self._dom
             return EqVal(self, assignment)
 
-    def __str__(self):
+    def __repr__(self):
         return self._name
 
 class VarMatrix:
