@@ -94,10 +94,6 @@ class Var:
         self._lits = {k:Bool("{} is {}".format(name,k)) for k in dom}
         self._name = str(name)
     
-    def litmap(self):
-        return self._lits
-    
-
     # partial allows some variables to be unassigned
     def modelToAssignment(self, model, partial=False):
         lits = [k for k in self._lits.keys() if model[self._lits[k]]]

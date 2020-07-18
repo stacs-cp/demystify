@@ -11,9 +11,9 @@ def Bool(name):
 # A variable is a dictionary mapping values to their SAT variable
 def buildLit(lit):
     if lit.equal:
-        return lit.var.litmap()[lit.val]
+        return lit.var._lits[lit.val]
     else:
-        return z3.Not(lit.var.litmap()[lit.val])
+        return z3.Not(lit.var._lits[lit.val])
 
 def buildConstraint(constraint):
     cs = constraint.clauseset()
@@ -36,7 +36,7 @@ class Solver:
         self._conlits = set()
 
         # Quick access to every boolean which represents a puzzle variable
-        self._puzlits = flatten([list(v.litmap().values()) for mat in self._puzzle.vars() for v in mat.varlist()])
+        self._puzlits = flatten([list(v._lits.values()) for mat in self._puzzle.vars() for v in mat.varlist()])
 
         # Unique identifier for each introduced variable
         count = 0

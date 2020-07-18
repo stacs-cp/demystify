@@ -105,7 +105,8 @@ puzlits = solver.puzlits()
 puzlits = [p for p in puzlits if p not in sudokumodel]
 
 # Now, we need to check each one in turn to see which is 'cheapest'
-while len(puzlits) > 0:
+#while len(puzlits) > 0:
+for i in range(3):
     musdict = {}
     for p in puzlits:
         mus = solver.MUS([p != fullsolution[p]], 50)
