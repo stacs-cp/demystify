@@ -1,3 +1,5 @@
+import math
+
 from typing import List
 # Some boring utility functions
 
@@ -11,3 +13,8 @@ def flatten_internal(arr):
 
 def flatten(arr:List) -> List:
   return list(flatten_internal(arr))
+
+def intsqrt(i: int) -> int:
+  root = int(math.sqrt(i) + 0.5)
+  assert root*root == i
+  return root

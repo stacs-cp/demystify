@@ -2,7 +2,7 @@ import math
 
 from itertools import combinations
 from smt.base import *
-
+from smt.utils import intsqrt
 
 def buildCage(name, cells, dom):
     constraints = []
@@ -51,7 +51,7 @@ def alldiffRowsCols(varmat):
 def boxConstraints(varmat):
     (x,y) = varmat.dim()
 
-    s = math.isqrt(x)
+    s = intsqrt(x)
 
     assert x==y
     assert s*s==x
