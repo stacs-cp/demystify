@@ -1,8 +1,8 @@
 import math
 
 from itertools import combinations
-from smt.base import *
-from smt.utils import intsqrt
+from puzsmt.base import *
+from puzsmt.utils import intsqrt
 
 def buildCage(name, cells, dom):
     constraints = []

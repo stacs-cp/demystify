@@ -4,19 +4,18 @@ import random
 import copy
 import types
 
-import z3
-
 from .utils import flatten
 
 from .base import EqVal, NeqVal
 
 # A variable is a dictionary mapping values to their SAT variable
 
+from .solvers.z3impl import Z3Solver
 
 class Solver:
     def __init__(self, puzzle):
         self._puzzle = puzzle
-        self._solver = z3.Solver()
+        self._solver = Z3Solver()
 
         # Map from internal booleans to constraints
         self._conmap = {}
@@ -26,7 +25,7 @@ class Solver:
 
         # Set up variable mappings -- we make a bunch as we need these to be fast.
         # 'lit' refers to base.EqVal and base.NeqVar, objects which users should see.
-        # 'smt' refers to the solver's internal representation
+        # 'puzsmt' refers to the solver's internal representation
 
         # Map EqVal and NeqVal to internal variables
         self._varlit2smtmap = {}
@@ -45,10 +44,10 @@ class Solver:
                 for d in v.dom():
                     lit = EqVal(v,d)
                     neglit = NeqVal(v,d)
-                    b = z3.Bool(str(lit))
+                    b = self._solver.Bool(str(lit))
 
                     self._varlit2smtmap[lit] = b
-                    self._varlit2smtmap[neglit] = z3.Not(b)
+                    self._varlit2smtmap[neglit] = self._solver.negate(b)
                     self._varsmt2litmap[b] = lit
                     self._varsmt2neglitmap[b] = neglit
                     self._varsmt.add(b)
@@ -60,8 +59,8 @@ class Solver:
             for c in mat.constraints():
                 name = "{}{}".format(mat.varname, count)
                 count = count + 1
-                var = z3.Bool(name)
-                self._solver.add(z3.Implies(var, self._buildConstraint(c)))
+                var = self._solver.Bool(name)
+                self._solver.addImplies(var, self._buildConstraint(c))
                 self._conmap[var] = c
                 self._conlits.add(var)
 
@@ -70,8 +69,8 @@ class Solver:
         for c in self._puzzle.constraints():
             name = "con{}".format(count)
             count = count + 1
-            var = z3.Bool(name)
-            self._solver.add(z3.Implies(var, self._buildConstraint(c)))
+            var = self._solver.Bool(name)
+            self._solver.addImplies(var, self._buildConstraint(c))
             self._conmap[var] = c
             self._conlits.add(var)
 
@@ -84,20 +83,12 @@ class Solver:
 
     def _buildConstraint(self, constraint):
         cs = constraint.clauseset()
-        z3clauses = [z3.Or([self._varlit2smtmap[lit] for lit in c]) for c in cs]
-        # Tiny optimisation
-        if len(z3clauses) == 1:
-            return z3clauses[0]
-        else:
-            return z3.And(z3clauses)
+        z3clause = [self._solver.Or([self._varlit2smtmap[lit] for lit in c]) for c in cs]
+        return z3clause
     
     # Check if there is a single solution, or return 'None'
     def _solve(self, smtassume = tuple()):
-        result = self._solver.check(self._conlits.union(smtassume))
-        if result == z3.sat:
-            return self._solver.model()
-        else:
-            return None
+        return self._solver.solve(self._conlits.union(smtassume))
     
     Multiple = "Multiple"
 
@@ -133,7 +124,7 @@ class Solver:
         clause = []
         for l in self._varsmt:
             clause.append(l != sol[l])
-        self._solver.add(z3.Or(clause))
+        self._solver.addConstraint(self._solver.Or(clause))
 
         newsol = self._solve(smtassume)
 
@@ -145,13 +136,13 @@ class Solver:
             return self.Multiple
 
     def basicCore(self, core):
-        solve = self._solver.check(core)
-        if solve == z3.sat:
+        solve = self._solver.solve(core)
+        if solve is not None:
             return None
         core = self._solver.unsat_core()
         return core
 
-    def MUS(self, assume = [], earlycutsize = None):
+    def MUS(self, assume = tuple(), earlycutsize = None):
         smtassume = [self._varlit2smtmap[l] for l in assume]
 
         core = self.basicCore(set(smtassume).union(self._conlits))
@@ -193,7 +184,7 @@ class Solver:
         return [self._conmap[x] for x in core if x in self._conmap]
 
     def addLit(self, lit):
-        self._solver.add(self._varlit2smtmap[lit])
+        self._solver.addLit(self._varlit2smtmap[lit])
         self._knownlits.append(lit)
 
     # Storing and restoring assignments
