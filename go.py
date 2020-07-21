@@ -23,6 +23,7 @@ solver = puzsmt.internal.Solver(puz)
 model = solver.solve()
 
 print(model)
+
 # Note that a model is mapping of all variables, both those that make the puzzle
 # and the constraints. We usually have to do some processing before we can use this.
 
@@ -88,10 +89,13 @@ for i in range(9):
 
 sudokumodel = puz.assignmentToModel([sudoku])
 
+print(solver.solve(sudokumodel))
+
 # Now, we solve it, and check it has one solution
 
 fullsolution = solver.solveSingle(sudokumodel)
-
+print(fullsolution)
+print(sudokumodel)
 # The full solution is an extension of sudokumodel to all literals
 assert set(sudokumodel).issubset(set(fullsolution))
 
@@ -115,7 +119,7 @@ for i in range(3):
     for p in puzlits:
         mus = solver.MUS([p.neg()], 50)
         if mus is not None:
-            # print(p, ":", len(mus))
+            #print(p, ":", len(mus))
             musdict[p] = mus
     smallest = min([len(v) for v in musdict.values()])
     print("Smallest mus size:", smallest)

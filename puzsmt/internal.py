@@ -4,19 +4,20 @@ import random
 import copy
 import types
 
-from .utils import flatten
+from .utils import flatten, chainlist
 
 from .base import EqVal, NeqVal
 
 # A variable is a dictionary mapping values to their SAT variable
 
 from .solvers.z3impl import Z3Solver
+from .solvers.pysatimpl import SATSolver
 
 class Solver:
     def __init__(self, puzzle):
         self._puzzle = puzzle
         self._solver = Z3Solver()
-
+        #self._solver = SATSolver()
         # Map from internal booleans to constraints
         self._conmap = {}
 
@@ -88,7 +89,11 @@ class Solver:
     
     # Check if there is a single solution, or return 'None'
     def _solve(self, smtassume = tuple()):
-        return self._solver.solve(self._conlits.union(smtassume))
+        return self._solver.solve(chainlist(self._conlits, smtassume))
+
+    # Check if there is a single solution, or return 'None'
+    def _solveSingle(self, smtassume = tuple()):
+        return self._solver.solveSingle(self._varsmt,chainlist(self._conlits,smtassume))
     
     Multiple = "Multiple"
 
@@ -113,39 +118,26 @@ class Solver:
     # returning Solver.Multiple if there is more than one solution
     def solveSingle(self, assume = tuple()):
         smtassume = [self._varlit2smtmap[l] for l in assume]
-        sol = self._solve(smtassume)
+        sol = self._solveSingle(smtassume)
         if sol is None:
             return None
-
-        # Save the state of the solver so we can add another constraint
-        self._solver.push()
-
-        # At least one variable must take a different variable
-        clause = []
-        for l in self._varsmt:
-            clause.append(l != sol[l])
-        self._solver.addConstraint(self._solver.Or(clause))
-
-        newsol = self._solve(smtassume)
-
-        self._solver.pop()
-
-        if newsol is None:
-            return self.var_smt2lits(sol)
-        else:
+        elif sol == self.Multiple:
             return self.Multiple
+        else:
+            return self.var_smt2lits(sol)
 
-    def basicCore(self, core):
-        solve = self._solver.solve(core)
+    def basicCore(self, lits):
+        solve = self._solver.solve(lits)
         if solve is not None:
             return None
         core = self._solver.unsat_core()
+        assert set(core).issubset(set(lits))
         return core
 
     def MUS(self, assume = tuple(), earlycutsize = None):
         smtassume = [self._varlit2smtmap[l] for l in assume]
 
-        core = self.basicCore(set(smtassume).union(self._conlits))
+        core = self.basicCore(chainlist(smtassume, self._conlits))
         # Should never be satisfiable on the first pass
         assert core is not None
         if earlycutsize is not None and len(core) > earlycutsize:
@@ -158,12 +150,14 @@ class Solver:
         step = int(len(core) / 4)
         while step > 1:
             i = 0
-            while i < len(core) - step:
+            while step > 1 and i < len(core) - step:
                 to_test = core[:i] + core[(i+step):]
                 newcore = self.basicCore(to_test)
                 if newcore is not None:
+                    assert(len(newcore) < len(core))
                     core = newcore
                     i = 0
+                    step = int(len(newcore) / 4)
                 else:
                     i += step
             step = int(step / 2)

@@ -1,4 +1,5 @@
 import math
+import itertools
 
 from typing import List
 # Some boring utility functions
@@ -18,3 +19,6 @@ def intsqrt(i: int) -> int:
   root = int(math.sqrt(i) + 0.5)
   assert root*root == i
   return root
+
+def chainlist(*lists):
+  return list(itertools.chain(*lists))
