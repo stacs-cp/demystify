@@ -3,6 +3,7 @@
 import random
 import copy
 import types
+import random
 
 from .utils import flatten, chainlist
 
@@ -16,8 +17,8 @@ from .solvers.pysatimpl import SATSolver
 class Solver:
     def __init__(self, puzzle):
         self._puzzle = puzzle
-        self._solver = Z3Solver()
-        #self._solver = SATSolver()
+        #self._solver = Z3Solver()
+        self._solver = SATSolver()
         # Map from internal booleans to constraints
         self._conmap = {}
 

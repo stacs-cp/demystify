@@ -1,10 +1,13 @@
 import itertools
+import functools
+
 
 from typing import Sequence
 
 from .utils import flatten
 
 # Represent 'var == val'
+@functools.total_ordering
 class Lit:
     def __init__(self, var, val: int, equal: bool):
         self.var = var
@@ -20,6 +23,9 @@ class Lit:
     def __eq__(self, other) -> bool:
         return (self.var, self.val, self.equal) == (other.var, other.val, other.equal)
     
+    def __lt__(self, other) -> bool:
+        return (self.var, self.val, self.equal) < (other.var, other.val, other.equal)
+
     def __hash__(self):
         return (self.var, self.val, self.equal).__hash__()
 
@@ -100,10 +106,10 @@ def cellHasValue(var,dom):
 
     return clauses
 
+@functools.total_ordering
 class Var:
     def __init__(self, name:str, dom:Sequence[int]):
         self._dom = dom
-        #self._lits = {k:Bool("{} is {}".format(name,k)) for k in dom}
         self._name = str(name)
     
     def dom(self):
@@ -133,6 +139,15 @@ class Var:
 
     def __repr__(self):
         return self._name
+
+    def __eq__(self, other):
+        return self._name == other._name
+    
+    def __lt__(self, other):
+        return self._name < other._name
+
+    def __hash__(self):
+        return self._name.__hash__()
 
 class VarMatrix:
     def __init__(self, varname, dim, dom):

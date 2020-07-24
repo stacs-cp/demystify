@@ -117,7 +117,7 @@ puzlits = [p for p in fullsolution if p not in sudokumodel]
 for i in range(3):
     musdict = {}
     for p in puzlits:
-        mus = solver.MUS([p.neg()], 50)
+        mus = puzsat.MUS.MUS(solver, [p.neg()], 50)
         if mus is not None:
             #print(p, ":", len(mus))
             musdict[p] = mus
