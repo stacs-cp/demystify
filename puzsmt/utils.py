@@ -24,3 +24,4 @@ def intsqrt(i: int) -> int:
 
 def chainlist(*lists):
   return list(itertools.chain(*lists))
+

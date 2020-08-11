@@ -1,5 +1,5 @@
 import copy
-
+import logging
 
 from pysat.solvers import Solver
 from ..utils import chainlist
@@ -7,7 +7,7 @@ from ..utils import chainlist
 import pysat
 import inspect
 
-print(inspect.getfile(pysat))
+#print(inspect.getfile(pysat))
 
 class SATSolver:
     def __init__(self):
@@ -45,6 +45,7 @@ class SATSolver:
 
     def solve(self, lits):
         x = self._solver.solve(assumptions=chainlist(lits, self._knownlits))
+        logging.info("Solve: %s %s", len(lits), x)
         if x:
             return self.satassignment2map(self._solver.get_model())
         else:
@@ -66,7 +67,9 @@ class SATSolver:
 
     # Returns unsat_core from last solve
     def unsat_core(self):
-        return [x for x in self._solver.get_core() if x not in self._knownlits]
+        core = [x for x in self._solver.get_core() if x not in self._knownlits]
+        logging.info("Core size: %s", len(core))
+        return core
 
     def push(self):
         self._stack.append(copy.deepcopy(self._knownlits))

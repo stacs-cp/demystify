@@ -1,7 +1,5 @@
-import random
 import copy
 import types
-import random
 import math
 
 from .utils import flatten, chainlist
@@ -23,7 +21,7 @@ def MUS(solver, assume, earlycutsize):
         return None
 
     # So we can find different cores if we recall method
-    random.shuffle(core)
+    solver.random.shuffle(core)
 
     # First try chopping big bits off
     step = int(len(core) / 4)

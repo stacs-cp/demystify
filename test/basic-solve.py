@@ -2,6 +2,7 @@
 import copy
 import sys
 import os
+import logging
 
 # Let me import puzsmt from one directory up
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))) 
@@ -11,6 +12,8 @@ import puzsmt.internal
 import puzsmt.MUS
 import puzsmt.prettyprint
 import buildpuz
+
+logging.basicConfig(level=logging.INFO)
 
 # Make a matrix of variables (we can make more than one)
 vars = puzsmt.base.VarMatrix(lambda t: (t[0]+1,t[1]+1), (9, 9), range(1,9+1))
@@ -54,10 +57,15 @@ for s in sudokumodel:
 # Start by finding the ones which are not part of the known values
 puzlits = [p for p in fullsolution if p not in sudokumodel]
 
+# Store how hard the problem was to solve
+trace = []
+
 # Now, we need to check each one in turn to see which is 'cheapest'
 while len(puzlits) > 0:
     musdict = puzsmt.MUS.findSmallestMUS(solver, puzlits)
     smallest = min([len(v) for v in musdict.values()])
+
+    logging.info([(v,len(musdict[v])) for v in sorted(musdict.keys())])
 
     if smallest == 1:
         lits = [k for k in sorted(musdict.keys()) if len(musdict[k]) == 1]
@@ -66,7 +74,6 @@ while len(puzlits) > 0:
         print("Doing", len(lits), " simple deductions ")
 
         for p in lits:
-            #print("<p>Setting ", p,"</p>")
             solver.addLit(p)
             puzlits.remove(p)
     else:
@@ -74,10 +81,11 @@ while len(puzlits) > 0:
         p = [k for k in sorted(musdict.keys()) if len(musdict[k]) == smallest][0]
         puzsmt.prettyprint.print_explanation(sys.stdout, solver, musdict[p], [p])
         print("Smallest mus size:", smallest)
+        trace.append(smallest)
         print("<p>Setting ", p," because:</p>")
         print("<ul>")
         for clause in sorted(musdict[p]):
-            print(clause.clauseset())
+            logging.info(clause.clauseset())
             print("<li>", solver.explain(clause), "</li>")
         print("</ul>")
         solver.addLit(p)
@@ -85,3 +93,4 @@ while len(puzlits) > 0:
     
     print("<hr>")
         
+print("Trace: ", trace)

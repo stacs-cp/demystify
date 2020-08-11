@@ -1,4 +1,6 @@
 #!/bin/bash
-./basic-solve.py > basic-solve.py.html &
+for test in *.py; do
+    python3 $test >$test.html 2>$test.log &
+done
 
 wait

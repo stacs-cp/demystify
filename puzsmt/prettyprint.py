@@ -29,7 +29,7 @@ def print_var(f, variable, known, involved, targets):
             
             if poslit in known:
                 style +="; font-weight: bolder"
-            print('<td style="{}">{}</td>'.format(style, d))
+            print('<td style="{}">{}</td>'.format(style, d), file=f)
         print('</tr>', file=f)
     print('</table>', file=f)
 
@@ -47,7 +47,7 @@ def print_matrix(f, matrix, known, involved, targets, innerborders = None):
         for cell in row:
             print('<td style="border:solid 1px">', file=f)
             print_var(f, cell, known, involved, targets)
-            print('</td>')
+            print('</td>', file=f)
         print('</tr>', file=f)
     print('</table>', file=f)
 

@@ -1,6 +1,5 @@
 # This files includes all code which needs to actually call the SMT solver
 
-import random
 import copy
 import types
 import random
@@ -18,6 +17,9 @@ class Solver:
         self._puzzle = puzzle
         #self._solver = Z3Solver()
         self._solver = SATSolver()
+
+        # We want a reliable random source
+        self.random = random.Random(1)
         # Map from internal booleans to constraints
         self._conmap = {}
 
@@ -127,17 +129,12 @@ class Solver:
             return self.var_smt2lits(sol)
 
     def basicCore(self, lits):
-        cores = []
-        for i in range(2):
-            solve = self._solver.solve(lits)
-            if solve is not None:
-                return None
-            core = self._solver.unsat_core()
-            assert set(core).issubset(set(lits))
-            cores.append(core)
-        if cores[0] != cores[1]:
-            print("abc:", [len(c) for c in cores])
-        return cores[0]
+        solve = self._solver.solve(lits)
+        if solve is not None:
+            return None
+        core = self._solver.unsat_core()
+        assert set(core).issubset(set(lits))
+        return core
 
 
 
