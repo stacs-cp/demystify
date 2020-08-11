@@ -77,6 +77,7 @@ while len(puzlits) > 0:
         print("<p>Setting ", p," because:</p>")
         print("<ul>")
         for clause in sorted(musdict[p]):
+            print(clause.clauseset())
             print("<li>", solver.explain(clause), "</li>")
         print("</ul>")
         solver.addLit(p)

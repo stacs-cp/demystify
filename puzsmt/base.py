@@ -43,7 +43,7 @@ class Clause:
         self._name = name
         self._clause = clause
         self._clausenames = clausenames
-        self._frozen = frozenset([frozenset(sorted(self._clause))])
+        self._frozen =tuple([tuple(sorted(self._clause))])
 
     def explain(self, knownvars):
         if self._clausenames is None:
@@ -74,7 +74,7 @@ class Clause:
 class ClauseList:
     def __init__(self, name, clauses):
         self._name = name
-        self._clauses = frozenset(sorted([frozenset(sorted(c)) for c in clauses]))
+        self._clauses = tuple(sorted([tuple(sorted(c)) for c in clauses]))
 
     def explain(self, _):
         return self._name
