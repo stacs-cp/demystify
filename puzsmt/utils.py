@@ -25,3 +25,7 @@ def intsqrt(i: int) -> int:
 def chainlist(*lists):
   return list(itertools.chain(*lists))
 
+def shuffledcopy(r, l):
+  cpy = list(l)
+  r.shuffle(cpy)
+  return cpy

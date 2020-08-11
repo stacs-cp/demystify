@@ -3,7 +3,7 @@ import types
 import math
 import random
 
-from .utils import flatten, chainlist
+from .utils import flatten, chainlist, shuffledcopy
 
 from .base import EqVal, NeqVal
 
@@ -15,7 +15,8 @@ r = random.Random(1)
 def MUS(solver, assume, earlycutsize):
     smtassume = [solver._varlit2smtmap[l] for l in assume]
 
-    core = solver.basicCore(chainlist(smtassume, solver._conlits))
+    l = chainlist(shuffledcopy(r, smtassume), shuffledcopy(r, solver._conlits))
+    core = solver.basicCore(l)
 
     # Should never be satisfiable on the first pass
     assert core is not None
@@ -61,7 +62,7 @@ def MUS(solver, assume, earlycutsize):
 def findSmallestMUS(solver, puzlits):
     musdict = {}
     # First check for really tiny ones
-    for iter in range(5):
+    for iter in range(20):
         for p in puzlits:
             mus = MUS(solver, [p.neg()], 5)
             if mus is not None and (p not in musdict or len(musdict[p]) > len(mus)):
@@ -72,7 +73,7 @@ def findSmallestMUS(solver, puzlits):
     if len(musdict) > 0:
         return musdict
     for size in [100,1000,10000, math.inf]:
-        for iter in range(5):
+        for iter in range(20):
             for p in puzlits:
                 mus = MUS(solver, [p.neg()], size)
                 if mus is not None and (p not in musdict or len(musdict[p]) > len(mus)):
