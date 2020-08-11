@@ -1,6 +1,7 @@
 import copy
 import types
 import math
+import random
 
 from .utils import flatten, chainlist
 
@@ -9,6 +10,7 @@ from .base import EqVal, NeqVal
 # This calculates Minimum Unsatisfiable Sets
 # It users internals from solver, but is put in another file just for "neatness"
 
+r = random.Random(1)
 
 def MUS(solver, assume, earlycutsize):
     smtassume = [solver._varlit2smtmap[l] for l in assume]
@@ -59,10 +61,14 @@ def MUS(solver, assume, earlycutsize):
 def findSmallestMUS(solver, puzlits):
     musdict = {}
     # First check for really tiny ones
-    for p in puzlits:
-        mus = MUS(solver, [p.neg()], 5)
-        if mus is not None and (p not in musdict or len(musdict[p]) > len(mus)):
-            musdict[p] = mus
+    for iter in range(5):
+        for p in puzlits:
+            mus = MUS(solver, [p.neg()], 5)
+            if mus is not None and (p not in musdict or len(musdict[p]) > len(mus)):
+                musdict[p] = mus
+        # Early exit for trivial case
+        if len(musdict) > 0 and min([len(v) for v in musdict.values()]) == 1:
+            return musdict
     if len(musdict) > 0:
         return musdict
     for size in [100,1000,10000, math.inf]:
