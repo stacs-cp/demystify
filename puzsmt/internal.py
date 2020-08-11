@@ -81,6 +81,9 @@ class Solver:
         self._stackknownlits = []
         self._knownlits = []
 
+        # For benchmarking
+        self._corecount = 0
+
     def puzzle(self):
         return self._puzzle
 
@@ -129,6 +132,7 @@ class Solver:
             return self.var_smt2lits(sol)
 
     def basicCore(self, lits):
+        self._corecount += 1
         solve = self._solver.solve(lits)
         if solve is not None:
             return None

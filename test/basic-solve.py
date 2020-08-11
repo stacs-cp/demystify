@@ -94,3 +94,4 @@ while len(puzlits) > 0:
     print("<hr>")
         
 print("Trace: ", trace)
+print("corecount: ", solver._corecount)

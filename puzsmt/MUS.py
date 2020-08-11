@@ -2,6 +2,7 @@ import copy
 import types
 import math
 import random
+import logging
 
 from .utils import flatten, chainlist, shuffledcopy
 
@@ -18,6 +19,18 @@ def MUS(r, solver, assume, earlycutsize):
     l = chainlist(shuffledcopy(r, smtassume), shuffledcopy(r, solver._conlits))
     core = solver.basicCore(l)
 
+    lens = [len(core)]
+    
+    while len(lens) <= 10 and len(core) > 2:
+        shufcpy = shuffledcopy(r, core)
+        del shufcpy[-1]
+        newcore = solver.basicCore(shufcpy)
+        if newcore is not None:
+            core = newcore
+            lens.append(len(core))
+        else:
+            lens.append(None)
+
     # Should never be satisfiable on the first pass
     assert core is not None
     if earlycutsize is not None and len(core) > earlycutsize:
@@ -26,13 +39,15 @@ def MUS(r, solver, assume, earlycutsize):
     # So we can find different cores if we recall method
     solver.random.shuffle(core)
 
+    stepcount = 0
     # First try chopping big bits off
     step = int(len(core) / 4)
-    while step > 1:
+    while step > 1 and len(core) > 2:
         i = 0
         while step > 1 and i < len(core) - step:
             to_test = core[:i] + core[(i+step):]
             newcore = solver.basicCore(to_test)
+            stepcount += 1
             if newcore is not None:
                 assert(len(newcore) < len(core))
                 core = newcore
@@ -48,13 +63,15 @@ def MUS(r, solver, assume, earlycutsize):
     # that
     corecpy = list(core)
     for lit in corecpy:
-        if lit in core:
+        if lit in core and len(core) > 2:
             to_test = list(core)
             to_test.remove(lit)
             newcore = solver.basicCore(to_test)
+            stepcount += 1
             if newcore is not None:
                 core = newcore
     
+    logging.info("Core: %s to %s, with %s steps", lens, len(core), stepcount)
     return [solver._conmap[x] for x in core if x in solver._conmap]
 
 
@@ -72,8 +89,8 @@ def findSmallestMUS(solver, puzlits):
             return musdict
     if len(musdict) > 0:
         return musdict
-    for size in [100,1000,10000, math.inf]:
-        for iter in range(50):
+    for size in [500,5000,50000, math.inf]:
+        for iter in range(5):
             for p in puzlits:
                 mus = MUS(random.Random("{}{}{}".format(iter,p,size)), solver, [p.neg()], size)
                 if mus is not None and (p not in musdict or len(musdict[p]) > len(mus)):
