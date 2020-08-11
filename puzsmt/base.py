@@ -87,6 +87,9 @@ class ClauseList:
 
     def __hash__(self):
         return self.clauseset().__hash__()
+    
+    def __lt__(self, other):
+        return self.clauseset() < other.clauseset()
 
 # Constraints to say each variable takes a single value
 def cellHasValue(var,dom):
