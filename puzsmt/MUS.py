@@ -10,9 +10,9 @@ from .base import EqVal, NeqVal
 # This calculates Minimum Unsatisfiable Sets
 # It users internals from solver, but is put in another file just for "neatness"
 
-r = random.Random(1)
 
-def MUS(solver, assume, earlycutsize):
+
+def MUS(r, solver, assume, earlycutsize):
     smtassume = [solver._varlit2smtmap[l] for l in assume]
 
     l = chainlist(shuffledcopy(r, smtassume), shuffledcopy(r, solver._conlits))
@@ -62,9 +62,9 @@ def MUS(solver, assume, earlycutsize):
 def findSmallestMUS(solver, puzlits):
     musdict = {}
     # First check for really tiny ones
-    for iter in range(20):
+    for iter in range(5):
         for p in puzlits:
-            mus = MUS(solver, [p.neg()], 5)
+            mus = MUS(random.Random("{}{}{}".format(iter,p,5)), solver, [p.neg()], 5)
             if mus is not None and (p not in musdict or len(musdict[p]) > len(mus)):
                 musdict[p] = mus
         # Early exit for trivial case
@@ -73,9 +73,9 @@ def findSmallestMUS(solver, puzlits):
     if len(musdict) > 0:
         return musdict
     for size in [100,1000,10000, math.inf]:
-        for iter in range(20):
+        for iter in range(50):
             for p in puzlits:
-                mus = MUS(solver, [p.neg()], size)
+                mus = MUS(random.Random("{}{}{}".format(iter,p,size)), solver, [p.neg()], size)
                 if mus is not None and (p not in musdict or len(musdict[p]) > len(mus)):
                     musdict[p] = mus
             if len(musdict) > 0:
