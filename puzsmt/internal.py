@@ -13,7 +13,6 @@ from .base import EqVal, NeqVal
 
 from .solvers.z3impl import Z3Solver
 from .solvers.pysatimpl import SATSolver
-
 class Solver:
     def __init__(self, puzzle):
         self._puzzle = puzzle
@@ -128,59 +127,26 @@ class Solver:
             return self.var_smt2lits(sol)
 
     def basicCore(self, lits):
-        solve = self._solver.solve(lits)
-        if solve is not None:
-            return None
-        core = self._solver.unsat_core()
-        assert set(core).issubset(set(lits))
-        return core
+        cores = []
+        for i in range(2):
+            solve = self._solver.solve(lits)
+            if solve is not None:
+                return None
+            core = self._solver.unsat_core()
+            assert set(core).issubset(set(lits))
+            cores.append(core)
+        if cores[0] != cores[1]:
+            print("abc:", [len(c) for c in cores])
+        return cores[0]
 
-    def MUS(self, assume = tuple(), earlycutsize = None):
-        smtassume = [self._varlit2smtmap[l] for l in assume]
 
-        core = self.basicCore(chainlist(smtassume, self._conlits))
-        # Should never be satisfiable on the first pass
-        assert core is not None
-        if earlycutsize is not None and len(core) > earlycutsize:
-            return None
-
-        # So we can find different cores if we recall method
-        random.shuffle(core)
-
-        # First try chopping big bits off
-        step = int(len(core) / 4)
-        while step > 1:
-            i = 0
-            while step > 1 and i < len(core) - step:
-                to_test = core[:i] + core[(i+step):]
-                newcore = self.basicCore(to_test)
-                if newcore is not None:
-                    assert(len(newcore) < len(core))
-                    core = newcore
-                    i = 0
-                    step = int(len(newcore) / 4)
-                else:
-                    i += step
-            step = int(step / 2)
-
-        # Final cleanup
-        # We need to be prepared for things to disappear as
-        # we reduce the core, so make a copy and iterate through
-        # that
-        corecpy = list(core)
-        for lit in corecpy:
-            if lit in core:
-                to_test = list(core)
-                to_test.remove(lit)
-                newcore = self.basicCore(to_test)
-                if newcore is not None:
-                    core = newcore
-        
-        return [self._conmap[x] for x in core if x in self._conmap]
 
     def addLit(self, lit):
         self._solver.addLit(self._varlit2smtmap[lit])
         self._knownlits.append(lit)
+
+    def getKnownLits(self):
+        return self._knownlits
 
     # Storing and restoring assignments
     def push(self):

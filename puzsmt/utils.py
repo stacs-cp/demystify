@@ -1,13 +1,13 @@
 import math
 import itertools
 
-from typing import List
+from typing import Iterable, List
 # Some boring utility functions
 
 # Flatten a (possibly even more nested) list of lists
 def flatten_internal(arr):
   for i in arr:
-    if isinstance(i, list):
+    if isinstance(i, Iterable):
       yield from flatten(i)
     else:
       yield i
@@ -17,8 +17,10 @@ def flatten(arr:List) -> List:
 
 def intsqrt(i: int) -> int:
   root = int(math.sqrt(i) + 0.5)
-  assert root*root == i
-  return root
+  if root*root != i:
+    return None
+  else:
+    return root
 
 def chainlist(*lists):
   return list(itertools.chain(*lists))

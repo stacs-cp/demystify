@@ -4,21 +4,25 @@ from itertools import combinations
 from puzsmt.base import *
 from puzsmt.utils import intsqrt
 
+
+def buildNeq(name, c1, c2, dom):
+    constraints = []
+    for v in dom:
+        constraints.append(
+            Clause(
+                "{} and {} cannot both be {} as they are both in {}".format(
+                    c1, c2, v, name
+                ),
+                [NeqVal(c1,v),NeqVal(c2,v)],
+            )
+        )
+    return constraints
+
 def buildCage(name, cells, dom):
     constraints = []
     for i1 in range(len(cells)):
         for i2 in range(i1 + 1, len(cells)):
-            c1 = cells[i1]
-            c2 = cells[i2]
-            for v in dom:
-                constraints.append(
-                    Clause(
-                        "{} and {} cannot both be {} as they are both in {}".format(
-                            c1, c2, v, name
-                        ),
-                        [NeqVal(c1,v),NeqVal(c2,v)],
-                    )
-                )
+            constraints += buildNeq(name, cells[i1], cells[i2], dom)
 
     for v in dom:
         constraints.append(
@@ -63,6 +67,7 @@ def boxConstraints(varmat):
             constraints += buildCage("the cage starting at top-left position ({},{})".format(i,j), v, varmat.domain())
     
     return constraints
+
 
 def basicSudoku(varmat):
     constraints = []

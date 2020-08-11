@@ -4,6 +4,11 @@ import copy
 from pysat.solvers import Solver
 from ..utils import chainlist
 
+import pysat
+import inspect
+
+print(inspect.getfile(pysat))
+
 class SATSolver:
     def __init__(self):
         self._solver = Solver(name="g4", incr=True)

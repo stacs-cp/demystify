@@ -2,6 +2,7 @@ import random
 import copy
 import types
 import random
+import math
 
 from .utils import flatten, chainlist
 
@@ -11,10 +12,11 @@ from .base import EqVal, NeqVal
 # It users internals from solver, but is put in another file just for "neatness"
 
 
-def MUS(solver, assume = tuple(), earlycutsize = None):
+def MUS(solver, assume, earlycutsize):
     smtassume = [solver._varlit2smtmap[l] for l in assume]
 
     core = solver.basicCore(chainlist(smtassume, solver._conlits))
+
     # Should never be satisfiable on the first pass
     assert core is not None
     if earlycutsize is not None and len(core) > earlycutsize:
@@ -34,7 +36,7 @@ def MUS(solver, assume = tuple(), earlycutsize = None):
                 assert(len(newcore) < len(core))
                 core = newcore
                 i = 0
-                step = int(len(newcore) / 4)
+                step = int(len(core) / 4)
             else:
                 i += step
         step = int(step / 2)
@@ -61,14 +63,16 @@ def findSmallestMUS(solver, puzlits):
     # First check for really tiny ones
     for p in puzlits:
         mus = MUS(solver, [p.neg()], 5)
-        if mus is not None:
+        if mus is not None and (p not in musdict or len(musdict[p]) > len(mus)):
             musdict[p] = mus
     if len(musdict) > 0:
         return musdict
-    for size in [100,1000,10000]:
-        for p in puzlits:
-            mus = MUS(solver, [p.neg()], size)
-            if mus is not None:
-                musdict[p] = mus
-        if len(musdict) > 0:
-            return musdict
+    for size in [100,1000,10000, math.inf]:
+        for iter in range(5):
+            for p in puzlits:
+                mus = MUS(solver, [p.neg()], size)
+                if mus is not None and (p not in musdict or len(musdict[p]) > len(mus)):
+                    musdict[p] = mus
+            if len(musdict) > 0:
+                return musdict
+    return musdict
