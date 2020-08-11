@@ -68,6 +68,9 @@ class Clause:
     def __hash__(self):
         return self.clauseset().__hash__()
 
+    def __lt__(self, other):
+        return self.clauseset() < other.clauseset()
+
 class ClauseList:
     def __init__(self, name, clauses):
         self._name = name

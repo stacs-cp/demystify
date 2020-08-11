@@ -76,7 +76,7 @@ while len(puzlits) > 0:
         print("Smallest mus size:", smallest)
         print("<p>Setting ", p," because:</p>")
         print("<ul>")
-        for clause in musdict[p]:
+        for clause in sorted(musdict[p]):
             print("<li>", solver.explain(clause), "</li>")
         print("</ul>")
         solver.addLit(p)
