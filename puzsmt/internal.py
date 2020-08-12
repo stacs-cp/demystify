@@ -20,6 +20,7 @@ class Solver:
 
         # We want a reliable random source
         self.random = random.Random(1)
+
         # Map from internal booleans to constraints
         self._conmap = {}
 
@@ -83,6 +84,26 @@ class Solver:
 
         # For benchmarking
         self._corecount = 0
+
+        self.init_litmappings()
+
+    def init_litmappings(self):
+        # Set up some mappings for efficient finding of tiny MUSes
+        self._varlit2con = { l : set() for l in self._varlit2smtmap.keys() }
+        for (var,con) in self._conmap.items():
+            lits = con.lits()
+            # Negate all the lits
+            neglits = [l.neg() for l in lits]
+            for l in neglits:
+                self._varlit2con[l].add(var)
+
+        self._varlit2con2 = {l : set() for l in self._varlit2smtmap.keys() }
+        for (var,cons) in self._varlit2con.items():
+            lits = set(flatten([self._conmap[c].lits() for c in cons]))
+            neglits = [l.neg() for l in lits]
+            for l in neglits:
+                self._varlit2con2[l].add(var)
+
 
     def puzzle(self):
         return self._puzzle

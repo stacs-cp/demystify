@@ -45,7 +45,7 @@ class SATSolver:
 
     def solve(self, lits):
         x = self._solver.solve(assumptions=chainlist(lits, self._knownlits))
-        logging.info("Solve: %s %s", len(lits), x)
+        #logging.info("Solve: %s %s", len(lits), x)
         if x:
             return self.satassignment2map(self._solver.get_model())
         else:
@@ -68,7 +68,7 @@ class SATSolver:
     # Returns unsat_core from last solve
     def unsat_core(self):
         core = [x for x in self._solver.get_core() if x not in self._knownlits]
-        logging.info("Core size: %s", len(core))
+        #logging.info("Core size: %s", len(core))
         return core
 
     def push(self):

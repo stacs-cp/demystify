@@ -24,8 +24,10 @@ def print_var(f, variable, known, involved, targets):
             # Put this neglit check here, as we want to skip displaying it we already know it is gone
             elif neglit in known:
                 style="color:white"
-            elif poslit in involved or neglit in involved:
-                style = "background-color:yellow"
+            elif poslit in involved:
+                style = "background-color:blue"
+            elif neglit in involved:
+                style = "background-color:orange"
             
             if poslit in known:
                 style +="; font-weight: bolder"
