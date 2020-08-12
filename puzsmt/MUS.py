@@ -136,7 +136,7 @@ def findSmallestMUSParallel(solver, puzlits, repeats=3):
         return musdict
 
     with Pool(processes=12) as pool:
-        for (shortcutsize,minsize) in [(50,3),(200,5),(500,8),(1000,math.inf)]:
+        for (shortcutsize,minsize) in [(50,3),(200,5),(500,8),(1000,20),(math.inf,math.inf)]:
             for iter in range(repeats):
                 res = pool.map(dopar,[(p,"{}{}{}".format(iter,p,shortcutsize),shortcutsize,minsize)  for p in puzlits if muscount[p] < repeats])
                 for (p,mus) in res:
