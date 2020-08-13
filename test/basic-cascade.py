@@ -11,6 +11,7 @@ import puzsmt.base
 import puzsmt.internal
 import puzsmt.MUS
 import puzsmt.prettyprint
+import puzsmt.solve
 import buildpuz
 
 #logging.basicConfig(level=logging.INFO)
@@ -57,43 +58,10 @@ for s in sudokumodel:
 # Start by finding the ones which are not part of the known values
 puzlits = [p for p in fullsolution if p not in sudokumodel]
 
-# Store how hard the problem was to solve
-trace = []
-
 MUS = puzsmt.MUS.CascadeMUSFinder(solver)
 
-# Now, we need to check each one in turn to see which is 'cheapest'
-while len(puzlits) > 0:
-    musdict = MUS.smallestMUS(puzlits)
-    smallest = min([len(v) for v in musdict.values()])
+trace = puzsmt.solve.html_solve(sys.stdout, solver, puzlits, MUS)
 
-    logging.info([(v,len(musdict[v])) for v in sorted(musdict.keys())])
-
-    if smallest == 1:
-        lits = [k for k in sorted(musdict.keys()) if len(musdict[k]) == 1]
-        puzsmt.prettyprint.print_explanation(sys.stdout, solver, [musdict[l] for l in lits], lits)
-
-        print("Doing", len(lits), " simple deductions ")
-
-        for p in lits:
-            solver.addLit(p)
-            puzlits.remove(p)
-    else:
-        # Find first thing with smallest value
-        p = [k for k in sorted(musdict.keys()) if len(musdict[k]) == smallest][0]
-        puzsmt.prettyprint.print_explanation(sys.stdout, solver, musdict[p], [p])
-        print("Smallest mus size:", smallest)
-        trace.append((smallest, p))
-        print("<p>Setting ", p," because:</p>")
-        print("<ul>")
-        for clause in sorted(musdict[p]):
-            logging.info(clause.clauseset())
-            print("<li>", solver.explain(clause), "</li>")
-        print("</ul>")
-        solver.addLit(p)
-        puzlits.remove(p)
-    
-    print("<hr>")
         
 print("Trace: ", trace)
 print("corecount: ", solver._corecount)
