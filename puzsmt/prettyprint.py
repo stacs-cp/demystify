@@ -19,8 +19,10 @@ def print_var(f, variable, known, involved, targets):
             style = ""
             poslit = EqVal(variable, d)
             neglit = NeqVal(variable, d)
-            if poslit in targets or neglit in targets:
+            if neglit in targets:
                 style = "background-color:red"
+            elif poslit in targets:
+                style = "background-color:green"
             # Put this neglit check here, as we want to skip displaying it we already know it is gone
             elif neglit in known:
                 style="color:white"

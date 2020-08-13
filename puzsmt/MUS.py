@@ -191,7 +191,7 @@ def cascadeMUS(solver, puzlits, repeats):
         return musdict
 
     with Pool(processes=12) as pool:
-        for minsize in range(2,20,2):
+        for minsize in range(2,100,1):
             for iter in range(repeats):
                 res = pool.map(dopar,[(p,"{}{}{}".format(iter,p,minsize),math.inf,minsize*2)  for p in puzlits if muscount[p] < repeats])
                 for (p,mus) in res:
