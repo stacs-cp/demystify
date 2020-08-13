@@ -127,7 +127,7 @@ def dopar(tup):
     return (p,MUS(random.Random(randstr), parsolver, [p.neg()], shortcutsize, minsize))
 
 
-def findSmallestMUSParallel(solver, puzlits, repeats=3):
+def findSmallestMUS(solver, puzlits, repeats=3):
     musdict = {}
     muscount = {p:0 for p in puzlits}
 
@@ -154,36 +154,8 @@ def findSmallestMUSParallel(solver, puzlits, repeats=3):
                 return musdict
         return musdict
 
-def findSmallestMUS(solver, puzlits, repeats=3):
-    return findSmallestMUSParallel(solver, puzlits, repeats=3)
-    musdict = {}
-    muscount = {p:0 for p in puzlits}
 
-    for p in puzlits:
-        mus = tinyMUS(solver, [p.neg()])
-        if mus is not None:
-
-            assert(len(mus) == 1)
-            musdict[p] = mus
-    # Early exit for trivial case
-    if len(musdict) > 0 and min([len(v) for v in musdict.values()]) == 1:
-        return musdict
-
-    for (shortcutsize,minsize) in [(50,3),(200,5),(500,8),(1000,math.inf)]:
-        for iter in range(repeats):
-            for p in puzlits:
-                if muscount[p] < repeats:
-                    mus = MUS(random.Random("{}{}{}".format(iter,p,shortcutsize)), solver, [p.neg()], shortcutsize, minsize)
-                    if mus is not None and (p not in musdict or len(musdict[p]) > len(mus)):
-                        assert(len(mus) > 1)
-                        musdict[p] = mus
-                        muscount[p] += 1
-        if len(musdict) > 0 and min([len(v) for v in musdict.values()]) <= minsize:
-            return musdict
-    return musdict
-
-
-def cascadeMUS(solver, puzlits, repeats=1):
+def cascadeMUS(solver, puzlits, repeats):
     musdict = {}
     muscount = {p:0 for p in puzlits}
 
@@ -198,7 +170,7 @@ def cascadeMUS(solver, puzlits, repeats=1):
         return musdict
 
     with Pool(processes=12) as pool:
-        for minsize in range(2,20):
+        for minsize in range(2,20,2):
             for iter in range(repeats):
                 res = pool.map(dopar,[(p,"{}{}{}".format(iter,p,minsize),math.inf,minsize*2)  for p in puzlits if muscount[p] < repeats])
                 for (p,mus) in res:
@@ -215,13 +187,14 @@ class BasicMUSFinder:
         self._solver = solver
     
     def smallestMUS(self, puzlits):
-        return findSmallestMUS(self._solver, puzlits)
+        return findSmallestMUS(self._solver, puzlits, repeats)
 
 
 class CascadeMUSFinder:
 
-    def __init__(self, solver, repeats=3):
+    def __init__(self, solver, repeats=1):
         self._solver = solver
+        self._repeats = repeats
     
     def smallestMUS(self, puzlits):
-        return cascadeMUS(self._solver, puzlits)
+        return cascadeMUS(self._solver, puzlits, self._repeats)
