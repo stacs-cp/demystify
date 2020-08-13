@@ -46,11 +46,11 @@ puzlits = [p for p in fullsolution if p not in sudokumodel]
 # Store how hard the problem was to solve
 trace = []
 
-MUS = puzsmt.MUS.BasicMUSFinder(solver)
+MUS = puzsmt.MUS.CascadeMUSFinder(solver)
 
 # Now, we need to check each one in turn to see which is 'cheapest'
 while len(puzlits) > 0:
-    musdict = MUS.smallestMUS(solver, puzlits)
+    musdict = MUS.smallestMUS(puzlits)
     smallest = min([len(v) for v in musdict.values()])
 
     logging.info([(v,len(musdict[v])) for v in sorted(musdict.keys())])

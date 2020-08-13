@@ -111,12 +111,21 @@ def MUS(r, solver, assume, earlycutsize, minsize):
     logging.info("Core: %s to %s, with %s steps, %s bad", lens, len(core), stepcount, badcount)
     return [solver._conmap[x] for x in core if x in solver._conmap]
 
+def getTinyMUSes(solver, puzlits, musdict):
+    for p in puzlits:
+        mus = tinyMUS(solver, [p.neg()])
+        if mus is not None:
+            assert(len(mus) == 1)
+            musdict[p] = mus
+
+# Code for parallelisation of findSmallestMUSParallel
 from multiprocessing import Pool
 
 parsolver = []
 def dopar(tup):
     (p, randstr, shortcutsize, minsize) = tup
     return (p,MUS(random.Random(randstr), parsolver, [p.neg()], shortcutsize, minsize))
+
 
 def findSmallestMUSParallel(solver, puzlits, repeats=3):
     musdict = {}
@@ -126,11 +135,8 @@ def findSmallestMUSParallel(solver, puzlits, repeats=3):
     global parsolver
     parsolver = solver
 
-    for p in puzlits:
-        mus = tinyMUS(solver, [p.neg()])
-        if mus is not None:
-            assert(len(mus) == 1)
-            musdict[p] = mus
+    getTinyMUSes(solver, puzlits, musdict)
+
     # Early exit for trivial case
     if len(musdict) > 0 and min([len(v) for v in musdict.values()]) == 1:
         return musdict
@@ -144,8 +150,8 @@ def findSmallestMUSParallel(solver, puzlits, repeats=3):
                         assert(len(mus) > 1)
                         musdict[p] = mus
                         muscount[p] += 1
-        if len(musdict) > 0 and min([len(v) for v in musdict.values()]) <= minsize:
-            return musdict
+            if len(musdict) > 0 and min([len(v) for v in musdict.values()]) <= minsize:
+                return musdict
         return musdict
 
 def findSmallestMUS(solver, puzlits, repeats=3):
@@ -175,3 +181,47 @@ def findSmallestMUS(solver, puzlits, repeats=3):
         if len(musdict) > 0 and min([len(v) for v in musdict.values()]) <= minsize:
             return musdict
     return musdict
+
+
+def cascadeMUS(solver, puzlits, repeats=1):
+    musdict = {}
+    muscount = {p:0 for p in puzlits}
+
+    # We need this to be accessible by the pool
+    global parsolver
+    parsolver = solver
+
+    getTinyMUSes(solver, puzlits, musdict)
+
+    # Early exit for trivial case
+    if len(musdict) > 0 and min([len(v) for v in musdict.values()]) == 1:
+        return musdict
+
+    with Pool(processes=12) as pool:
+        for minsize in range(2,20):
+            for iter in range(repeats):
+                res = pool.map(dopar,[(p,"{}{}{}".format(iter,p,minsize),math.inf,minsize*2)  for p in puzlits if muscount[p] < repeats])
+                for (p,mus) in res:
+                    if mus is not None and (p not in musdict or len(musdict[p]) > len(mus)):
+                        assert(len(mus) > 1)
+                        musdict[p] = mus
+            if len(musdict) > 0 and min([len(v) for v in musdict.values()]) <= minsize:
+                return musdict
+        return musdict
+
+class BasicMUSFinder:
+
+    def __init__(self, solver, repeats=3):
+        self._solver = solver
+    
+    def smallestMUS(self, puzlits):
+        return findSmallestMUS(self._solver, puzlits)
+
+
+class CascadeMUSFinder:
+
+    def __init__(self, solver, repeats=3):
+        self._solver = solver
+    
+    def smallestMUS(self, puzlits):
+        return cascadeMUS(self._solver, puzlits)
