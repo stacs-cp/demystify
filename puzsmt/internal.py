@@ -114,8 +114,8 @@ class Solver:
         return z3clause
     
     # Check if there is a single solution, or return 'None'
-    def _solve(self, smtassume = tuple()):
-        return self._solver.solve(chainlist(self._conlits, smtassume))
+    def _solve(self, smtassume = tuple(), *,getsol):
+        return self._solver.solve(chainlist(self._conlits, smtassume),getsol=getsol)
 
     # Check if there is a single solution, or return 'None'
     def _solveSingle(self, smtassume = tuple()):
@@ -132,9 +132,12 @@ class Solver:
                 ret.append(self._varsmt2neglitmap[l])
         return ret
 
-    def solve(self, assume = tuple()):
+    def solve(self, assume = tuple(), *, getsol):
         smtassume = [self._varlit2smtmap[l] for l in assume]
-        sol = self._solve(smtassume)
+        sol = self._solve(smtassume, getsol=getsol)
+        if getsol == False:
+            return sol
+
         if sol is None:
             return None
         else:
@@ -154,8 +157,8 @@ class Solver:
 
     def basicCore(self, lits):
         self._corecount += 1
-        solve = self._solver.solve(lits)
-        if solve is not None:
+        solve = self._solver.solve(lits,getsol=False)
+        if solve:
             return None
         core = self._solver.unsat_core()
         assert set(core).issubset(set(lits))

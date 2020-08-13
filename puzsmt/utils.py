@@ -26,6 +26,6 @@ def chainlist(*lists):
   return list(itertools.chain(*lists))
 
 def shuffledcopy(r, l):
-  cpy = list(l)
+  cpy = l[:]
   r.shuffle(cpy)
   return cpy

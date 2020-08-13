@@ -20,7 +20,7 @@ puz.addConstraints(buildpuz.basicSudoku(vars))
 
 solver = puzsmt.internal.Solver(puz)
 
-model = solver.solve()
+model = solver.solve(getsol=True)
 
 print(model)
 
@@ -89,7 +89,7 @@ for i in range(9):
 
 sudokumodel = puz.assignmentToModel([sudoku])
 
-print(solver.solve(sudokumodel))
+print(solver.solve(sudokumodel,getsol=True))
 
 # Now, we solve it, and check it has one solution
 

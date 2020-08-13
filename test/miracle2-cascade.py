@@ -20,14 +20,26 @@ vars = puzsmt.base.VarMatrix(lambda t: (t[0]+1,t[1]+1), (9, 9), range(1,9+1))
 
 # Build the puzzle (we can pass multiple matrices, depending on the puzzle)
 puz = puzsmt.base.Puzzle([vars])
-puz.addConstraints(buildpuz.basicMiracle(vars))
+
+
+thermometers = [
+    [(1,4),(0,3),(1,2),(2,3)],
+    [(2,4),(1,3)],
+    [(1,6),(2,5),(3,4)],
+    [(2,6),(3,7),(4,6),(3,5)],
+    [(5,6),(6,7),(7,6),(6,5),(5,4)],
+    [(6,6),(7,5),(6,4),(5,5)]
+
+]
+puz.addConstraints(buildpuz.basicMiracle2(vars, thermometers))
 
 
 solver = puzsmt.internal.Solver(puz)
 
 sudoku = [ [None] * 9 for _ in range(9) ]
-sudoku[4][2] = 1
-sudoku[5][6] = 2
+sudoku[1][3] = 9
+
+
 
 # First, we turn it into an assignment (remember technically an assignment is a list of variables, so we pass [sudoku])
 
@@ -46,7 +58,7 @@ puzlits = [p for p in fullsolution if p not in sudokumodel]
 # Store how hard the problem was to solve
 trace = []
 
-MUS = puzsmt.MUS.BasicMUSFinder(solver)
+MUS = puzsmt.MUS.CascadeMUSFinder(solver)
 
 # Now, we need to check each one in turn to see which is 'cheapest'
 while len(puzlits) > 0:

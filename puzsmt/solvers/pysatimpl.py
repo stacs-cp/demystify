@@ -43,8 +43,10 @@ class SATSolver:
     def satassignment2map(self, l):
         return {abs(x): x > 0 for x in l}
 
-    def solve(self, lits):
+    def solve(self, lits,*,getsol):
         x = self._solver.solve(assumptions=chainlist(lits, self._knownlits))
+        if getsol == False:
+            return x
         #logging.info("Solve: %s %s", len(lits), x)
         if x:
             return self.satassignment2map(self._solver.get_model())
@@ -53,15 +55,15 @@ class SATSolver:
 
     def solveSingle(self, puzlits, lits):
         # We just brute force check all assignments to other variables
-        sol = self.solve(lits)
+        sol = self.solve(lits,getsol=True)
         if sol is None:
             return sol
         for p in puzlits:
             if sol[p]:
-                extrasol = self.solve(chainlist(lits, [-p]))
+                extrasol = self.solve(chainlist(lits, [-p]),getsol=False)
             else:
-                extrasol = self.solve(chainlist(lits, [p]))
-            if extrasol is not None:
+                extrasol = self.solve(chainlist(lits, [p]),getsol=False)
+            if extrasol:
                 return "Multiple"
         return sol
 

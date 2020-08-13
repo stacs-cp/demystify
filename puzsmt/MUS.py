@@ -3,6 +3,7 @@ import types
 import math
 import random
 import logging
+import itertools
 
 from .utils import flatten, chainlist, shuffledcopy
 
@@ -35,12 +36,15 @@ def tinyMUS(solver, assume):
     
 
 def MUS(r, solver, assume, earlycutsize, minsize):
-    smtassume = [solver._varlit2smtmap[l] for l in assume]
+    smtassume = [solver._varlit2smtmap[a] for a in assume]
 
-    l = chainlist(shuffledcopy(r, smtassume), shuffledcopy(r, solver._conlits))
-    #l = chainlist(shuffledcopy(r, smtassume), shuffledcopy(r, solver._conlits))
-    core = solver.basicCore(l)
+    r.shuffle(smtassume)
 
+    # Need to use 'sample' as solver._conlits is a set
+    cons = r.sample(solver._conlits, len(solver._conlits))
+
+    core = solver.basicCore(smtassume + cons)
+    
     lens = [len(core)]
 
     if False:
@@ -64,7 +68,7 @@ def MUS(r, solver, assume, earlycutsize, minsize):
             return None
 
     # So we can find different cores if we recall method
-    solver.random.shuffle(core)
+    r.shuffle(core)
 
     stepcount = 0
     badcount = 0
@@ -118,9 +122,26 @@ def getTinyMUSes(solver, puzlits, musdict):
             assert(len(mus) == 1)
             musdict[p] = mus
 
-# Code for parallelisation of findSmallestMUSParallel
+
+
 from multiprocessing import Pool
 
+# Fake Pool for profiling with py-spy
+if False:
+    class Pool:
+        def __init__(self, processes):
+            pass
+        
+        def map(self, func, args):
+            return list(map(func, args))
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self,a,b,c):
+            pass
+
+# Code for parallelisation of findSmallestMUSParallel
 parsolver = []
 def dopar(tup):
     (p, randstr, shortcutsize, minsize) = tup
@@ -185,9 +206,10 @@ class BasicMUSFinder:
 
     def __init__(self, solver, repeats=3):
         self._solver = solver
+        self._repeats = repeats
     
     def smallestMUS(self, puzlits):
-        return findSmallestMUS(self._solver, puzlits, repeats)
+        return findSmallestMUS(self._solver, puzlits, self._repeats)
 
 
 class CascadeMUSFinder:

@@ -26,15 +26,18 @@ class Z3Solver:
             con = z3.And(clauses)
         self._solver.add(z3.Implies(var, con))
     
-    def solve(self, lits):
+    def solve(self, lits,*,getsol):
         result = self._solver.check(list(lits))
+        if getsol == False:
+            return result == z3.sat
+
         if result == z3.unsat:
             return None
         else:
             return self._solver.model()
 
     def solveSingle(self, puzlits, lits):
-        sol = self.solve(lits)
+        sol = self.solve(lits,getsol=True)
         if sol is None:
             return None
 
@@ -47,13 +50,13 @@ class Z3Solver:
             clause.append(l != sol[l])
         self.addConstraint(self.Or(clause))
 
-        newsol = self.solve(lits)
+        newsol = self.solve(lits,getsol=False)
 
         self.pop()
-        if newsol is None:
-            return sol
-        else:
+        if newsol:
             return "Multiple"
+        else:
+            return sol
 
     # Returns unsat_core from last solve
     def unsat_core(self):

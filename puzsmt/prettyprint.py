@@ -58,4 +58,4 @@ def print_explanation(f, solver, mus, targets):
     known = solver.getKnownLits()
     involved = flatten([m.clauseset() for m in flatten(mus)])
     for matrix in vars:
-        print_matrix(f, matrix, known, involved, targets, 3)
+        print_matrix(f, matrix, set(known), set(involved), set(targets), 3)
