@@ -57,13 +57,13 @@ def MUS(r, solver, assume, earlycutsize, minsize):
             else:
                 lens.append(None)
                 if len(core) > earlycutsize:
-                    logging.info("Core None exit: %s", lens)
+                    logging.info("Core for %s None exit: %s", assume, lens)
                     return None
 
         # Should never be satisfiable on the first pass
         assert core is not None
         if earlycutsize is not None and len(core) > earlycutsize:
-            logging.info("Core early exit: %s", lens)
+            logging.info("Core for %s early exit: %s", assume, lens)
             return None
 
     # So we can find different cores if we recall method
@@ -105,13 +105,13 @@ def MUS(r, solver, assume, earlycutsize, minsize):
             else:
                 badcount += 1
                 if badcount > minsize:
-                    logging.info("Core: failed - badcount too big: %s / %s > 5 * %s / %s",badcount, stepcount, minsize, len(core))
+                    logging.info("Core for %s : failed - badcount too big: %s / %s > 5 * %s / %s", assume, badcount, stepcount, minsize, len(core))
                     return None
                 if badcount > minsize or (badcount/stepcount) > 5*minsize/len(core):
-                    logging.info("Core: failed - minsize: %s / %s > 5 * %s / %s",badcount, stepcount, minsize, len(core))
+                    logging.info("Core for %s: failed - minsize: %s / %s > 5 * %s / %s", assume, badcount, stepcount, minsize, len(core))
                     return None
     
-    logging.info("Core: %s to %s, with %s steps, %s bad", lens, len(core), stepcount, badcount)
+    logging.info("Core for %s : %s to %s, with %s steps, %s bad", assume, lens, len(core), stepcount, badcount)
     return [solver._conmap[x] for x in core if x in solver._conmap]
 
 def getTinyMUSes(solver, puzlits, musdict):
