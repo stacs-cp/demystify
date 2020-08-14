@@ -5,6 +5,8 @@ from puzsmt.base import *
 from puzsmt.utils import intsqrt
 
 
+SmallClauseList = False
+
 def buildNeq(name, c1, c2, dom):
     constraints = []
     for v in dom:
@@ -67,9 +69,21 @@ def buildDiffBy(name, c1, c2, diff, dom):
 
 def buildCage(name, cells, dom):
     constraints = []
-    for i1 in range(len(cells)):
-        for i2 in range(i1 + 1, len(cells)):
-            constraints += buildNeq(name, cells[i1], cells[i2], dom)
+    if SmallClauseList:
+        for v in dom:
+            constraints.append(
+                ClauseList(
+                    "At most one cell in {} can be {}".format(name, v),
+                    [
+                        [NeqVal(c1,v),NeqVal(c2,v)] for (c1,c2) in itertools.combinations(cells, 2)
+                    ],
+                    [EqVal(c,v) for c in cells],
+                    [str(c) for c in cells]
+                )
+            )
+    else:
+        for (c1,c2) in itertools.combinations(cells,2):
+            constraints += buildNeq(name, c1, c2, dom)
 
     for v in dom:
         constraints.append(

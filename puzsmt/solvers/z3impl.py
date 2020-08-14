@@ -70,3 +70,10 @@ class Z3Solver:
 
     def addLit(self, var):
         self._solver.add(var)
+
+    # TODO: Would be more efficient, but not required
+    def set_phases(self, positive, negative):
+        pass
+
+    def solveLimited(self, lits):
+        return self.solve(lits, getsol=False)

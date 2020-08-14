@@ -19,7 +19,6 @@ def tinyMUS(solver, assume):
     cons = flatten([solver._varlit2con[l] for l in assume])
 
     core = solver.basicCore(smtassume + cons)
-    
     if core is None:
         return None
 
@@ -191,7 +190,7 @@ def cascadeMUS(solver, puzlits, repeats):
         return musdict
 
     with Pool(processes=12) as pool:
-        for minsize in range(2,100,1):
+        for minsize in range(2,200,1):
             for iter in range(repeats):
                 res = pool.map(dopar,[(p,"{}{}{}".format(iter,p,minsize),math.inf,minsize*2)  for p in puzlits if muscount[p] < repeats])
                 for (p,mus) in res:

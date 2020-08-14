@@ -16,6 +16,7 @@ class SATSolver:
         self._boolnames = {}
         self._knownlits = set()
         self._stack = []
+        self._clauses = 0
 
     def Bool(self, name):
         newbool = self._boolcount
@@ -30,10 +31,12 @@ class SATSolver:
         return list(lits)
 
     def addConstraint(self, clause):
+        self._clauses += 1
         self._solver.add_clause(clause)
 
     def addImplies(self, var, clauses):
         for c in clauses:
+            self._clauses += 1
             self._solver.add_clause(c + [-var])
     
     # SAT assignments look like a list of integers, where:
@@ -52,6 +55,12 @@ class SATSolver:
             return self.satassignment2map(self._solver.get_model())
         else:
             return None
+
+    def solveLimited(self, lits):
+        #self._solver.conf_budget(10000)
+        #x = self._solver.solve_limited(assumptions=chainlist(lits, self._knownlits))
+        x = self._solver.solve(assumptions=chainlist(lits, self._knownlits))
+        return x
 
     def solveSingle(self, puzlits, lits):
         # We just brute force check all assignments to other variables
@@ -82,3 +91,8 @@ class SATSolver:
     def addLit(self, var):
         assert var not in self._knownlits
         self._knownlits.add(var)
+
+    def set_phases(self, positive, negative):
+        # TODO: Ignore the positive ones seems to be best
+        l =  [-x for x in negative]
+        self._solver.set_phases(l)

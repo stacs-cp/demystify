@@ -75,14 +75,32 @@ class Clause:
     def __lt__(self, other):
         return self.clauseset() < other.clauseset()
 
+    def __repr__(self):
+        return self._name + ":" + str(self.clauseset()) + "\n"
+
 class ClauseList:
-    def __init__(self, name, clauses):
+    def __init__(self, name, clauses, usedlits = None, namelits = None, fromClauses = False):
         self._name = name
-        self._clauses = tuple(sorted([tuple(sorted(c)) for c in clauses]))
+        if fromClauses:
+            self._clauses = tuple(sorted(itertools.chain([c.clauseset() for c in clauses])))
+        else:
+            self._clauses = tuple(sorted([tuple(sorted(c)) for c in clauses]))
+
+        self._usedlits = usedlits
+        self._namelits = namelits
+
         self._lits = tuple(sorted(flatten(self._clauses)))
 
-    def explain(self, _):
-        return self._name
+    def explain(self, knownvars):
+        if self._usedlits is None:
+            return self._name
+        
+        remainingchoices = []
+        for i in range(len(self._usedlits)):
+            if self._usedlits[i].neg() not in knownvars:
+                remainingchoices.append(self._namelits[i])
+        
+        return self._name + " (Choices are: " + ", ".join(remainingchoices) + ")"
 
     def clauseset(self):
         return self._clauses
@@ -98,6 +116,9 @@ class ClauseList:
     
     def __lt__(self, other):
         return self.clauseset() < other.clauseset()
+
+    def __repr__(self):
+        return self._name + ":\n" + "\n".join([str(c) for c in self.clauseset()])
 
 # Constraints to say each variable takes a single value
 def cellHasValue(var,dom):

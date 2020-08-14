@@ -39,3 +39,5 @@ def html_solve(outstream, solver, puzlits, MUS):
             puzlits.remove(p)
         
         print("<hr>")
+    
+    return trace

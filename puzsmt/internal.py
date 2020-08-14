@@ -69,6 +69,8 @@ class Solver:
                 self._conlits.add(var)
 
      
+        self._solver.set_phases(positive = self._varsmt, negative = self._conlits)
+
         count = 0
         for c in self._puzzle.constraints():
             name = "con{}".format(count)
@@ -110,12 +112,17 @@ class Solver:
 
     def _buildConstraint(self, constraint):
         cs = constraint.clauseset()
-        z3clause = [self._solver.Or([self._varlit2smtmap[lit] for lit in c]) for c in cs]
-        return z3clause
+        clauses = [self._solver.Or([self._varlit2smtmap[lit] for lit in c]) for c in cs]
+        return clauses
     
     # Check if there is a single solution, or return 'None'
     def _solve(self, smtassume = tuple(), *,getsol):
         return self._solver.solve(chainlist(self._conlits, smtassume),getsol=getsol)
+
+    
+    # Check if there is a single solution and return True/False, or return 'None' if timeout
+    def _solve(self, smtassume = tuple()):
+        return self._solver.solveLimited(chainlist(self._conlits, smtassume))
 
     # Check if there is a single solution, or return 'None'
     def _solveSingle(self, smtassume = tuple()):
@@ -155,10 +162,12 @@ class Solver:
         else:
             return self.var_smt2lits(sol)
 
+    # Return a subset of 'lits' which forms a core, or
+    # None if no core exists (or can be proved in the time limit)
     def basicCore(self, lits):
         self._corecount += 1
-        solve = self._solver.solve(lits,getsol=False)
-        if solve:
+        solve = self._solver.solveLimited(lits)
+        if solve is True or solve is None:
             return None
         core = self._solver.unsat_core()
         assert set(core).issubset(set(lits))
