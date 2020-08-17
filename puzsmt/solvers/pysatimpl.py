@@ -3,6 +3,7 @@ import logging
 
 from pysat.solvers import Solver
 from ..utils import chainlist
+from ..config import CONFIG
 
 import pysat
 import inspect
@@ -57,9 +58,11 @@ class SATSolver:
             return None
 
     def solveLimited(self, lits):
-        #self._solver.conf_budget(10000)
-        #x = self._solver.solve_limited(assumptions=chainlist(lits, self._knownlits))
-        x = self._solver.solve(assumptions=chainlist(lits, self._knownlits))
+        if CONFIG["solveLimited"]
+            self._solver.conf_budget(100000)
+            x = self._solver.solve_limited(assumptions=chainlist(lits, self._knownlits))
+        else:
+            x = self._solver.solve(assumptions=chainlist(lits, self._knownlits))
         return x
 
     def solveSingle(self, puzlits, lits):
