@@ -57,7 +57,7 @@ def doSingleStep(delvals, target):
 
 
     logging.info("Finished")
-logging.info("Full Trace %s", trace)
+    logging.info("Full Trace %s", trace)
 
 
 
