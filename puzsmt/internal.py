@@ -121,7 +121,7 @@ class Solver:
 
     
     # Check if there is a single solution and return True/False, or return 'None' if timeout
-    def _solve(self, smtassume = tuple()):
+    def _solveLimited(self, smtassume = tuple()):
         return self._solver.solveLimited(chainlist(self._conlits, smtassume))
 
     # Check if there is a single solution, or return 'None'
