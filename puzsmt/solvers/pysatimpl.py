@@ -105,5 +105,6 @@ class SATSolver:
 
     def set_phases(self, positive, negative):
         # TODO: Ignore the positive ones seems to be best
-        l =  [-x for x in negative]
-        self._solver.set_phases(l)
+        if CONFIG["setPhases"]:
+            l =  [-x for x in negative]
+            self._solver.set_phases(l)

@@ -20,6 +20,9 @@ CONFIG = {
 
     # Limit search to 100,000 conflicts
     "solveLimited": True,
+    
+    # TO CHECK: Does this help?
+    "setPhases": True,
 
 
 
