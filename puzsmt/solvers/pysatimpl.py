@@ -7,6 +7,7 @@ from ..config import CONFIG
 
 import pysat
 import inspect
+import time
 
 #print(inspect.getfile(pysat))
 
@@ -48,21 +49,28 @@ class SATSolver:
         return {abs(x): x > 0 for x in l}
 
     def solve(self, lits,*,getsol):
+        start_time = time.time()
         x = self._solver.solve(assumptions=chainlist(lits, self._knownlits))
+        end_time = time.time()
+        if end_time - start_time > 5:
+            logging.info("Long time solve: %s %s", len(lits), end_time - start_time)
         if getsol == False:
             return x
-        #logging.info("Solve: %s %s", len(lits), x)
         if x:
             return self.satassignment2map(self._solver.get_model())
         else:
             return None
 
     def solveLimited(self, lits):
-        if CONFIG["solveLimited"]
+        start_time = time.time()
+        if CONFIG["solveLimited"]:
             self._solver.conf_budget(100000)
             x = self._solver.solve_limited(assumptions=chainlist(lits, self._knownlits))
         else:
             x = self._solver.solve(assumptions=chainlist(lits, self._knownlits))
+        end_time = time.time()
+        if end_time - start_time > 5:
+            logging.info("Long time solveLimited: %s %s", len(lits), end_time - start_time)
         return x
 
     def solveSingle(self, puzlits, lits):

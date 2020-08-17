@@ -14,6 +14,8 @@ import puzsmt.solve
 import puzsmt.prettyprint
 import buildpuz
 
+logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(relativeCreated)d:%(message)s")
+
 puzsmt.config.LoadConfigFromDict({"repeats": 5})
 
 # Make a matrix of variables (we can make more than one)

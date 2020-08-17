@@ -15,6 +15,8 @@ import puzsmt.prettyprint
 import buildpuz
 import puzsmt.config
 
+logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(relativeCreated)d:%(message)s")
+
 
 puzsmt.config.LoadConfigFromDict({"OneClauseAtMost": True, "repeats": 5, "solveLimited": True})
 

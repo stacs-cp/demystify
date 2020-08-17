@@ -15,7 +15,8 @@ import puzsmt.solve
 import buildpuz
 
 import puzsmt.config
-#logging.basicConfig(level=logging.INFO)
+
+logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(relativeCreated)d:%(message)s")
 
 
 
