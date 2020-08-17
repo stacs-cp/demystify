@@ -9,7 +9,7 @@ import sys
 CONFIG = {
     # How many cores to use when running in parallel
     # Set to 1 (or 0) to disable parallelisation
-    "parallel": 8,
+    "cores": 8,
 
 
     # How many times to try looking for each size of core
