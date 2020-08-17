@@ -53,8 +53,13 @@ def doSingleStep(delvals, target):
 
     trace = puzsmt.solve.html_solve(sys.stdout, solver, puzlits, MUS)
             
-    print("Trace: ", trace)
-    print("corecount: ", solver._corecount)
+    print("Minitrace: ", [(s, mins[0], len(mins)) for (s,mins) in trace])
+
+
+    logging.info("Finished")
+logging.info("Full Trace %s", trace)
+
+
 
 
 

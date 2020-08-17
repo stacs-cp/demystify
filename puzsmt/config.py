@@ -19,7 +19,15 @@ CONFIG = {
     "OneClauseAtMost": False,
 
     # Limit search to 100,000 conflicts
-    "solveLimited": True
+    "solveLimited": True,
+
+
+
+    # Which solver to use (g4 = glucose)
+    "solver": "g4",
+
+    # Use 'incremental' mode in solver
+    "solverIncremental": True,
 }
 
 

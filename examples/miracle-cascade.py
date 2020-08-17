@@ -16,7 +16,7 @@ import buildpuz
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(relativeCreated)d:%(message)s")
 
-puzsmt.config.LoadConfigFromDict({"repeats": 5})
+puzsmt.config.LoadConfigFromDict({"repeats": 5, "solverIncremental": False})
 
 # Make a matrix of variables (we can make more than one)
 vars = puzsmt.base.VarMatrix(lambda t: (t[0]+1,t[1]+1), (9, 9), range(1,9+1))
@@ -50,5 +50,9 @@ MUS = puzsmt.MUS.CascadeMUSFinder(solver)
 
 trace = puzsmt.solve.html_solve(sys.stdout, solver, puzlits, MUS)
         
-print("Trace: ", trace)
-print("corecount: ", solver._corecount)
+print("Minitrace: ", [(s, mins[0], len(mins)) for (s,mins) in trace])
+
+
+logging.info("Finished")
+logging.info("Full Trace %s", trace)
+

@@ -13,7 +13,7 @@ import time
 
 class SATSolver:
     def __init__(self):
-        self._solver = Solver(name="g4", incr=True)
+        self._solver = Solver(name=CONFIG["solver"], incr=CONFIG["solverIncremental"])
         self._boolcount = 1
         self._boolnames = {}
         self._knownlits = set()
