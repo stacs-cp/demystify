@@ -14,6 +14,7 @@ import puzsmt.prettyprint
 import puzsmt.solve
 import buildpuz
 
+import puzsmt.config
 #logging.basicConfig(level=logging.INFO)
 
 
@@ -34,10 +35,9 @@ def doSingleStep(delvals, target):
     for (var, vals) in delvals:
         for v in vals:
             lit = puzsmt.base.NeqVal(vars[var[0]][var[1]], v)
-            print(lit)
             solver.addLit(lit)
 
-    print(solver.solve(getsol=True))
+    #print(solver.solve(getsol=True))
     ((x,y),v) = target
 
     # The 'puzlits' are all the booleans we have to solve
@@ -56,34 +56,39 @@ def doSingleStep(delvals, target):
     print("corecount: ", solver._corecount)
 
 
-print("<hr>Hidden Single")
-doSingleStep([ ((0,i),[1]) for i in range(8) ], ((0,8),1))
+
+for oneclause in [False,True]:
+    print("<hr><h1>Setting 'OneClauseAtMost' to", oneclause,"</h1>")
+    puzsmt.config.LoadConfigFromDict({"OneClauseAtMost": oneclause})
+
+    print("<hr><h2>Hidden Single</h2>")
+    doSingleStep([ ((0,i),[1]) for i in range(8) ], ((0,8),1))
 
 
-print("<hr>Naked Pair")
+    print("<hr><h2>Naked Pair</h2>")
 
-doSingleStep([ ((0,i),[j for j in range(1,8)]) for i in range(2) ] , ((0,2),-8))
-
-
-print("<hr>Hidden Pair")
-
-doSingleStep([ ((0,i),[j for j in range(1,3)]) for i in range(2,9) ] , ((0,1),-8))
+    doSingleStep([ ((0,i),[j for j in range(1,8)]) for i in range(2) ] , ((0,2),-8))
 
 
-print("<hr>Naked Triple")
+    print("<hr><h2>Hidden Pair</h2>")
 
-doSingleStep([ ((0,i),[j for j in range(1,7)]) for i in range(3) ] , ((0,3),-8))
-
-
-print("<hr>Hidden Triple")
-
-doSingleStep([ ((0,i),[j for j in range(1,4)]) for i in range(3,9) ] , ((0,1),-8))
-
-print("<hr>Naked Quad")
-
-doSingleStep([ ((0,i),[j for j in range(1,6)]) for i in range(4) ] , ((0,4),-8))
+    doSingleStep([ ((0,i),[j for j in range(1,3)]) for i in range(2,9) ] , ((0,1),-8))
 
 
-print("<hr>Hidden Quad")
+    print("<hr><h2>Naked Triple</h2>")
 
-doSingleStep([ ((0,i),[j for j in range(1,5)]) for i in range(4,9) ] , ((0,1),-8))
+    doSingleStep([ ((0,i),[j for j in range(1,7)]) for i in range(3) ] , ((0,3),-8))
+
+
+    print("<hr><h2>Hidden Triple</h2>")
+
+    doSingleStep([ ((0,i),[j for j in range(1,4)]) for i in range(3,9) ] , ((0,1),-8))
+
+    print("<hr><h2>Naked Quad</h2>")
+
+    doSingleStep([ ((0,i),[j for j in range(1,6)]) for i in range(4) ] , ((0,4),-8))
+
+
+    print("<hr><h2>Hidden Quad</h2>")
+
+    doSingleStep([ ((0,i),[j for j in range(1,5)]) for i in range(4,9) ] , ((0,1),-8))

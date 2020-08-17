@@ -3,9 +3,8 @@ import math
 from itertools import combinations
 from puzsmt.base import *
 from puzsmt.utils import intsqrt
+from puzsmt.config import CONFIG
 
-
-SmallClauseList = False
 
 def buildNeq(name, c1, c2, dom):
     constraints = []
@@ -69,7 +68,7 @@ def buildDiffBy(name, c1, c2, diff, dom):
 
 def buildCage(name, cells, dom):
     constraints = []
-    if SmallClauseList:
+    if CONFIG["OneClauseAtMost"]:
         for v in dom:
             constraints.append(
                 ClauseList(

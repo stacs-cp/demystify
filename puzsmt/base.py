@@ -6,6 +6,8 @@ from typing import Sequence
 
 from .utils import flatten
 
+from .config import CONFIG
+
 # Represent 'var == val'
 @functools.total_ordering
 class Lit:
@@ -131,13 +133,26 @@ def cellHasValue(var,dom):
         )
     )
 
-    for (d1,d2) in itertools.combinations(dom, 2):
-        clauses.append(
-            Clause(
-                "{} cannot be both {} and {}".format(var, d1, d2),
-                [NeqVal(var, d1), NeqVal(var, d2)],
+    if CONFIG["OneClauseAtMost"]:
+        for v in dom:
+            clauses.append(
+                ClauseList(
+                    "{} cannot take more than one value".format(var),
+                    [
+                        [NeqVal(var,d1),NeqVal(var,d2)] for (d1,d2) in itertools.combinations(dom, 2)
+                    ],
+                    [EqVal(var,d) for d in dom],
+                    [str(d) for d in dom]
+                )
             )
-        )
+    else:
+        for (d1,d2) in itertools.combinations(dom, 2):
+            clauses.append(
+                Clause(
+                    "{} cannot be both {} and {}".format(var, d1, d2),
+                    [NeqVal(var, d1), NeqVal(var, d2)],
+                )
+            )
 
     return clauses
 

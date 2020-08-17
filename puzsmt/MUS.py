@@ -9,6 +9,8 @@ from .utils import flatten, chainlist, shuffledcopy
 
 from .base import EqVal, NeqVal
 
+from .config import CONFIG
+
 # This calculates Minimum Unsatisfiable Sets
 # It uses internals from solver, but is put in another file just for "neatness"
 
@@ -126,19 +128,25 @@ def getTinyMUSes(solver, puzlits, musdict):
 from multiprocessing import Pool
 
 # Fake Pool for profiling with py-spy
-if False:
-    class Pool:
-        def __init__(self, processes):
-            pass
-        
-        def map(self, func, args):
-            return list(map(func, args))
+class FakePool:
+    def __init__(self, processes):
+        pass
+    
+    def map(self, func, args):
+        return list(map(func, args))
 
-        def __enter__(self):
-            return self
+    def __enter__(self):
+        return self
 
-        def __exit__(self,a,b,c):
-            pass
+    def __exit__(self,a,b,c):
+        pass
+
+def getPool(cores):
+    if cores <= 1:
+        return FakePool()
+    else:
+        return Pool(processes=cores)
+
 
 # Code for parallelisation of findSmallestMUSParallel
 parsolver = []
@@ -161,7 +169,7 @@ def findSmallestMUS(solver, puzlits, repeats=3):
     if len(musdict) > 0 and min([len(v) for v in musdict.values()]) == 1:
         return musdict
 
-    with Pool(processes=12) as pool:
+    with getPool(CONFIG["cores"]) as pool:
         for (shortcutsize,minsize) in [(50,3),(200,5),(500,8),(1000,20),(math.inf,math.inf)]:
             for iter in range(repeats):
                 res = pool.map(dopar,[(p,"{}{}{}".format(iter,p,shortcutsize),shortcutsize,minsize)  for p in puzlits if muscount[p] < repeats])
@@ -203,12 +211,11 @@ def cascadeMUS(solver, puzlits, repeats):
 
 class BasicMUSFinder:
 
-    def __init__(self, solver, repeats=3):
+    def __init__(self, solver):
         self._solver = solver
-        self._repeats = repeats
     
     def smallestMUS(self, puzlits):
-        return findSmallestMUS(self._solver, puzlits, self._repeats)
+        return findSmallestMUS(self._solver, puzlits, CONFIG["repeats"])
 
 
 class CascadeMUSFinder:
@@ -218,4 +225,4 @@ class CascadeMUSFinder:
         self._repeats = repeats
     
     def smallestMUS(self, puzlits):
-        return cascadeMUS(self._solver, puzlits, self._repeats)
+        return cascadeMUS(self._solver, puzlits, CONFIG["repeats"])
