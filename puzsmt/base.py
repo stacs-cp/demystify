@@ -68,14 +68,19 @@ class Clause:
     def lits(self):
         return self._lits
 
+    # repobj returns an object which can be used to implement several other methods
+    # We do this for both Clause and ClauseList, to make the easy to compare
+    def repobj(self):
+        return ("Clause", self._frozen)
+
     def __eq__(self, other):
-        return self.clauseset() == other.clauseset()
+        return self.repobj() == other.repobj()
 
     def __hash__(self):
-        return self.clauseset().__hash__()
+        return self.repobj().__hash__()
 
     def __lt__(self, other):
-        return self.clauseset() < other.clauseset()
+        return self.repobj() < other.repobj()
 
     def __repr__(self):
         return self._name + ":" + str(self.clauseset()) + "\n"
@@ -83,13 +88,14 @@ class Clause:
 class ClauseList:
     def __init__(self, name, clauses, usedlits = None, namelits = None):
         self._name = name
+        self._children = tuple(sorted(clauses))
         # XXX: Next line [0] broken
         self._clauses = tuple(sorted(itertools.chain([c.clauseset()[0] for c in clauses])))
 
         self._usedlits = usedlits
         self._namelits = namelits
 
-        self._lits = tuple(sorted(flatten(self._clauses)))
+        self._lits = tuple(sorted(flatten([c.lits() for c in clauses])))
 
     def explain(self, knownvars):
         if self._usedlits is None:
@@ -108,17 +114,22 @@ class ClauseList:
     def lits(self):
         return self._lits
 
+    # repobj returns an object which can be used to implement several other methods
+    # We do this for both Clause and ClauseList, to make the easy to compare
+    def repobj(self):
+        return ("ClauseList", self._children)
+
     def __eq__(self, other):
-        return self.clauseset() == other.clauseset()
+        return self.repobj() == other.repobj()
 
     def __hash__(self):
-        return self.clauseset().__hash__()
-    
+        return self.repobj().__hash__()
+
     def __lt__(self, other):
-        return self.clauseset() < other.clauseset()
+        return self.repobj() < other.repobj()
 
     def __repr__(self):
-        return self._name + ":\n" + "\n".join([str(c) for c in self.clauseset()])
+        return self._name + ":\n" + "\n".join([str(c) for c in self._children])
 
 # Constraints to say each variable takes a single value
 def cellHasValue(var,dom):
