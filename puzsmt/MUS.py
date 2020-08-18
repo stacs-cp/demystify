@@ -129,7 +129,7 @@ from multiprocessing import Pool
 
 # Fake Pool for profiling with py-spy
 class FakePool:
-    def __init__(self, processes):
+    def __init__(self):
         pass
     
     def map(self, func, args):
