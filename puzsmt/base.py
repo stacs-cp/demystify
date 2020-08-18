@@ -81,12 +81,10 @@ class Clause:
         return self._name + ":" + str(self.clauseset()) + "\n"
 
 class ClauseList:
-    def __init__(self, name, clauses, usedlits = None, namelits = None, fromClauses = False):
+    def __init__(self, name, clauses, usedlits = None, namelits = None):
         self._name = name
-        if fromClauses:
-            self._clauses = tuple(sorted(itertools.chain([c.clauseset() for c in clauses])))
-        else:
-            self._clauses = tuple(sorted([tuple(sorted(c)) for c in clauses]))
+        # XXX: Next line [0] broken
+        self._clauses = tuple(sorted(itertools.chain([c.clauseset()[0] for c in clauses])))
 
         self._usedlits = usedlits
         self._namelits = namelits
@@ -137,10 +135,13 @@ def cellHasValue(var,dom):
         for v in dom:
             clauses.append(
                 ClauseList(
-                    "{} cannot take more than one value".format(var),
-                    [
-                        [NeqVal(var,d1),NeqVal(var,d2)] for (d1,d2) in itertools.combinations(dom, 2)
-                    ],
+                        "{} cannot take more than one value".format(var),
+                        [
+                            Clause(
+                                "{} cannot be both {} and {}".format(var, d1, d2),
+                                [NeqVal(var, d1), NeqVal(var, d2)],
+                            ) for (d1,d2) in itertools.combinations(dom, 2)
+                        ],
                     [EqVal(var,d) for d in dom],
                     [str(d) for d in dom]
                 )

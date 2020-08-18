@@ -72,10 +72,13 @@ def buildCage(name, cells, dom):
         for v in dom:
             constraints.append(
                 ClauseList(
-                    "At most one cell in {} can be {}".format(name, v),
-                    [
-                        [NeqVal(c1,v),NeqVal(c2,v)] for (c1,c2) in itertools.combinations(cells, 2)
-                    ],
+                        "At most one cell in {} can be {}".format(name, v),
+                        [
+                            Clause(
+                                "{} and {} cannot both be {}".format(c1, c2, v),
+                                [NeqVal(c1,v),NeqVal(c2,v)]
+                             ) for (c1,c2) in itertools.combinations(cells, 2)
+                        ],
                     [EqVal(c,v) for c in cells],
                     [str(c) for c in cells]
                 )
