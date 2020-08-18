@@ -16,9 +16,9 @@ import puzsmt.config
 
 import buildpuz
 
-logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(relativeCreated)d:%(message)s")
+logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s")
 
-puzsmt.config.LoadConfigFromDict({"OneClauseAtMost": True})
+puzsmt.config.LoadConfigFromDict({"OneClauseAtMost": True, "cores":0})
 
 # Make a matrix of variables (we can make more than one)
 vars = puzsmt.base.VarMatrix(lambda t: (t[0]+1,t[1]+1), (9, 9), range(1,9+1))
