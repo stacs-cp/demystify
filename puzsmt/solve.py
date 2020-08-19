@@ -14,7 +14,7 @@ def get_id():
 def hidden(name, content):
     id = get_id()
     s = ""
-    s += """<input type='submit' value='{}' onclick="toggle('{}'):>""".format(name, id)
+    s += """<input type='submit' value='{}' onclick="toggle('{}');">""".format(name, id)
     s += "<div id={} style='display:none;'>\n".format(id)
     s += content
     s += "\n</div>\n"
@@ -53,13 +53,15 @@ def html_solve(outstream, solver, puzlits, MUS):
     </script>
     """)
 
+    step = 1
     # Now, we need to check each one in turn to see which is 'cheapest'
     while len(puzlits) > 0:
         musdict = MUS.smallestMUS(puzlits)
         smallest = min([len(v) for v in musdict.values()])
 
         logging.info([(v,len(musdict[v])) for v in sorted(musdict.keys())])
-
+        print("<h3>Step {}</h3>".format(step))
+        step += 1
         if smallest == 1:
             lits = [k for k in sorted(musdict.keys()) if len(musdict[k]) == 1]
             print_explanation(outstream, solver, [musdict[l] for l in lits], lits)
