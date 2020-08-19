@@ -14,7 +14,7 @@ import puzsmt.prettyprint
 import puzsmt.solve
 import buildpuz
 
-logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(relativeCreated)d:%(message)s")
+logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s")
 
 
 # Make a matrix of variables (we can make more than one)
