@@ -21,8 +21,9 @@ class Solver:
         # We want a reliable random source
         self.random = random.Random(1)
 
-        # Map from internal booleans to constraints
+        # Map from internal booleans to constraints and vice versa
         self._conmap = {}
+        self._conlit2conmap = {}
 
         # Quick access to every internal boolean which represents a constraint
         self._conlits = set()
@@ -66,6 +67,8 @@ class Solver:
                 var = self._solver.Bool(name)
                 self._solver.addImplies(var, self._buildConstraint(c))
                 self._conmap[var] = c
+                assert(c not in self._conlit2conmap)
+                self._conlit2conmap[c] = var
                 self._conlits.add(var)
 
      
@@ -78,6 +81,8 @@ class Solver:
             var = self._solver.Bool(name)
             self._solver.addImplies(var, self._buildConstraint(c))
             self._conmap[var] = c
+            assert(c not in self._conlit2conmap)
+            self._conlit2conmap[c] = var
             self._conlits.add(var)
 
         # Used for tracking in push/pop/addLits

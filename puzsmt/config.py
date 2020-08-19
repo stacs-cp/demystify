@@ -24,7 +24,8 @@ CONFIG = {
     # TO CHECK: Does this help?
     "setPhases": True,
 
-
+    # Cache MUSes between steps
+    "useCache": True,
 
     # Which solver to use (g4 = glucose)
     "solver": "g4",
