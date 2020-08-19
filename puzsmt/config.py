@@ -38,7 +38,7 @@ CONFIG = {
     "earlyExit": True,
 
     # Exit when MUS might be too big
-    "earlyExitAllFailed": True,
+    "earlyExitAllFailed": False,
 
     # Exit when MUS might be too big
     "earlyExitMaybe": False,
