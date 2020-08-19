@@ -30,7 +30,8 @@ CONFIG = {
     "solver": "g4",
 
     # Use 'incremental' mode in solver
-    "solverIncremental": True,
+    # Todo: Sometimes this makes the solver go super-slow
+    "solverIncremental": False,
 }
 
 
