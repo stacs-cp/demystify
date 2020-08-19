@@ -6,6 +6,8 @@ import logging
 import itertools
 import copy
 
+from time import time
+
 from .utils import flatten, chainlist, shuffledcopy
 
 from .base import EqVal, NeqVal
@@ -43,12 +45,13 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons = None):
     r.shuffle(smtassume)
 
     if initial_cons is None:
-        initial_conlits = solver._conlits
+        cons = list(solver._conlits)
     else:
-        initial_conlits = [solver._conlit2conmap[x] for x in initial_cons]
+        cons = [solver._conlit2conmap[x] for x in initial_cons]
 
     # Need to use 'sample' as solver._conlits is a set
-    cons = r.sample(solver._conlits, len(solver._conlits))
+    r.shuffle(cons)
+    #cons = r.sample(initial_conlits, len(initial_conlits))
 
     core = solver.basicCore(smtassume + cons)
     # If this ever fails, check why then maybe remove
@@ -142,7 +145,7 @@ from multiprocessing import Pool, Process, get_start_method, Queue
 
 # Fake Pool for profiling with py-spy
 class FakePool:
-    def __init__(self, processes):
+    def __init__(self):
         pass
     
     def map(self, func, args):
