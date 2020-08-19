@@ -70,13 +70,13 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons = None):
             else:
                 lens.append(None)
                 if len(core) > earlycutsize:
-                    logging.info("Core for %s None exit: %s", assume, lens)
+                    logging.debug("Core for %s None exit: %s", assume, lens)
                     return None
 
         # Should never be satisfiable on the first pass
         assert core is not None
         if earlycutsize is not None and len(core) > earlycutsize:
-            logging.info("Core for %s early exit: %s", assume, lens)
+            logging.debug("Core for %s early exit: %s", assume, lens)
             return None
 
     # So we can find different cores if we recall method
@@ -118,13 +118,13 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons = None):
             else:
                 badcount += 1
                 if badcount > minsize:
-                    logging.info("Core for %s : failed - badcount too big: %s / %s > 5 * %s / %s", assume, badcount, stepcount, minsize, len(core))
+                    logging.debug("Core for %s : failed - badcount too big: %s / %s > 5 * %s / %s", assume, badcount, stepcount, minsize, len(core))
                     return None
                 if badcount > minsize or (badcount/stepcount) > 5*minsize/len(core):
-                    logging.info("Core for %s: failed - minsize: %s / %s > 5 * %s / %s", assume, badcount, stepcount, minsize, len(core))
+                    logging.debug("Core for %s: failed - minsize: %s / %s > 5 * %s / %s", assume, badcount, stepcount, minsize, len(core))
                     return None
     
-    logging.info("Core for %s : %s to %s, with %s steps, %s bad", assume, lens, len(core), stepcount, badcount)
+    logging.debug("Core for %s : %s to %s, with %s steps, %s bad", assume, lens, len(core), stepcount, badcount)
     return [solver._conmap[x] for x in core if x in solver._conmap]
 
 def getTinyMUSes(solver, puzlits, musdict, repeats):
@@ -242,7 +242,6 @@ def dopar(tup):
 
 def findSmallestMUS(solver, puzlits, repeats=3):
     musdict = {}
-    muscount = {p:0 for p in puzlits}
 
     # We need this to be accessible by the pool
     global parsolver
@@ -257,12 +256,11 @@ def findSmallestMUS(solver, puzlits, repeats=3):
     with getPool(CONFIG["cores"]) as pool:
         for (shortcutsize,minsize) in [(50,3),(200,5),(500,8),(1000,20),(math.inf,math.inf)]:
             for iter in range(repeats):
-                res = pool.map(dopar,[(p,"{}{}{}".format(iter,p,shortcutsize),shortcutsize,minsize)  for p in puzlits if muscount[p] < repeats])
+                res = pool.map(dopar,[(p,"{}{}{}".format(iter,p,shortcutsize),shortcutsize,minsize)  for p in puzlits])
                 for (p,mus) in res:
                     if mus is not None and (p not in musdict or len(musdict[p]) > len(mus)):
                         assert(len(mus) > 1)
                         musdict[p] = mus
-                        muscount[p] += 1
             if len(musdict) > 0 and min([len(v) for v in musdict.values()]) <= minsize:
                 return musdict
         return musdict
@@ -279,20 +277,18 @@ def checkMUS(solver, puzlits, oldmus, musdict):
             musdict[p] = newmus
 
 def cascadeMUS(solver, puzlits, repeats, musdict):
-    muscount = {p:0 for p in puzlits}
-
     # We need this to be accessible by the pool
     global parsolver
     parsolver = solver
 
     with getPool(CONFIG["cores"]) as pool:
         for minsize in range(2,200,1):
-            for iter in range(repeats):
-                res = pool.map(dopar,[(p,"{}{}{}".format(iter,p,minsize),math.inf,minsize*2)  for p in puzlits if muscount[p] < repeats])
-                for (p,mus) in res:
-                    if mus is not None and (p not in musdict or len(musdict[p]) > len(mus)):
-                        assert(len(mus) > 1)
-                        musdict[p] = mus
+            # Do 'range(repeats)' first, so when we distribute we get an even spread of literals on different cores
+            res = pool.map(dopar,[(p,"{}{}{}".format(iter,p,minsize),math.inf,minsize*2) for _ in range(repeats) for p in puzlits])
+            for (p,mus) in res:
+                if mus is not None and (p not in musdict or len(musdict[p]) > len(mus)):
+                    assert(len(mus) > 1)
+                    musdict[p] = mus
             if len(musdict) > 0 and min([len(v) for v in musdict.values()]) <= minsize:
                 return musdict
         return
