@@ -33,6 +33,20 @@ CONFIG = {
     # Use 'incremental' mode in solver
     # Todo: Sometimes this makes the solver go super-slow
     "solverIncremental": False,
+
+    # Exit when MUS is too big
+    "earlyExit": True,
+
+    # Exit when MUS might be too big
+    "earlyExitAllFailed": True,
+
+    # Exit when MUS might be too big
+    "earlyExitMaybe": False,
+
+    # When "officially" looking for a mus of size k,
+    # instead look for cascadeMult*k, because it is not too much
+    # more work and we might want it later
+    "cascadeMult": 2
 }
 
 

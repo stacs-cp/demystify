@@ -59,7 +59,6 @@ def html_solve(outstream, solver, puzlits, MUS):
         musdict = MUS.smallestMUS(puzlits)
         smallest = min([len(v) for v in musdict.values()])
 
-        logging.info([(v,len(musdict[v])) for v in sorted(musdict.keys())])
         print("<h3>Step {}</h3>".format(step))
         step += 1
         if smallest == 1:

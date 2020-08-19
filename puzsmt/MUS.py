@@ -85,8 +85,7 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons = None):
     # So we can find different cores if we recall method
     r.shuffle(core)
 
-    stepcount = 0
-    badcount = 0
+
     # First try chopping big bits off
     if False:
         step = int(len(core) / 4)
@@ -109,6 +108,9 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons = None):
     # We need to be prepared for things to disappear as
     # we reduce the core, so make a copy and iterate through
     # that
+    stepcount = 0
+    badcount = 0
+    probability = 1
     corecpy = list(core)
     for lit in corecpy:
         if lit in core and len(core) > 2:
@@ -118,28 +120,37 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons = None):
             stepcount += 1
             if newcore is not None:
                 core = newcore
+                probability = 1
             else:
-                badcount += 1
-                if badcount > minsize:
+                probability *= 1/len(core)
+                if CONFIG["earlyExitAllFailed"] and probability < 1/10000:
+                    logging.debug("Core for %s: failed - probability: %s -- %s %s %s %s", assume, probability, badcount, stepcount, minsize, len(core))
+                    
+                if CONFIG["earlyExit"] and badcount > minsize:
                     logging.debug("Core for %s : failed - badcount too big: %s / %s > 5 * %s / %s", assume, badcount, stepcount, minsize, len(core))
                     return None
-                if badcount > minsize or (badcount/stepcount) > 5*minsize/len(core):
+                if CONFIG["earlyExitMaybe"] and (badcount > minsize or (badcount/stepcount) > 5*minsize/len(core)):
                     logging.debug("Core for %s: failed - minsize: %s / %s > 5 * %s / %s", assume, badcount, stepcount, minsize, len(core))
                     return None
     
     logging.debug("Core for %s : %s to %s, with %s steps, %s bad", assume, lens, len(core), stepcount, badcount)
     return [solver._conmap[x] for x in core if x in solver._conmap]
 
+# Needs to be global so we can call it from a child process
+_parfunc_dotinymus_solver = None
+def _parfunc_dotinymus(p):
+    return (p,tinyMUS(_parfunc_dotinymus_solver, [p.neg()]))
+
 def getTinyMUSes(solver, puzlits, musdict, repeats):
-    for r in range(repeats):
-        for p in puzlits:
-            mus = tinyMUS(solver, [p.neg()])
+    global _parfunc_dotinymus_solver
+    _parfunc_dotinymus_solver = solver
+    with getPool(CONFIG["cores"]) as pool:
+        res = pool.map(_parfunc_dotinymus, [p for r in range(repeats) for p in puzlits])
+        for (p,mus) in res:
             if mus is not None and (p not in musdict or len(musdict[p]) > len(mus)):
                     # If this ever fails, check out why. Might mean tinyMUS cannot promise size 1 MUSes
                     assert(len(mus) == 1)
                     musdict[p] = mus
-
-
 
 from multiprocessing import Pool, Process, get_start_method, Queue
 
@@ -164,16 +175,18 @@ def getPool(cores):
         return ProcessPool(processes=cores)
     #    return Pool(processes=cores)
 
+_process_parfunc = None
+
 def doprocess(id, inqueue, outqueue):
     count = 0
     while True:
         # print("! {} Waiting for task".format(id))
-        msg = inqueue.get()
+        (func, msg) = inqueue.get()
         # print("! {} Got task {}".format(id,count))
-        if msg == 'EXIT':
+        if func is None:
             # print("! {} exit".format(id))
             break
-        outqueue.put(dopar(msg))
+        outqueue.put(func(msg))
         # print("! {} Done task {}".format(id,count))
         count += 1
 
@@ -196,7 +209,7 @@ class ProcessPool:
         for i, chunk in enumerate(chunks):
             for c in chunk:
                 # print("! Putting task {} for {}".format(i, c))
-                self._inqueues[i].put(c)
+                self._inqueues[i].put((func, c))
 
         results = []
         for i, q in enumerate(self._outqueues):
@@ -230,25 +243,25 @@ class ProcessPool:
     def __exit__(self,a,b,c):
         ## print("! exit")
         for q in self._inqueues:
-            q.put('EXIT')
+            q.put((None,None))
         for p in self._processes:
             p.join()
         return False
 
 
 # Code for parallelisation of findSmallestMUSParallel
-parsolver = []
-def dopar(tup):
+_findSmallestMUS_solver = None
+def _findSmallestMUS_func(tup):
     (p, randstr, shortcutsize, minsize) = tup
-    return (p,MUS(random.Random(randstr), parsolver, [p.neg()], shortcutsize, minsize))
+    return (p,MUS(random.Random(randstr), _findSmallestMUS_solver, [p.neg()], shortcutsize, minsize))
 
 
 def findSmallestMUS(solver, puzlits, repeats=3):
     musdict = {}
 
-    # We need this to be accessible by the pool
-    global parsolver
-    parsolver = solver
+    # We need this to be accessible by child processes
+    global _findSmallestMUS_solver
+    _findSmallestMUS_solver = solver
 
     getTinyMUSes(solver, puzlits, musdict, repeats)
 
@@ -259,7 +272,8 @@ def findSmallestMUS(solver, puzlits, repeats=3):
     with getPool(CONFIG["cores"]) as pool:
         for (shortcutsize,minsize) in [(50,3),(200,5),(500,8),(1000,20),(math.inf,math.inf)]:
             for iter in range(repeats):
-                res = pool.map(dopar,[(p,"{}{}{}".format(iter,p,shortcutsize),shortcutsize,minsize)  for p in puzlits])
+                res = pool.map(_findSmallestMUS_func,
+                    [(p,"{}{}{}".format(iter,p,shortcutsize),shortcutsize,minsize)  for p in puzlits])
                 for (p,mus) in res:
                     if mus is not None and (p not in musdict or len(musdict[p]) > len(mus)):
                         assert(len(mus) > 1)
@@ -272,22 +286,22 @@ def findSmallestMUS(solver, puzlits, repeats=3):
 # Check an existing dictionary. Reject any invalid MUS and squash any good MUS
 def checkMUS(solver, puzlits, oldmus, musdict):
     for p in puzlits:
-        if p in oldmus:
+        if p in oldmus and len(oldmus[p]) < 12:
             newmus = MUS(random.Random("X"), solver, [p.neg()], math.inf, math.inf, initial_cons = oldmus[p])
             assert newmus is not None
             if len(newmus) < len(oldmus[p]):
-                logging.info("Squashed a MUS %s %s %s", p, oldmus[p], newmus)
+                logging.info("Squashed a MUS %s %s -> %s", p, len(oldmus[p]), len(newmus))
             musdict[p] = newmus
 
 def cascadeMUS(solver, puzlits, repeats, musdict):
     # We need this to be accessible by the pool
-    global parsolver
-    parsolver = solver
+    global _findSmallestMUS_solver
+    _findSmallestMUS_solver = solver
 
     with getPool(CONFIG["cores"]) as pool:
         for minsize in range(2,200,1):
             # Do 'range(repeats)' first, so when we distribute we get an even spread of literals on different cores
-            res = pool.map(dopar,[(p,"{}{}{}".format(iter,p,minsize),math.inf,minsize*2) for _ in range(repeats) for p in puzlits])
+            res = pool.map(_findSmallestMUS_func,[(p,"{}{}{}".format(iter,p,minsize),math.inf,minsize*CONFIG["cascadeMult"]) for _ in range(repeats) for p in puzlits])
             for (p,mus) in res:
                 if mus is not None and (p not in musdict or len(musdict[p]) > len(mus)):
                     assert(len(mus) > 1)
