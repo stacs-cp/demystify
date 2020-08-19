@@ -122,10 +122,11 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons = None):
                 core = newcore
                 probability = 1
             else:
-                probability *= 1/len(core)
+                badcount += 1
+                probability *= minsize/len(core)
                 if CONFIG["earlyExitAllFailed"] and probability < 1/10000:
                     logging.debug("Core for %s: failed - probability: %s -- %s %s %s %s", assume, probability, badcount, stepcount, minsize, len(core))
-                    
+                    return None
                 if CONFIG["earlyExit"] and badcount > minsize:
                     logging.debug("Core for %s : failed - badcount too big: %s / %s > 5 * %s / %s", assume, badcount, stepcount, minsize, len(core))
                     return None
@@ -288,6 +289,7 @@ def checkMUS(solver, puzlits, oldmus, musdict):
     for p in puzlits:
         if p in oldmus and len(oldmus[p]) < 12:
             newmus = MUS(random.Random("X"), solver, [p.neg()], math.inf, math.inf, initial_cons = oldmus[p])
+            #print("!!! {} :: {}".format(oldmus[p], newmus))
             assert newmus is not None
             if len(newmus) < len(oldmus[p]):
                 logging.info("Squashed a MUS %s %s -> %s", p, len(oldmus[p]), len(newmus))
@@ -341,4 +343,6 @@ class CascadeMUSFinder:
 
         if CONFIG["useCache"]:
             self._bestcache = copy.deepcopy(musdict)
+
+        #print("!! {} {}".format(min(len(v) for v in musdict.values()), max(len(v) for v in musdict.values())))
         return musdict
