@@ -125,7 +125,7 @@ def getTinyMUSes(solver, puzlits, musdict):
 
 
 
-from multiprocessing import Pool
+from multiprocessing import Pool, Process, get_start_method, Queue
 
 # Fake Pool for profiling with py-spy
 class FakePool:
@@ -145,7 +145,79 @@ def getPool(cores):
     if cores <= 1:
         return FakePool()
     else:
-        return Pool(processes=cores)
+        return ProcessPool(processes=cores)
+    #    return Pool(processes=cores)
+
+def doprocess(id, inqueue, outqueue):
+    count = 0
+    while True:
+        # print("! {} Waiting for task".format(id))
+        msg = inqueue.get()
+        # print("! {} Got task {}".format(id,count))
+        if msg == 'EXIT':
+            # print("! {} exit".format(id))
+            break
+        outqueue.put(dopar(msg))
+        # print("! {} Done task {}".format(id,count))
+        count += 1
+
+# Magic from https://stackoverflow.com/questions/2130016/splitting-a-list-into-n-parts-of-approximately-equal-length
+def split(a, n):
+    k, m = divmod(len(a), n)
+    # Listify this so we check the lengths here
+    return list(list(a[i * k + min(i, m):(i + 1) * k + min(i + 1, m)]) for i in range(n))
+
+class ProcessPool:
+    def __init__(self, processes):
+        assert processes > 1
+        self._processcount = processes
+
+    def map(self, func, args):
+        # TODO: This can be unbalanced
+        chunks = split(args, self._processcount)
+        # print("!A ", chunks)
+        # Push all the work
+        for i, chunk in enumerate(chunks):
+            for c in chunk:
+                # print("! Putting task {} for {}".format(i, c))
+                self._inqueues[i].put(c)
+
+        results = []
+        for i, q in enumerate(self._outqueues):
+            l = []
+            # Get one answer for each thing in the chunk
+            for _ in chunks[i]:
+                x = q.get()
+                # print("!X got ", i, x)
+                l.append(x)
+            results.append(l)
+
+        # print("!Ax {} {} {} {} {}".format(len(args), sum([len(c) for c in chunks]), sum([len(r) for r in results]), [len(c) for c in chunks], [len(r) for r in results]))
+        if len(list(itertools.chain(*results))) != len(args):
+            logging.error("Missing answers: {} {} {} {}".format([len(r) for r in results], [len(c) for c in chunks], sum([len(c) for c in chunks]), len(args)))
+            assert len(list(itertools.chain(*results))) == len(args)
+        # print("!B ", results)
+        # print("!C", list(itertools.chain(*results)))
+        return list(itertools.chain(*results))
+
+    def __enter__(self):
+        assert get_start_method() == 'fork'
+        ## print("! enter")
+        self._inqueues = [Queue() for i in range(self._processcount)]
+        self._outqueues = [Queue() for i in range(self._processcount)]
+        self._processes = [Process(target = doprocess, args=(i,self._inqueues[i], self._outqueues[i])) for i in range(self._processcount)]
+        for p in self._processes:
+            p.start()
+        return self
+
+    # Clean up
+    def __exit__(self,a,b,c):
+        ## print("! exit")
+        for q in self._inqueues:
+            q.put('EXIT')
+        for p in self._processes:
+            p.join()
+        return False
 
 
 # Code for parallelisation of findSmallestMUSParallel
