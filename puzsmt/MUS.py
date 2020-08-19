@@ -120,18 +120,19 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons = None):
             stepcount += 1
             if newcore is not None:
                 core = newcore
+                lens.append(len(core))
                 probability = 1
             else:
                 badcount += 1
                 probability *= minsize/len(core)
                 if CONFIG["earlyExitAllFailed"] and probability < 1/10000:
-                    logging.debug("Core for %s: failed - probability: %s -- %s %s %s %s", assume, probability, badcount, stepcount, minsize, len(core))
+                    logging.debug("Core for %s %s: failed - probability: %s -- %s %s %s %s", assume, lens, probability, badcount, stepcount, minsize, len(core))
                     return None
                 if CONFIG["earlyExit"] and badcount > minsize:
-                    logging.debug("Core for %s : failed - badcount too big: %s / %s > 5 * %s / %s", assume, badcount, stepcount, minsize, len(core))
+                    logging.debug("Core for %s %s: failed - badcount too big: %s / %s > 5 * %s / %s", assume, lens, badcount, stepcount, minsize, len(core))
                     return None
                 if CONFIG["earlyExitMaybe"] and (badcount > minsize or (badcount/stepcount) > 5*minsize/len(core)):
-                    logging.debug("Core for %s: failed - minsize: %s / %s > 5 * %s / %s", assume, badcount, stepcount, minsize, len(core))
+                    logging.debug("Core for %s %s: failed - minsize: %s / %s > 5 * %s / %s", assume, lens, badcount, stepcount, minsize, len(core))
                     return None
     
     logging.debug("Core for %s : %s to %s, with %s steps, %s bad", assume, lens, len(core), stepcount, badcount)
@@ -287,12 +288,12 @@ def findSmallestMUS(solver, puzlits, repeats=3):
 # Check an existing dictionary. Reject any invalid MUS and squash any good MUS
 def checkMUS(solver, puzlits, oldmus, musdict):
     for p in puzlits:
-        if p in oldmus and len(oldmus[p]) < 12:
+        if p in oldmus:
             newmus = MUS(random.Random("X"), solver, [p.neg()], math.inf, math.inf, initial_cons = oldmus[p])
             #print("!!! {} :: {}".format(oldmus[p], newmus))
             assert newmus is not None
             if len(newmus) < len(oldmus[p]):
-                logging.info("Squashed a MUS %s %s -> %s", p, len(oldmus[p]), len(newmus))
+                logging.info("Squashed an old MUS %s %s -> %s", p, len(oldmus[p]), len(newmus))
             musdict[p] = newmus
 
 def cascadeMUS(solver, puzlits, repeats, musdict):
@@ -344,5 +345,5 @@ class CascadeMUSFinder:
         if CONFIG["useCache"]:
             self._bestcache = copy.deepcopy(musdict)
 
-        #print("!! {} {}".format(min(len(v) for v in musdict.values()), max(len(v) for v in musdict.values())))
+        # print("!! {} {}".format(min(len(v) for v in musdict.values()), max(len(v) for v in musdict.values())))
         return musdict
