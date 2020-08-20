@@ -320,7 +320,6 @@ def cascadeMUS(solver, puzlits, repeats, musdict):
             res = pool.map(_findSmallestMUS_func,[(p,"{}{}{}".format(iter,p,minsize),math.inf,(minsize+1)*CONFIG["cascadeMult"]) for _ in range(repeats) for p in puzlits])
             for (p,mus) in res:
                 if mus is not None and (p not in musdict or len(musdict[p]) > len(mus)):
-                    assert(len(mus) > 1)
                     musdict[p] = mus
             if len(musdict) > 0 and min([len(v) for v in musdict.values()]) <= minsize:
                 return musdict
