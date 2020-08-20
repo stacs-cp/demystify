@@ -13,7 +13,7 @@ CONFIG = {
 
 
     # How many times to try looking for each size of core
-    "repeats": 3,
+    "repeats": 5,
 
     # Encode "at most one thing is true" as a single clause
     "OneClauseAtMost": False,
@@ -46,7 +46,7 @@ CONFIG = {
     # When "officially" looking for a mus of size k,
     # instead look for cascadeMult*k, because it is not too much
     # more work and we might want it later
-    "cascadeMult": 2
+    "cascadeMult": 1
 }
 
 
