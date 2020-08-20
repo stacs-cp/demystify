@@ -142,6 +142,7 @@ def _parfunc_dotinymus(args):
 def getTinyMUSes(solver, puzlits, musdict, *, distance, repeats):
     global _parfunc_dotinymus_solver
     _parfunc_dotinymus_solver = solver
+    logging.info("Getting tiny MUSes, distance %s, for %s puzlits, %s repeats", distance, len(puzlits), repeats)
     with getPool(CONFIG["cores"]) as pool:
         res = pool.map(_parfunc_dotinymus, [(p,distance) for r in range(repeats) for p in puzlits])
         for (p,mus) in res:
