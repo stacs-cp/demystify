@@ -5,6 +5,7 @@ import random
 import logging
 import itertools
 import copy
+import sys
 
 from time import time
 
@@ -18,16 +19,24 @@ from .config import CONFIG
 # It uses internals from solver, but is put in another file just for "neatness"
 
 
-def tinyMUS(solver, assume):
+def tinyMUS(solver, assume, distance):
     smtassume = [solver._varlit2smtmap[l] for l in assume]
 
-    cons = flatten([solver._varlit2con[l] for l in assume])
+    if distance == 1:
+        cons = flatten([solver._varlit2con[l] for l in assume])
+    elif distance == 2:
+        cons = flatten([solver._varlit2con2[l] for l in assume])
+    else:
+        print("!! Invalid distance")
+        sys.exit(1)
+
 
     core = solver.basicCore(smtassume + cons)
     if core is None:
         return None
 
     corecpy = list(core)
+    badcount = 1
     for lit in corecpy:
         if lit in core and len(core) > 2:
             to_test = list(core)
@@ -35,6 +44,10 @@ def tinyMUS(solver, assume):
             newcore = solver.basicCore(to_test)
             if newcore is not None:
                 core = newcore
+            else:
+                badcount += 1
+                if badcount > 5:
+                    return None
     
     return [solver._conmap[x] for x in core if x in solver._conmap]
     
@@ -140,18 +153,17 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons = None):
 
 # Needs to be global so we can call it from a child process
 _parfunc_dotinymus_solver = None
-def _parfunc_dotinymus(p):
-    return (p,tinyMUS(_parfunc_dotinymus_solver, [p.neg()]))
+def _parfunc_dotinymus(args):
+    (p, distance) = args
+    return (p,tinyMUS(_parfunc_dotinymus_solver, [p.neg()], distance))
 
-def getTinyMUSes(solver, puzlits, musdict, repeats):
+def getTinyMUSes(solver, puzlits, musdict, *, distance, repeats):
     global _parfunc_dotinymus_solver
     _parfunc_dotinymus_solver = solver
     with getPool(CONFIG["cores"]) as pool:
-        res = pool.map(_parfunc_dotinymus, [p for r in range(repeats) for p in puzlits])
+        res = pool.map(_parfunc_dotinymus, [(p,distance) for r in range(repeats) for p in puzlits])
         for (p,mus) in res:
             if mus is not None and (p not in musdict or len(musdict[p]) > len(mus)):
-                    # If this ever fails, check out why. Might mean tinyMUS cannot promise size 1 MUSes
-                    assert(len(mus) == 1)
                     musdict[p] = mus
 
 from multiprocessing import Pool, Process, get_start_method, Queue
@@ -292,9 +304,8 @@ def checkMUS(solver, puzlits, oldmus, musdict):
             newmus = MUS(random.Random("X"), solver, [p.neg()], math.inf, math.inf, initial_cons = oldmus[p])
             #print("!!! {} :: {}".format(oldmus[p], newmus))
             assert newmus is not None
-            if len(newmus) < len(oldmus[p]):
-                logging.info("Squashed an old MUS %s %s -> %s", p, len(oldmus[p]), len(newmus))
-            musdict[p] = newmus
+            if p not in musdict or len(musdict[p]) > len(newmus):
+                musdict[p] = newmus
 
 def cascadeMUS(solver, puzlits, repeats, musdict):
     # We need this to be accessible by the pool
@@ -333,7 +344,9 @@ class CascadeMUSFinder:
     
     def smallestMUS(self, puzlits):
         musdict = {}
-        getTinyMUSes(self._solver, puzlits, musdict, self._repeats)
+        if CONFIG["checkSmall1"]:
+            logging.info("Early exit: checkSmall1")
+            getTinyMUSes(self._solver, puzlits, musdict, repeats = self._repeats, distance = 1)
 
         # Early exit for trivial case
         if len(musdict) > 0 and min([len(v) for v in musdict.values()]) == 1:
@@ -342,7 +355,13 @@ class CascadeMUSFinder:
         if CONFIG["useCache"]:
             checkMUS(self._solver, puzlits, self._bestcache, musdict)
 
-        cascadeMUS(self._solver, puzlits, self._repeats, musdict)
+        if CONFIG["checkSmall2"]:
+            getTinyMUSes(self._solver, puzlits, musdict, repeats = self._repeats, distance = 2)
+
+        if (not CONFIG["checkSmall2"]) or (len(musdict) == 0 or min([len(v) for v in musdict.values()]) > 3):
+            cascadeMUS(self._solver, puzlits, self._repeats, musdict)
+        else:
+            logging.info("Early exit: skipping cascade")
 
         if CONFIG["useCache"]:
             self._bestcache = copy.deepcopy(musdict)

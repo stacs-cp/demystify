@@ -96,20 +96,26 @@ class Solver:
 
     def init_litmappings(self):
         # Set up some mappings for efficient finding of tiny MUSes
+        # Map from a var lit to all the constraints it is in
         self._varlit2con = { l : set() for l in self._varlit2smtmap.keys() }
-        for (var,con) in self._conmap.items():
+
+        # Map from a var lit to the negation of all lits it is in a constraint with
+        # (to later make distance 2 mappings)
+        self._varlit2negconnectedlits = { l : set() for l in self._varlit2smtmap.keys() }
+        
+        for (cvar,con) in self._conmap.items():
             lits = con.lits()
             # Negate all the lits
             neglits = [l.neg() for l in lits]
             for l in neglits:
-                self._varlit2con[l].add(var)
+                self._varlit2con[l].add(cvar)
+                self._varlit2negconnectedlits[l].update(neglits)
 
-        self._varlit2con2 = {l : set() for l in self._varlit2smtmap.keys() }
-        for (var,cons) in self._varlit2con.items():
-            lits = set(flatten([self._conmap[c].lits() for c in cons]))
-            neglits = [l.neg() for l in lits]
-            for l in neglits:
-                self._varlit2con2[l].add(var)
+        # Map from a var lit to all constraints it is distance 2 from
+        self._varlit2con2 = {}# {l : set() for l in self._varlit2smtmap.keys() }
+        for (lit, connected) in self._varlit2negconnectedlits.items():
+            allcon = set.union(*[self._varlit2con[x] for x in connected]).union(self._varlit2con[lit])
+            self._varlit2con2[lit] = allcon
 
 
     def puzzle(self):
