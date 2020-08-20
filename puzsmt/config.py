@@ -55,6 +55,12 @@ CONFIG = {
 
     # Make use of unsat cores when shrinking MUSes
     "useUnsatCores":True,
+
+    # Reset solver for each size of MUS
+    "resetSolverMUS":False,
+
+    # Reset solver for every call (VERY slow)
+    "resetSolverFull":False,
 }
 
 

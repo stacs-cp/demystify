@@ -229,6 +229,7 @@ class ProcessPool:
         random.Random(getGlobalProcessCounter()).shuffle(args)
         # TODO: This can be unbalanced
         chunks = split(args, self._processcount)
+        logging.info("Chunked %s in %s", len(args), [len(c) for c in chunks])
         # print("!A ", chunks)
         # Push all the work
         for i, chunk in enumerate(chunks):
@@ -313,18 +314,31 @@ def cascadeMUS(solver, puzlits, repeats, musdict):
     global _findSmallestMUS_solver
     _findSmallestMUS_solver = solver
 
-
-    with getPool(CONFIG["cores"]) as pool:
+    # Have to duplicate code, to swap loops around
+    if CONFIG["resetSolverMUS"]:
         for minsize in range(3,200,1):
-            # Do 'range(repeats)' first, so when we distribute we get an even spread of literals on different cores
-            # minsize+1 for MUS size, as the MUS will include 'p'
-            res = pool.map(_findSmallestMUS_func,[(p,"{}{}{}".format(iter,p,minsize),math.inf,(minsize+1)*CONFIG["cascadeMult"]) for _ in range(repeats) for p in puzlits])
-            for (p,mus) in res:
-                if mus is not None and (p not in musdict or len(musdict[p]) > len(mus)):
-                    musdict[p] = mus
-            if len(musdict) > 0 and min([len(v) for v in musdict.values()]) <= minsize:
-                return musdict
-        return
+            with getPool(CONFIG["cores"]) as pool:
+                # Do 'range(repeats)' first, so when we distribute we get an even spread of literals on different cores
+                # minsize+1 for MUS size, as the MUS will include 'p'
+                logging.info("Considering %s * %s jobs for minsize=%s", repeats, len(puzlits), minsize)
+                res = pool.map(_findSmallestMUS_func,[(p,"{}{}{}".format(iter,p,minsize),math.inf,(minsize+1)*CONFIG["cascadeMult"]) for _ in range(repeats) for p in puzlits])
+                for (p,mus) in res:
+                    if mus is not None and (p not in musdict or len(musdict[p]) > len(mus)):
+                        musdict[p] = mus
+                if len(musdict) > 0 and min([len(v) for v in musdict.values()]) <= minsize:
+                    return
+    else:
+        with getPool(CONFIG["cores"]) as pool:
+            for minsize in range(3,200,1):
+                # Do 'range(repeats)' first, so when we distribute we get an even spread of literals on different cores
+                # minsize+1 for MUS size, as the MUS will include 'p'
+                logging.info("Considering %s * %s jobs for minsize=%s", repeats, len(puzlits), minsize)
+                res = pool.map(_findSmallestMUS_func,[(p,"{}{}{}".format(iter,p,minsize),math.inf,(minsize+1)*CONFIG["cascadeMult"]) for _ in range(repeats) for p in puzlits])
+                for (p,mus) in res:
+                    if mus is not None and (p not in musdict or len(musdict[p]) > len(mus)):
+                        musdict[p] = mus
+                if len(musdict) > 0 and min([len(v) for v in musdict.values()]) <= minsize:
+                    return
 
 class BasicMUSFinder:
 

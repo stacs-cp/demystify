@@ -20,7 +20,7 @@ class SATSolver:
         self._boolnames = {}
         self._knownlits = set()
         self._stack = []
-        self._clauses = 0
+        self._clauses = []
 
     def Bool(self, name):
         newbool = self._boolcount
@@ -35,14 +35,19 @@ class SATSolver:
         return list(lits)
 
     def addConstraint(self, clause):
-        self._clauses += 1
+        self._clauses.append(clause)
         self._solver.add_clause(clause)
 
     def addImplies(self, var, clauses):
         for c in clauses:
-            self._clauses += 1
+            self._clauses.append(c + [-var])
             self._solver.add_clause(c + [-var])
     
+    # Recreate solver, throwing away all learned clauses
+    def rebootSolver(self):
+        self._solver.delete()
+        self._solver = Solver(name=CONFIG["solver"], incr=CONFIG["solverIncremental"], bootstrap_with=self._clauses)
+
     # SAT assignments look like a list of integers, where:
     # '5' means variable 5 is true
     # '-5' means variable 5 is false
@@ -54,6 +59,9 @@ class SATSolver:
         #if multiprocessing.current_process().name == "MainProcess":
         #    print("!! solving in the main thread")
         #    traceback.print_stack()
+        if CONFIG["resetSolverFull"]:
+            self.rebootSolver()
+
         start_time = time.time()
         x = self._solver.solve(assumptions=chainlist(lits, self._knownlits))
         end_time = time.time()
@@ -70,6 +78,9 @@ class SATSolver:
         #if multiprocessing.current_process().name == "MainProcess":
         #    print("!! solveLimited in the main thread")
         #    traceback.print_stack()
+        if CONFIG["resetSolverFull"]:
+            self.rebootSolver()
+
         start_time = time.time()
         if CONFIG["solveLimited"]:
             self._solver.conf_budget(100000)
