@@ -94,4 +94,6 @@ def html_solve(outstream, solver, puzlits, MUS):
     
     logging.info("Trace: %s", trace)
     logging.info("Trace Quality: %s", [(i,len(j)) for (i,j) in trace])
+    logging.info("Trace Sorted: %s", sorted([(i,len(j)) for (i,j) in trace]))
+
     return trace
