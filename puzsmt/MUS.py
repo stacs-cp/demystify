@@ -73,13 +73,11 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons = None):
 
     # Need to use 'sample' as solver._conlits is a set
     #cons = r.sample(initial_conlits, len(initial_conlits))
+    core = cons + smtassume
 
-    core = solver.basicCore(smtassume + cons)
-    # If this ever fails, check why then maybe remove
-    assert core is not None
-    if core is None:
-        logging.info("Asked for invalid core!")
-        return None
+    # We used to start with one 'core' calculation, stop that because
+    # it might send us down a bad track
+    #core = solver.basicCore(smtassume + cons)
     
     lens = [len(core)]
 
@@ -150,6 +148,27 @@ def getTinyMUSes(solver, puzlits, musdict, *, distance, repeats):
             if mus is not None and (p not in musdict or len(musdict[p]) > len(mus)):
                     musdict[p] = mus
 
+
+_parfunc_docheckmus_solver = None
+def _parfunc_docheckmus(args):
+    (p, oldmus) = args
+    return (p, MUS(random.Random("X"), _parfunc_docheckmus_solver, [p.neg()], math.inf, math.inf, initial_cons=oldmus))
+
+# Check an existing dictionary. Reject any invalid MUS and squash any good MUS
+def checkMUS(solver, puzlits, oldmus, musdict):
+    global _parfuncdocheckmus_solver
+    _parfuncdocheckmus_solver = solver
+    if len(oldmus) > 0:
+        _parfuncdocheckmus_solver = solver
+        with getPool(CONFIG["cores"]) as pool:
+            res = pool.map(_parfunc_docheckmus, [(p, oldmus[p]) for p in puzlits if p in oldmus])
+            for (p, newmus) in res:
+                #print("!!! {} :: {}".format(oldmus[p], newmus))
+                assert newmus is not None
+                if p not in musdict or len(musdict[p]) > len(newmus):
+                    musdict[p] = newmus
+
+
 from multiprocessing import Pool, Process, get_start_method, Queue
 
 # Fake Pool for profiling with py-spy
@@ -194,12 +213,21 @@ def split(a, n):
     # Listify this so we check the lengths here
     return list(list(a[i * k + min(i, m):(i + 1) * k + min(i + 1, m)]) for i in range(n))
 
+
+global_process_counter = 0
+def getGlobalProcessCounter():
+    global global_process_counter
+    global_process_counter += 1
+    return global_process_counter
+
 class ProcessPool:
     def __init__(self, processes):
         assert processes > 1
         self._processcount = processes
 
     def map(self, func, args):
+        # Make this repeatable, but shuffled differently on each call
+        random.Random(getGlobalProcessCounter()).shuffle(args)
         # TODO: This can be unbalanced
         chunks = split(args, self._processcount)
         # print("!A ", chunks)
@@ -280,16 +308,6 @@ def findSmallestMUS(solver, puzlits, repeats=3):
                 return musdict
         return musdict
 
-
-# Check an existing dictionary. Reject any invalid MUS and squash any good MUS
-def checkMUS(solver, puzlits, oldmus, musdict):
-    for p in puzlits:
-        if p in oldmus:
-            newmus = MUS(random.Random("X"), solver, [p.neg()], math.inf, math.inf, initial_cons = oldmus[p])
-            #print("!!! {} :: {}".format(oldmus[p], newmus))
-            assert newmus is not None
-            if p not in musdict or len(musdict[p]) > len(newmus):
-                musdict[p] = newmus
 
 def cascadeMUS(solver, puzlits, repeats, musdict):
     # We need this to be accessible by the pool

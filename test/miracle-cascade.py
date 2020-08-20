@@ -14,8 +14,9 @@ import puzsmt.solve
 import puzsmt.prettyprint
 import buildpuz
 
-logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(relativeCreated)d:%(message)s")
+logging.basicConfig(level=logging.DEBUG, format="%(levelname)s:%(name)s:%(relativeCreated)d:%(message)s")
 
+puzsmt.config.LoadConfigFromDict({"solverIncremental": False, "cores": 12, "repeats": 10})
 
 # Make a matrix of variables (we can make more than one)
 vars = puzsmt.base.VarMatrix(lambda t: (t[0]+1,t[1]+1), (9, 9), range(1,9+1))

@@ -8,6 +8,8 @@ from ..config import CONFIG
 import pysat
 import inspect
 import time
+import multiprocessing
+import traceback
 
 #print(inspect.getfile(pysat))
 
@@ -49,6 +51,9 @@ class SATSolver:
         return {abs(x): x > 0 for x in l}
 
     def solve(self, lits,*,getsol):
+        if multiprocessing.current_process().name == "MainProcess":
+            print("!! solving in the main thread")
+            traceback.print_stack()
         start_time = time.time()
         x = self._solver.solve(assumptions=chainlist(lits, self._knownlits))
         end_time = time.time()
@@ -62,6 +67,9 @@ class SATSolver:
             return None
 
     def solveLimited(self, lits):
+        if multiprocessing.current_process().name == "MainProcess":
+            print("!! solveLimited in the main thread")
+            traceback.print_stack()
         start_time = time.time()
         if CONFIG["solveLimited"]:
             self._solver.conf_budget(100000)
@@ -74,6 +82,8 @@ class SATSolver:
         return x
 
     def solveSingle(self, puzlits, lits):
+        if multiprocessing.current_process().name == "MainProcess":
+            print("!! solveSingle in the main thread")
         # We just brute force check all assignments to other variables
         sol = self.solve(lits,getsol=True)
         if sol is None:
