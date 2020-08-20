@@ -1,5 +1,6 @@
 import logging
 import sys
+import math
 
 from .prettyprint import print_explanation
 
@@ -31,7 +32,7 @@ def explain(solver, lit, reason):
 
     return exp
 
-def html_solve(outstream, solver, puzlits, MUS):
+def html_solve(outstream, solver, puzlits, MUS, steps=math.inf):
     trace = []
 
     # Set up Javascript
@@ -55,7 +56,7 @@ def html_solve(outstream, solver, puzlits, MUS):
 
     step = 1
     # Now, we need to check each one in turn to see which is 'cheapest'
-    while len(puzlits) > 0:
+    while len(puzlits) > 0 and step <= steps:
         logging.info("Starting Step %s", step)
         logging.info("Current state %s", solver.getCurrentDomain())
         musdict = MUS.smallestMUS(puzlits)
