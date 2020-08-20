@@ -58,12 +58,20 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons = None):
     r.shuffle(smtassume)
 
     if initial_cons is None:
-        cons = list(solver._conlits)
+        if CONFIG["checkCloseFirst"]:
+            closecons = set(flatten([solver._varlit2con[l] for l in assume]))
+            farcons = solver._conlits - closecons
+            cons = r.sample(closecons, len(closecons)) + r.sample(farcons, len(farcons))
+        else:
+            cons = list(solver._conlits)
+            r.shuffle(cons)
+
     else:
         cons = [solver._conlit2conmap[x] for x in initial_cons]
+        r.shuffle(cons)
+
 
     # Need to use 'sample' as solver._conlits is a set
-    r.shuffle(cons)
     #cons = r.sample(initial_conlits, len(initial_conlits))
 
     core = solver.basicCore(smtassume + cons)
@@ -74,30 +82,6 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons = None):
         return None
     
     lens = [len(core)]
-
-    if False:
-        while len(lens) <= 5 and len(core) > 2:
-            shufcpy = shuffledcopy(r, core)
-            del shufcpy[-1]
-            newcore = solver.basicCore(shufcpy)
-            if newcore is not None:
-                core = newcore
-                lens.append(len(core))
-            else:
-                lens.append(None)
-                if len(core) > earlycutsize:
-                    logging.debug("Core for %s None exit: %s", assume, lens)
-                    return None
-
-        # Should never be satisfiable on the first pass
-        assert core is not None
-        if earlycutsize is not None and len(core) > earlycutsize:
-            logging.debug("Core for %s early exit: %s", assume, lens)
-            return None
-
-    # So we can find different cores if we recall method
-    r.shuffle(core)
-
 
     # First try chopping big bits off
     if False:
@@ -344,17 +328,19 @@ class CascadeMUSFinder:
     def smallestMUS(self, puzlits):
         musdict = {}
         if CONFIG["checkSmall1"]:
-            logging.info("Early exit: checkSmall1")
+            logging.info("Doing checkSmall1")
             getTinyMUSes(self._solver, puzlits, musdict, repeats = self._repeats, distance = 1)
 
         # Early exit for trivial case
         if len(musdict) > 0 and min([len(v) for v in musdict.values()]) == 1:
+            logging.info("Early exit from checkSmall1")
             return musdict
 
         if CONFIG["useCache"]:
             checkMUS(self._solver, puzlits, self._bestcache, musdict)
 
         if CONFIG["checkSmall2"]:
+            logging.info("Doing checkSmall2")
             getTinyMUSes(self._solver, puzlits, musdict, repeats = self._repeats, distance = 2)
 
         if (not CONFIG["checkSmall2"]) or (len(musdict) == 0 or min([len(v) for v in musdict.values()]) > 3):

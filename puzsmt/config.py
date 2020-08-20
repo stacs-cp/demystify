@@ -50,6 +50,8 @@ CONFIG = {
 
     "checkSmall1": True,
     "checkSmall2": True,
+
+    "checkCloseFirst": True,
 }
 
 
