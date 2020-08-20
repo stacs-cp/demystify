@@ -156,10 +156,9 @@ def _parfunc_docheckmus(args):
 
 # Check an existing dictionary. Reject any invalid MUS and squash any good MUS
 def checkMUS(solver, puzlits, oldmus, musdict):
-    global _parfuncdocheckmus_solver
-    _parfuncdocheckmus_solver = solver
+    global _parfunc_docheckmus_solver
+    _parfunc_docheckmus_solver = solver
     if len(oldmus) > 0:
-        _parfuncdocheckmus_solver = solver
         with getPool(CONFIG["cores"]) as pool:
             res = pool.map(_parfunc_docheckmus, [(p, oldmus[p]) for p in puzlits if p in oldmus])
             for (p, newmus) in res:
