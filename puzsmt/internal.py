@@ -8,6 +8,8 @@ from .utils import flatten, chainlist
 
 from .base import EqVal, NeqVal
 
+from .config import CONFIG
+
 # A variable is a dictionary mapping values to their SAT variable
 
 from .solvers.z3impl import Z3Solver
@@ -180,8 +182,11 @@ class Solver:
         solve = self._solver.solveLimited(lits)
         if solve is True or solve is None:
             return None
-        core = self._solver.unsat_core()
-        assert set(core).issubset(set(lits))
+        if CONFIG["useUnsatCores"]:
+            core = self._solver.unsat_core()
+            assert set(core).issubset(set(lits))
+        else:
+            core = lits
         return core
 
 

@@ -52,6 +52,9 @@ CONFIG = {
     "checkSmall2": True,
 
     "checkCloseFirst": True,
+
+    # Make use of unsat cores when shrinking MUSes
+    "useUnsatCores":True,
 }
 
 
