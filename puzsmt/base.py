@@ -188,12 +188,20 @@ class Var:
         assert len(poslits) == 1
         return poslits[0]
 
-    def assignmentToModel(self, assignment):
+    def assignmentToModel(self, assignment, partial=False):
         if assignment is None:
             return []
         else:
-            assert assignment in self._dom
-            return EqVal(self, assignment)
+            if partial==False:
+                assert assignment in self._dom
+                return EqVal(self, assignment)
+            else:
+                assert set(assignment).issubset(set(self._dom))
+                lits = [NeqVal(self, d) for d in self._dom if not (d in assignment)]
+                if len(assignment) == 1:
+                    lits.append([EqVal(self, assignment[0])])
+                return lits
+                
 
     def __repr__(self):
         return self._name
@@ -243,8 +251,8 @@ class VarMatrix:
     def modelToAssignment(self, model, partial=False):
         return [[var.modelToAssignment(model, partial) for var in row] for row in self._vars]
 
-    def assignmentToModel(self, assignment):
-        return [[var.assignmentToModel(avar) for (var,avar) in zip(row,arow)] for (row, arow) in zip(self._vars, assignment)]
+    def assignmentToModel(self, assignment, partial=False):
+        return [[var.assignmentToModel(avar, partial) for (var,avar) in zip(row,arow)] for (row, arow) in zip(self._vars, assignment)]
 
 
 class Puzzle:
@@ -279,5 +287,5 @@ class Puzzle:
     def modelToAssignment(self, model, partial = False):
         return [v.modelToAssignment(model, partial) for v in self._vars]
 
-    def assignmentToModel(self, assignment):
-        return flatten([v.assignmentToModel(a) for (v,a) in zip(self._vars, assignment)])
+    def assignmentToModel(self, assignment, partial = False):
+        return flatten([v.assignmentToModel(a, partial) for (v,a) in zip(self._vars, assignment)])
