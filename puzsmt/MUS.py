@@ -129,7 +129,7 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons = None):
                     logging.debug("Core for %s %s: failed - probability: %s -- %s %s %s %s", assume, lens, probability, badcount, stepcount, minsize, len(core))
                     return None
                 if CONFIG["earlyExit"] and badcount > minsize:
-                    logging.debug("Core for %s %s: failed - badcount too big: %s / %s > 5 * %s / %s", assume, lens, badcount, stepcount, minsize, len(core))
+                    logging.debug("Core for %s %s: failed - badcount too big: %s of %s failed towards %s", assume, lens, badcount, stepcount, minsize)
                     return None
                 if CONFIG["earlyExitMaybe"] and (badcount > minsize or (badcount/stepcount) > 5*minsize/len(core)):
                     logging.debug("Core for %s %s: failed - minsize: %s / %s > 5 * %s / %s", assume, lens, badcount, stepcount, minsize, len(core))
@@ -301,10 +301,12 @@ def cascadeMUS(solver, puzlits, repeats, musdict):
     global _findSmallestMUS_solver
     _findSmallestMUS_solver = solver
 
+
     with getPool(CONFIG["cores"]) as pool:
-        for minsize in range(2,200,1):
+        for minsize in range(3,200,1):
             # Do 'range(repeats)' first, so when we distribute we get an even spread of literals on different cores
-            res = pool.map(_findSmallestMUS_func,[(p,"{}{}{}".format(iter,p,minsize),math.inf,minsize*CONFIG["cascadeMult"]) for _ in range(repeats) for p in puzlits])
+            # minsize+1 for MUS size, as the MUS will include 'p'
+            res = pool.map(_findSmallestMUS_func,[(p,"{}{}{}".format(iter,p,minsize),math.inf,(minsize+1)*CONFIG["cascadeMult"]) for _ in range(repeats) for p in puzlits])
             for (p,mus) in res:
                 if mus is not None and (p not in musdict or len(musdict[p]) > len(mus)):
                     assert(len(mus) > 1)
