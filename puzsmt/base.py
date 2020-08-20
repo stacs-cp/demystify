@@ -167,18 +167,26 @@ class Var:
 
     # partial allows some variables to be unassigned
     def modelToAssignment(self, model, partial=False):
-        lits = [k for k in self._dom if EqVal(self, k) in model]
+        poslits = [k for k in self._dom if EqVal(self, k) in model]
+        neglits = [k for k in self._dom if NeqVal(self, k) in model]
+
         # Nothing should ever be assigned more than once!
-        assert len(lits) <= 1
+        assert len(poslits) <= 1
         if partial:
-            if len(lits) > 0:
-                return lits[0]
+            # If assigned return that, else return values not yet
+            # removed
+            if len(poslits) > 0:
+                return poslits
+
+            nonneg = [k for k in self._dom if not (k in neglits)]
+            if len(nonneg) > 0:
+                return nonneg
             else:
-                return None
+                return self._dom
 
         # Sanity check: Only one thing in a variable should be defined in a solution
-        assert len(lits) == 1
-        return lits[0]
+        assert len(poslits) == 1
+        return poslits[0]
 
     def assignmentToModel(self, assignment):
         if assignment is None:

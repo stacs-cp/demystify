@@ -193,6 +193,9 @@ class Solver:
     def getKnownLits(self):
         return self._knownlits
 
+    def getCurrentDomain(self):
+        return self._puzzle.modelToAssignment(self.getKnownLits(), partial = True)
+
     # Storing and restoring assignments
     def push(self):
         self._solver.push()

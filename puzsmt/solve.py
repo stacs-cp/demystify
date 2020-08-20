@@ -56,9 +56,10 @@ def html_solve(outstream, solver, puzlits, MUS):
     step = 1
     # Now, we need to check each one in turn to see which is 'cheapest'
     while len(puzlits) > 0:
+        logging.info("Starting Step %s", step)
+        logging.info("Current state %s", solver.getCurrentDomain())
         musdict = MUS.smallestMUS(puzlits)
         smallest = min([len(v) for v in musdict.values()])
-
         print("<h3>Step {}</h3>".format(step))
         step += 1
         if smallest == 1:
