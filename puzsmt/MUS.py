@@ -359,7 +359,7 @@ class CascadeMUSFinder:
         musdict = {}
         if CONFIG["checkSmall1"]:
             logging.info("Doing checkSmall1")
-            getTinyMUSes(self._solver, puzlits, musdict, repeats = CONFIG["repeats"], distance = 1)
+            getTinyMUSes(self._solver, puzlits, musdict, repeats = CONFIG["smallRepeats"], distance = 1)
 
         # Early exit for trivial case
         if len(musdict) > 0 and min([len(v) for v in musdict.values()]) == 1:
@@ -371,7 +371,7 @@ class CascadeMUSFinder:
 
         if CONFIG["checkSmall2"]:
             logging.info("Doing checkSmall2")
-            getTinyMUSes(self._solver, puzlits, musdict, repeats = CONFIG["repeats"], distance = 2)
+            getTinyMUSes(self._solver, puzlits, musdict, repeats = CONFIG["smallRepeats"], distance = 2)
 
         if (not CONFIG["checkSmall2"]) or (len(musdict) == 0 or min([len(v) for v in musdict.values()]) > 3):
             cascadeMUS(self._solver, puzlits, CONFIG["repeats"], musdict)

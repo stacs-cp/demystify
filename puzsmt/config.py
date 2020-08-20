@@ -11,6 +11,9 @@ CONFIG = {
     # Set to 1 (or 0) to disable parallelisation
     "cores": 8,
 
+    # How many times to look for very tiny cores
+    # Incrasing this past 5 doesn't (seem) to be useful
+    "smallRepeats": 5,
 
     # How many times to try looking for each size of core
     "repeats": 5,
