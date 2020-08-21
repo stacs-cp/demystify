@@ -1,10 +1,8 @@
 import copy
-import types
 import math
 import random
 import logging
 import itertools
-import copy
 import sys
 
 from time import time
