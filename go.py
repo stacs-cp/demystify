@@ -8,11 +8,10 @@ import copy
 import sys
 
 # Make a matrix of variables (we can make more than one)
-vars = puzsmt.base.VarMatrix(lambda t: (t[0]+1,t[1]+1), (9, 9), range(1,9+1))
+vars = puzsmt.base.VarMatrix(lambda t: (t[0] + 1, t[1] + 1), (9, 9), range(1, 9 + 1))
 
 # Build the puzzle (we can pass multiple matrices, depending on the puzzle)
 puz = puzsmt.base.Puzzle([vars])
-
 
 
 puz.addConstraints(buildpuz.basicSudoku(vars))
@@ -66,15 +65,16 @@ print(solutionmodel)
 print(puz.modelToAssignment(model, partial=True))
 
 
-
 # Now, let's get an actual Sudoku!
 
-#str = "600120384008459072000006005000264030070080006940003000310000050089700000502000190"
-sudokustr = "093004560060003140004608309981345000347286951652070483406002890000400010029800034"
+# str = "600120384008459072000006005000264030070080006940003000310000050089700000502000190"
+sudokustr = (
+    "093004560060003140004608309981345000347286951652070483406002890000400010029800034"
+)
 
 l = [int(c) for c in sudokustr]
 
-sudoku = [l[i:i+9] for i in range(0, len(l), 9)]
+sudoku = [l[i : i + 9] for i in range(0, len(l), 9)]
 
 print("Going to solve:")
 print(sudoku)
@@ -89,7 +89,7 @@ for i in range(9):
 
 sudokumodel = puz.assignmentToModel([sudoku])
 
-print(solver.solve(sudokumodel,getsol=True))
+print(solver.solve(sudokumodel, getsol=True))
 
 # Now, we solve it, and check it has one solution
 
@@ -113,13 +113,13 @@ for s in sudokumodel:
 puzlits = [p for p in fullsolution if p not in sudokumodel]
 
 # Now, we need to check each one in turn to see which is 'cheapest'
-#while len(puzlits) > 0:
+# while len(puzlits) > 0:
 for i in range(3):
     musdict = {}
     for p in puzlits:
         mus = puzsat.MUS.MUS(solver, [p.neg()], 50)
         if mus is not None:
-            #print(p, ":", len(mus))
+            # print(p, ":", len(mus))
             musdict[p] = mus
     smallest = min([len(v) for v in musdict.values()])
     print("Smallest mus size:", smallest)
@@ -136,4 +136,3 @@ for i in range(3):
         print("Setting ", p, " because ", [solver.explain(c) for c in musdict[p]])
         solver.addLit(p)
         puzlits.remove(p)
-        

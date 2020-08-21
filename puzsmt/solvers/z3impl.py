@@ -5,7 +5,6 @@ class Z3Solver:
     def __init__(self):
         self._solver = z3.Solver()
 
-
     def Bool(self, name):
         return z3.Bool(name)
 
@@ -25,8 +24,8 @@ class Z3Solver:
         else:
             con = z3.And(clauses)
         self._solver.add(z3.Implies(var, con))
-    
-    def solve(self, lits,*,getsol):
+
+    def solve(self, lits, *, getsol):
         result = self._solver.check(list(lits))
         if getsol == False:
             return result == z3.sat
@@ -37,7 +36,7 @@ class Z3Solver:
             return self._solver.model()
 
     def solveSingle(self, puzlits, lits):
-        sol = self.solve(lits,getsol=True)
+        sol = self.solve(lits, getsol=True)
         if sol is None:
             return None
 
@@ -50,7 +49,7 @@ class Z3Solver:
             clause.append(l != sol[l])
         self.addConstraint(self.Or(clause))
 
-        newsol = self.solve(lits,getsol=False)
+        newsol = self.solve(lits, getsol=False)
 
         self.pop()
         if newsol:
@@ -64,7 +63,7 @@ class Z3Solver:
 
     def push(self):
         self._solver.push()
-    
+
     def pop(self):
         self._solver.pop()
 

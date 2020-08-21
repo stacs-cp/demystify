@@ -5,7 +5,7 @@ import os
 import logging
 
 # Let me import puzsmt from one directory up
-sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))) 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 import puzsmt
 import puzsmt.base
 import puzsmt.internal
@@ -14,12 +14,14 @@ import puzsmt.solve
 import puzsmt.prettyprint
 import buildpuz
 
-logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(relativeCreated)d:%(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(levelname)s:%(name)s:%(relativeCreated)d:%(message)s"
+)
 
 puzsmt.config.LoadConfigFromDict({"cores": 24, "smallRepeats": 50, "repeats": 200})
 
 # Make a matrix of variables (we can make more than one)
-vars = puzsmt.base.VarMatrix(lambda t: (t[0]+1,t[1]+1), (9, 9), range(1,9+1))
+vars = puzsmt.base.VarMatrix(lambda t: (t[0] + 1, t[1] + 1), (9, 9), range(1, 9 + 1))
 
 
 # https://www.youtube.com/watch?v=QNzltTzv0fc&t=79s
@@ -35,7 +37,7 @@ puz.addConstraints(constraints)
 
 solver = puzsmt.internal.Solver(puz)
 
-sudoku = [ [None] * 9 for _ in range(9) ]
+sudoku = [[None] * 9 for _ in range(9)]
 sudoku[3][2] = 6
 sudoku[2][3] = 4
 
@@ -65,10 +67,9 @@ puzlits = [p for p in fullsolution if p not in sudokumodel]
 MUS = puzsmt.MUS.CascadeMUSFinder(solver)
 
 trace = puzsmt.solve.html_solve(sys.stdout, solver, puzlits, MUS)
-        
-print("Minitrace: ", [(s, mins[0], len(mins)) for (s,mins) in trace])
+
+print("Minitrace: ", [(s, mins[0], len(mins)) for (s, mins) in trace])
 
 
 logging.info("Finished")
 logging.info("Full Trace %s", trace)
-

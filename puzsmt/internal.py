@@ -14,10 +14,12 @@ from .config import CONFIG
 
 from .solvers.z3impl import Z3Solver
 from .solvers.pysatimpl import SATSolver
+
+
 class Solver:
     def __init__(self, puzzle):
         self._puzzle = puzzle
-        #self._solver = Z3Solver()
+        # self._solver = Z3Solver()
         self._solver = SATSolver()
 
         # We want a reliable random source
@@ -49,8 +51,8 @@ class Solver:
         for mat in self._puzzle.vars():
             for v in mat.varlist():
                 for d in v.dom():
-                    lit = EqVal(v,d)
-                    neglit = NeqVal(v,d)
+                    lit = EqVal(v, d)
+                    neglit = NeqVal(v, d)
                     b = self._solver.Bool(str(lit))
 
                     self._varlit2smtmap[lit] = b
@@ -58,7 +60,7 @@ class Solver:
                     self._varsmt2litmap[b] = lit
                     self._varsmt2neglitmap[b] = neglit
                     self._varsmt.add(b)
-    
+
         # Unique identifier for each introduced variable
         count = 0
 
@@ -69,12 +71,11 @@ class Solver:
                 var = self._solver.Bool(name)
                 self._solver.addImplies(var, self._buildConstraint(c))
                 self._conmap[var] = c
-                assert(c not in self._conlit2conmap)
+                assert c not in self._conlit2conmap
                 self._conlit2conmap[c] = var
                 self._conlits.add(var)
 
-     
-        self._solver.set_phases(positive = self._varsmt, negative = self._conlits)
+        self._solver.set_phases(positive=self._varsmt, negative=self._conlits)
 
         count = 0
         for c in self._puzzle.constraints():
@@ -83,7 +84,7 @@ class Solver:
             var = self._solver.Bool(name)
             self._solver.addImplies(var, self._buildConstraint(c))
             self._conmap[var] = c
-            assert(c not in self._conlit2conmap)
+            assert c not in self._conlit2conmap
             self._conlit2conmap[c] = var
             self._conlits.add(var)
 
@@ -99,13 +100,13 @@ class Solver:
     def init_litmappings(self):
         # Set up some mappings for efficient finding of tiny MUSes
         # Map from a var lit to all the constraints it is in
-        self._varlit2con = { l : set() for l in self._varlit2smtmap.keys() }
+        self._varlit2con = {l: set() for l in self._varlit2smtmap.keys()}
 
         # Map from a var lit to the negation of all lits it is in a constraint with
         # (to later make distance 2 mappings)
-        self._varlit2negconnectedlits = { l : set() for l in self._varlit2smtmap.keys() }
-        
-        for (cvar,con) in self._conmap.items():
+        self._varlit2negconnectedlits = {l: set() for l in self._varlit2smtmap.keys()}
+
+        for (cvar, con) in self._conmap.items():
             lits = con.lits()
             # Negate all the lits
             neglits = [l.neg() for l in lits]
@@ -114,11 +115,12 @@ class Solver:
                 self._varlit2negconnectedlits[l].update(neglits)
 
         # Map from a var lit to all constraints it is distance 2 from
-        self._varlit2con2 = {}# {l : set() for l in self._varlit2smtmap.keys() }
+        self._varlit2con2 = {}  # {l : set() for l in self._varlit2smtmap.keys() }
         for (lit, connected) in self._varlit2negconnectedlits.items():
-            allcon = set.union(*[self._varlit2con[x] for x in connected]).union(self._varlit2con[lit])
+            allcon = set.union(*[self._varlit2con[x] for x in connected]).union(
+                self._varlit2con[lit]
+            )
             self._varlit2con2[lit] = allcon
-
 
     def puzzle(self):
         return self._puzzle
@@ -127,20 +129,21 @@ class Solver:
         cs = constraint.clauseset()
         clauses = [self._solver.Or([self._varlit2smtmap[lit] for lit in c]) for c in cs]
         return clauses
-    
-    # Check if there is a single solution, or return 'None'
-    def _solve(self, smtassume = tuple(), *,getsol):
-        return self._solver.solve(chainlist(self._conlits, smtassume),getsol=getsol)
 
-    
+    # Check if there is a single solution, or return 'None'
+    def _solve(self, smtassume=tuple(), *, getsol):
+        return self._solver.solve(chainlist(self._conlits, smtassume), getsol=getsol)
+
     # Check if there is a single solution and return True/False, or return 'None' if timeout
-    def _solveLimited(self, smtassume = tuple()):
+    def _solveLimited(self, smtassume=tuple()):
         return self._solver.solveLimited(chainlist(self._conlits, smtassume))
 
     # Check if there is a single solution, or return 'None'
-    def _solveSingle(self, smtassume = tuple()):
-        return self._solver.solveSingle(self._varsmt,chainlist(self._conlits,smtassume))
-    
+    def _solveSingle(self, smtassume=tuple()):
+        return self._solver.solveSingle(
+            self._varsmt, chainlist(self._conlits, smtassume)
+        )
+
     Multiple = "Multiple"
 
     def var_smt2lits(self, model):
@@ -152,7 +155,7 @@ class Solver:
                 ret.append(self._varsmt2neglitmap[l])
         return ret
 
-    def solve(self, assume = tuple(), *, getsol):
+    def solve(self, assume=tuple(), *, getsol):
         smtassume = [self._varlit2smtmap[l] for l in assume]
         sol = self._solve(smtassume, getsol=getsol)
         if getsol == False:
@@ -165,7 +168,7 @@ class Solver:
 
     # This is the same as 'solve', but checks if there are many solutions,
     # returning Solver.Multiple if there is more than one solution
-    def solveSingle(self, assume = tuple()):
+    def solveSingle(self, assume=tuple()):
         smtassume = [self._varlit2smtmap[l] for l in assume]
         sol = self._solveSingle(smtassume)
         if sol is None:
@@ -189,8 +192,6 @@ class Solver:
             core = lits
         return core
 
-
-
     def addLit(self, lit):
         self._solver.addLit(self._varlit2smtmap[lit])
         self._knownlits.append(lit)
@@ -199,17 +200,16 @@ class Solver:
         return self._knownlits
 
     def getCurrentDomain(self):
-        return self._puzzle.modelToAssignment(self.getKnownLits(), partial = True)
+        return self._puzzle.modelToAssignment(self.getKnownLits(), partial=True)
 
     # Storing and restoring assignments
     def push(self):
         self._solver.push()
         self._stackknownlits.append(copy.deepcopy(self._knownlits))
-    
+
     def pop(self):
         self._solver.pop()
         self._knownlits = self._stackknownlits.pop()
 
-    
     def explain(self, c):
         return c.explain(self._knownlits)

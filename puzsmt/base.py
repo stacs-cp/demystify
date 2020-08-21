@@ -21,10 +21,10 @@ class Lit:
             return "{} is {}".format(self.var, self.val)
         else:
             return "{} is not {}".format(self.var, self.val)
-    
+
     def __eq__(self, other) -> bool:
         return (self.var, self.val, self.equal) == (other.var, other.val, other.equal)
-    
+
     def __lt__(self, other) -> bool:
         return (self.var, self.val, self.equal) < (other.var, other.val, other.equal)
 
@@ -34,14 +34,17 @@ class Lit:
     def neg(self):
         return Lit(self.var, self.val, not self.equal)
 
+
 def EqVal(var, val: int) -> Lit:
     return Lit(var, val, True)
+
 
 def NeqVal(var, val: int) -> Lit:
     return Lit(var, val, False)
 
+
 class Clause:
-    def __init__(self, name:str, clause:Sequence[str], clausenames=None):
+    def __init__(self, name: str, clause: Sequence[str], clausenames=None):
         self._name = name
         self._clause = clause
         self._clausenames = clausenames
@@ -80,11 +83,14 @@ class Clause:
     def __repr__(self):
         return self._name + ":" + str(self.clauseset()) + "\n"
 
+
 class ClauseList:
-    def __init__(self, name, clauses, usedlits = None, namelits = None, fromClauses = False):
+    def __init__(self, name, clauses, usedlits=None, namelits=None, fromClauses=False):
         self._name = name
         if fromClauses:
-            self._clauses = tuple(sorted(itertools.chain([c.clauseset() for c in clauses])))
+            self._clauses = tuple(
+                sorted(itertools.chain([c.clauseset() for c in clauses]))
+            )
         else:
             self._clauses = tuple(sorted([tuple(sorted(c)) for c in clauses]))
 
@@ -96,17 +102,17 @@ class ClauseList:
     def explain(self, knownvars):
         if self._usedlits is None:
             return self._name
-        
+
         remainingchoices = []
         for i in range(len(self._usedlits)):
             if self._usedlits[i].neg() not in knownvars:
                 remainingchoices.append(self._namelits[i])
-        
+
         return self._name + " (Choices are: " + ", ".join(remainingchoices) + ")"
 
     def clauseset(self):
         return self._clauses
-    
+
     def lits(self):
         return self._lits
 
@@ -115,15 +121,16 @@ class ClauseList:
 
     def __hash__(self):
         return self.clauseset().__hash__()
-    
+
     def __lt__(self, other):
         return self.clauseset() < other.clauseset()
 
     def __repr__(self):
         return self._name + ":\n" + "\n".join([str(c) for c in self.clauseset()])
 
+
 # Constraints to say each variable takes a single value
-def cellHasValue(var,dom):
+def cellHasValue(var, dom):
     clauses = []
     clauses.append(
         Clause(
@@ -139,14 +146,15 @@ def cellHasValue(var,dom):
                 ClauseList(
                     "{} cannot take more than one value".format(var),
                     [
-                        [NeqVal(var,d1),NeqVal(var,d2)] for (d1,d2) in itertools.combinations(dom, 2)
+                        [NeqVal(var, d1), NeqVal(var, d2)]
+                        for (d1, d2) in itertools.combinations(dom, 2)
                     ],
-                    [EqVal(var,d) for d in dom],
-                    [str(d) for d in dom]
+                    [EqVal(var, d) for d in dom],
+                    [str(d) for d in dom],
                 )
             )
     else:
-        for (d1,d2) in itertools.combinations(dom, 2):
+        for (d1, d2) in itertools.combinations(dom, 2):
             clauses.append(
                 Clause(
                     "{} cannot be both {} and {}".format(var, d1, d2),
@@ -156,12 +164,13 @@ def cellHasValue(var,dom):
 
     return clauses
 
+
 @functools.total_ordering
 class Var:
-    def __init__(self, name:str, dom:Sequence[int]):
+    def __init__(self, name: str, dom: Sequence[int]):
         self._dom = dom
         self._name = str(name)
-    
+
     def dom(self):
         return self._dom
 
@@ -192,7 +201,7 @@ class Var:
         if assignment is None:
             return []
         else:
-            if partial==False:
+            if partial == False:
                 assert assignment in self._dom
                 return EqVal(self, assignment)
             else:
@@ -201,26 +210,28 @@ class Var:
                 if len(assignment) == 1:
                     lits.append([EqVal(self, assignment[0])])
                 return lits
-                
 
     def __repr__(self):
         return self._name
 
     def __eq__(self, other):
         return self._name == other._name
-    
+
     def __lt__(self, other):
         return self._name < other._name
 
     def __hash__(self):
         return self._name.__hash__()
 
+
 class VarMatrix:
     def __init__(self, varname, dim, dom):
         self.varname = varname
         self._dim = dim
         self._domain = tuple(dom)
-        self._vars = [[Var(varname((i,j)), dom) for j in range(dim[1])] for i in range(dim[0])]
+        self._vars = [
+            [Var(varname((i, j)), dom) for j in range(dim[1])] for i in range(dim[0])
+        ]
         self._constraints = flatten([cellHasValue(v, dom) for v in flatten(self._vars)])
 
     def varmat(self):
@@ -234,7 +245,7 @@ class VarMatrix:
 
     def dim(self):
         return self._dim
-    
+
     def xdim(self):
         return self._dim[0]
 
@@ -249,10 +260,15 @@ class VarMatrix:
         return self._constraints
 
     def modelToAssignment(self, model, partial=False):
-        return [[var.modelToAssignment(model, partial) for var in row] for row in self._vars]
+        return [
+            [var.modelToAssignment(model, partial) for var in row] for row in self._vars
+        ]
 
     def assignmentToModel(self, assignment, partial=False):
-        return [[var.assignmentToModel(avar, partial) for (var,avar) in zip(row,arow)] for (row, arow) in zip(self._vars, assignment)]
+        return [
+            [var.assignmentToModel(avar, partial) for (var, avar) in zip(row, arow)]
+            for (row, arow) in zip(self._vars, assignment)
+        ]
 
 
 class Puzzle:
@@ -283,9 +299,10 @@ class Puzzle:
     def vars(self):
         return self._vars
 
-
-    def modelToAssignment(self, model, partial = False):
+    def modelToAssignment(self, model, partial=False):
         return [v.modelToAssignment(model, partial) for v in self._vars]
 
-    def assignmentToModel(self, assignment, partial = False):
-        return flatten([v.assignmentToModel(a, partial) for (v,a) in zip(self._vars, assignment)])
+    def assignmentToModel(self, assignment, partial=False):
+        return flatten(
+            [v.assignmentToModel(a, partial) for (v, a) in zip(self._vars, assignment)]
+        )

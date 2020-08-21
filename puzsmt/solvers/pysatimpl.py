@@ -11,7 +11,8 @@ import time
 import multiprocessing
 import traceback
 
-#print(inspect.getfile(pysat))
+# print(inspect.getfile(pysat))
+
 
 class SATSolver:
     def __init__(self):
@@ -42,11 +43,15 @@ class SATSolver:
         for c in clauses:
             self._clauses.append(c + [-var])
             self._solver.add_clause(c + [-var])
-    
+
     # Recreate solver, throwing away all learned clauses
     def rebootSolver(self):
         self._solver.delete()
-        self._solver = Solver(name=CONFIG["solver"], incr=CONFIG["solverIncremental"], bootstrap_with=self._clauses)
+        self._solver = Solver(
+            name=CONFIG["solver"],
+            incr=CONFIG["solverIncremental"],
+            bootstrap_with=self._clauses,
+        )
 
     # SAT assignments look like a list of integers, where:
     # '5' means variable 5 is true
@@ -55,8 +60,8 @@ class SATSolver:
     def satassignment2map(self, l):
         return {abs(x): x > 0 for x in l}
 
-    def solve(self, lits,*,getsol):
-        #if multiprocessing.current_process().name == "MainProcess":
+    def solve(self, lits, *, getsol):
+        # if multiprocessing.current_process().name == "MainProcess":
         #    print("!! solving in the main thread")
         #    traceback.print_stack()
         if CONFIG["resetSolverFull"]:
@@ -75,7 +80,7 @@ class SATSolver:
             return None
 
     def solveLimited(self, lits):
-        #if multiprocessing.current_process().name == "MainProcess":
+        # if multiprocessing.current_process().name == "MainProcess":
         #    print("!! solveLimited in the main thread")
         #    traceback.print_stack()
         if CONFIG["resetSolverFull"]:
@@ -89,21 +94,23 @@ class SATSolver:
             x = self._solver.solve(assumptions=chainlist(lits, self._knownlits))
         end_time = time.time()
         if end_time - start_time > 5:
-            logging.info("Long time solveLimited: %s %s", len(lits), end_time - start_time)
+            logging.info(
+                "Long time solveLimited: %s %s", len(lits), end_time - start_time
+            )
         return x
 
     def solveSingle(self, puzlits, lits):
-        #if multiprocessing.current_process().name == "MainProcess":
+        # if multiprocessing.current_process().name == "MainProcess":
         #    print("!! solveSingle in the main thread")
         # We just brute force check all assignments to other variables
-        sol = self.solve(lits,getsol=True)
+        sol = self.solve(lits, getsol=True)
         if sol is None:
             return sol
         for p in puzlits:
             if sol[p]:
-                extrasol = self.solve(chainlist(lits, [-p]),getsol=False)
+                extrasol = self.solve(chainlist(lits, [-p]), getsol=False)
             else:
-                extrasol = self.solve(chainlist(lits, [p]),getsol=False)
+                extrasol = self.solve(chainlist(lits, [p]), getsol=False)
             if extrasol:
                 return "Multiple"
         return sol
@@ -111,12 +118,12 @@ class SATSolver:
     # Returns unsat_core from last solve
     def unsat_core(self):
         core = [x for x in self._solver.get_core() if x not in self._knownlits]
-        #logging.info("Core size: %s", len(core))
+        # logging.info("Core size: %s", len(core))
         return core
 
     def push(self):
         self._stack.append(copy.deepcopy(self._knownlits))
-    
+
     def pop(self):
         self._knownlits = self._stack.pop()
 
@@ -127,5 +134,5 @@ class SATSolver:
     def set_phases(self, positive, negative):
         # TODO: Ignore the positive ones seems to be best
         if CONFIG["setPhases"]:
-            l =  [-x for x in negative]
+            l = [-x for x in negative]
             self._solver.set_phases(l)

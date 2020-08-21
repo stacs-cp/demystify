@@ -6,10 +6,13 @@ from .prettyprint import print_explanation
 
 # Make a unique id
 id_counter = 0
+
+
 def get_id():
     global id_counter
     id_counter += 1
     return "id{}".format(id_counter)
+
 
 # Make a div which starts hidden
 def hidden(name, content):
@@ -32,11 +35,13 @@ def explain(solver, lit, reason):
 
     return exp
 
+
 def html_solve(outstream, solver, puzlits, MUS, steps=math.inf):
     trace = []
 
     # Set up Javascript
-    print("""
+    print(
+        """
     <script>
     toggle = function(id) {
         div = document.getElementById(id)
@@ -52,7 +57,8 @@ def html_solve(outstream, solver, puzlits, MUS, steps=math.inf):
         div.style.display = "none";
     };
     </script>
-    """)
+    """
+    )
 
     step = 1
     # Now, we need to check each one in turn to see which is 'cheapest'
@@ -84,17 +90,21 @@ def html_solve(outstream, solver, puzlits, MUS, steps=math.inf):
             trace.append((smallest, mins))
             print(explain(solver, p, musdict[p]))
             if len(mins) > 1:
-                print(hidden("There were {} choices of the same size".format(len(mins)-1),
-                    "\n".join([explain(solver, p, musdict[p]) for p in mins[1:]])))
+                print(
+                    hidden(
+                        "There were {} choices of the same size".format(len(mins) - 1),
+                        "\n".join([explain(solver, p, musdict[p]) for p in mins[1:]]),
+                    )
+                )
             else:
                 print("<p>No other choices</p>")
             solver.addLit(p)
             puzlits.remove(p)
-        
+
         print("<hr>")
-    
+
     logging.info("Trace: %s", trace)
-    logging.info("Trace Quality: %s", [(i,len(j)) for (i,j) in trace])
-    logging.info("Trace Sorted: %s", sorted([(i,len(j)) for (i,j) in trace]))
+    logging.info("Trace Quality: %s", [(i, len(j)) for (i, j) in trace])
+    logging.info("Trace Sorted: %s", sorted([(i, len(j)) for (i, j) in trace]))
 
     return trace
