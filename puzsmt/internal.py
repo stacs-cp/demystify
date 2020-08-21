@@ -19,8 +19,10 @@ from .solvers.pysatimpl import SATSolver
 class Solver:
     def __init__(self, puzzle):
         self._puzzle = puzzle
-        # self._solver = Z3Solver()
-        self._solver = SATSolver()
+        if CONFIG["solver"] == "z3":
+            self._solver = Z3Solver()
+        else:
+            self._solver = SATSolver()
 
         # We want a reliable random source
         self.random = random.Random(1)

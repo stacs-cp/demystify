@@ -24,7 +24,8 @@ CONFIG = {
     "setPhases": True,
     # Cache MUSes between steps
     "useCache": True,
-    # Which solver to use (g4 = glucose)
+
+    # Which solver to use (g4 = glucose), z3 = Use Z3
     "solver": "g4",
     # Use 'incremental' mode in solver
     # Todo: Sometimes this makes the solver go super-slow

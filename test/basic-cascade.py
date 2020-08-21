@@ -18,7 +18,7 @@ logging.basicConfig(
     level=logging.DEBUG, format="%(levelname)s:%(name)s:%(relativeCreated)d:%(message)s"
 )
 
-puzsmt.config.LoadConfigFromDict({"repeats": 5, "resetSolverFull": True, "cores": 12})
+puzsmt.config.LoadConfigFromDict({"repeats": 5, "cores": 12})
 
 # Make a matrix of variables (we can make more than one)
 vars = puzsmt.base.VarMatrix(lambda t: (t[0] + 1, t[1] + 1), (9, 9), range(1, 9 + 1))
