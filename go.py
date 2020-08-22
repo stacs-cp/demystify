@@ -1,23 +1,23 @@
 #!/usr/bin/env python3
 
-import puzsmt
-import puzsmt.internal
+import demystify
+import demystify.internal
 import buildpuz
 
 import copy
 import sys
 
 # Make a matrix of variables (we can make more than one)
-vars = puzsmt.base.VarMatrix(lambda t: (t[0] + 1, t[1] + 1), (9, 9), range(1, 9 + 1))
+vars = demystify.base.VarMatrix(lambda t: (t[0] + 1, t[1] + 1), (9, 9), range(1, 9 + 1))
 
 # Build the puzzle (we can pass multiple matrices, depending on the puzzle)
-puz = puzsmt.base.Puzzle([vars])
+puz = demystify.base.Puzzle([vars])
 
 
 puz.addConstraints(buildpuz.basicSudoku(vars))
 
 
-solver = puzsmt.internal.Solver(puz)
+solver = demystify.internal.Solver(puz)
 
 model = solver.solve(getsol=True)
 

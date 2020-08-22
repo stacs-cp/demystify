@@ -4,31 +4,31 @@ import sys
 import os
 import logging
 
-# Let me import puzsmt from one directory up
+# Let me import demystify from one directory up
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
-import puzsmt
-import puzsmt.base
-import puzsmt.internal
-import puzsmt.MUS
-import puzsmt.prettyprint
-import puzsmt.solve
+import demystify
+import demystify.base
+import demystify.internal
+import demystify.MUS
+import demystify.prettyprint
+import demystify.solve
 import buildpuz
 
 logging.basicConfig(
     level=logging.DEBUG, format="%(levelname)s:%(name)s:%(relativeCreated)d:%(message)s"
 )
 
-puzsmt.config.LoadConfigFromDict({"repeats": 5, "solver": "z3", "cores": 12})
+demystify.config.LoadConfigFromDict({"repeats": 5, "solver": "z3", "cores": 12})
 
 # Make a matrix of variables (we can make more than one)
-vars = puzsmt.base.VarMatrix(lambda t: (t[0] + 1, t[1] + 1), (9, 9), range(1, 9 + 1))
+vars = demystify.base.VarMatrix(lambda t: (t[0] + 1, t[1] + 1), (9, 9), range(1, 9 + 1))
 
 # Build the puzzle (we can pass multiple matrices, depending on the puzzle)
-puz = puzsmt.base.Puzzle([vars])
+puz = demystify.base.Puzzle([vars])
 puz.addConstraints(buildpuz.basicSudoku(vars))
 
 
-solver = puzsmt.internal.Solver(puz)
+solver = demystify.internal.Solver(puz)
 
 # Now, let's get an actual Sudoku!
 
@@ -64,9 +64,9 @@ for s in sudokumodel:
 # Start by finding the ones which are not part of the known values
 puzlits = [p for p in fullsolution if p not in sudokumodel]
 
-MUS = puzsmt.MUS.CascadeMUSFinder(solver)
+MUS = demystify.MUS.CascadeMUSFinder(solver)
 
-trace = puzsmt.solve.html_solve(sys.stdout, solver, puzlits, MUS)
+trace = demystify.solve.html_solve(sys.stdout, solver, puzlits, MUS)
 
 
 print("Minitrace: ", [(s, mins[0], len(mins)) for (s, mins) in trace])

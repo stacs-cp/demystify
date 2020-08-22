@@ -1,9 +1,9 @@
 import math
 
 from itertools import combinations
-from puzsmt.base import *
-from puzsmt.utils import intsqrt
-from puzsmt.config import CONFIG
+from demystify.base import *
+from demystify.utils import intsqrt
+from demystify.config import CONFIG
 
 
 def buildNeq(name, c1, c2, dom):

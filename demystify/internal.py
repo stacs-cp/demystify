@@ -36,7 +36,7 @@ class Solver:
 
         # Set up variable mappings -- we make a bunch as we need these to be fast.
         # 'lit' refers to base.EqVal and base.NeqVar, objects which users should see.
-        # 'puzsmt' refers to the solver's internal representation
+        # 'demystify' refers to the solver's internal representation
 
         # Map EqVal and NeqVal to internal variables
         self._varlit2smtmap = {}
