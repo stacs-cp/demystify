@@ -3,6 +3,7 @@
 import copy
 import types
 import random
+import logging
 
 from .utils import flatten, chainlist
 
@@ -86,6 +87,7 @@ class Solver:
             var = self._solver.Bool(name)
             self._solver.addImplies(var, self._buildConstraint(c))
             self._conmap[var] = c
+            logging.debug("Assigned %s to %s", c, var)
             assert c not in self._conlit2conmap
             self._conlit2conmap[c] = var
             self._conlits.add(var)
@@ -145,6 +147,9 @@ class Solver:
         return self._solver.solveSingle(
             self._varsmt, chainlist(self._conlits, smtassume)
         )
+
+    def reboot(self, seed):
+        self._solver.reboot(seed)
 
     Multiple = "Multiple"
 

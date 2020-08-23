@@ -21,7 +21,7 @@ CONFIG = {
     # Limit search to 100,000 conflicts
     "solveLimited": True,
     # TO CHECK: Does this help?
-    "setPhases": True,
+    "setPhases": False,
     # Cache MUSes between steps
     "useCache": True,
 
@@ -42,13 +42,16 @@ CONFIG = {
     "cascadeMult": 1,
     "checkSmall1": True,
     "checkSmall2": True,
-    "checkCloseFirst": True,
+    "checkCloseFirst": False,
     # Make use of unsat cores when shrinking MUSes
     "useUnsatCores": True,
     # Reset solver for each size of MUS
     "resetSolverMUS": False,
     # Reset solver for every call (VERY slow)
     "resetSolverFull": False,
+
+    # Reset solver for each new fork
+    "resetSolverFork": True
 }
 
 

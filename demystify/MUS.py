@@ -85,7 +85,6 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
             while step > 1 and i < len(core) - step:
                 to_test = core[:i] + core[(i + step) :]
                 newcore = solver.basicCore(to_test)
-                stepcount += 1
                 if newcore is not None:
                     assert len(newcore) < len(core)
                     core = newcore
@@ -105,15 +104,18 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
     corecpy = list(core)
     for lit in corecpy:
         if lit in core and len(core) > 2:
+            logging.debug("Trying to remove %s", lit)
             to_test = list(core)
             to_test.remove(lit)
             newcore = solver.basicCore(to_test)
             stepcount += 1
             if newcore is not None:
+                logging.debug("Can remove: %s", lit)
                 core = newcore
-                lens.append(len(core))
+                lens.append((lit,len(core)))
                 probability = 1
             else:
+                logging.debug("Failed to remove: %s", lit)
                 badcount += 1
                 probability *= minsize / len(core)
                 if CONFIG["earlyExitAllFailed"] and probability < 1 / 10000:
@@ -165,17 +167,17 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
 
 
 # Needs to be global so we can call it from a child process
-_parfunc_dotinymus_solver = None
+_global_solver_ref = None
 
 
 def _parfunc_dotinymus(args):
     (p, distance) = args
-    return (p, tinyMUS(_parfunc_dotinymus_solver, [p.neg()], distance))
+    return (p, tinyMUS(_global_solver_ref, [p.neg()], distance))
 
 
 def getTinyMUSes(solver, puzlits, musdict, *, distance, repeats):
-    global _parfunc_dotinymus_solver
-    _parfunc_dotinymus_solver = solver
+    global _global_solver_ref
+    _global_solver_ref = solver
     logging.info(
         "Getting tiny MUSes, distance %s, for %s puzlits, %s repeats",
         distance,
@@ -190,17 +192,13 @@ def getTinyMUSes(solver, puzlits, musdict, *, distance, repeats):
             if mus is not None and (p not in musdict or len(musdict[p]) > len(mus)):
                 musdict[p] = mus
 
-
-_parfunc_docheckmus_solver = None
-
-
 def _parfunc_docheckmus(args):
     (p, oldmus) = args
     return (
         p,
         MUS(
             random.Random("X"),
-            _parfunc_docheckmus_solver,
+            _global_solver_ref,
             [p.neg()],
             math.inf,
             math.inf,
@@ -211,8 +209,8 @@ def _parfunc_docheckmus(args):
 
 # Check an existing dictionary. Reject any invalid MUS and squash any good MUS
 def checkMUS(solver, puzlits, oldmus, musdict):
-    global _parfunc_docheckmus_solver
-    _parfunc_docheckmus_solver = solver
+    global _global_solver_ref
+    _global_solver_ref = solver
     if len(oldmus) > 0:
         with getPool(CONFIG["cores"]) as pool:
             res = pool.map(
@@ -255,6 +253,8 @@ _process_parfunc = None
 
 def doprocess(id, inqueue, outqueue):
     count = 0
+    if CONFIG["resetSolverFork"]:
+        _global_solver_ref.reboot(id)
     while True:
         # print("! {} Waiting for task".format(id))
         (func, msg) = inqueue.get()
@@ -334,7 +334,7 @@ class ProcessPool:
         self._inqueues = [Queue() for i in range(self._processcount)]
         self._outqueues = [Queue() for i in range(self._processcount)]
         self._processes = [
-            Process(target=doprocess, args=(i, self._inqueues[i], self._outqueues[i]))
+            Process(target=doprocess, args=(getGlobalProcessCounter(), self._inqueues[i], self._outqueues[i]))
             for i in range(self._processcount)
         ]
         for p in self._processes:
@@ -350,18 +350,14 @@ class ProcessPool:
             p.join()
         return False
 
-
-# Code for parallelisation of findSmallestMUSParallel
-_findSmallestMUS_solver = None
-
-
 def _findSmallestMUS_func(tup):
     (p, randstr, shortcutsize, minsize) = tup
+    #logging.info("Random str: '%s'", randstr)
     return (
         p,
         MUS(
             random.Random(randstr),
-            _findSmallestMUS_solver,
+            _global_solver_ref,
             [p.neg()],
             shortcutsize,
             minsize,
@@ -373,8 +369,8 @@ def findSmallestMUS(solver, puzlits, repeats=3):
     musdict = {}
 
     # We need this to be accessible by child processes
-    global _findSmallestMUS_solver
-    _findSmallestMUS_solver = solver
+    global _global_solver_ref
+    _global_solver_ref = solver
 
     getTinyMUSes(solver, puzlits, musdict, repeats)
 
@@ -416,8 +412,8 @@ def findSmallestMUS(solver, puzlits, repeats=3):
 
 def cascadeMUS(solver, puzlits, repeats, musdict):
     # We need this to be accessible by the pool
-    global _findSmallestMUS_solver
-    _findSmallestMUS_solver = solver
+    global _global_solver_ref
+    _global_solver_ref = solver
 
     # Have to duplicate code, to swap loops around
     if CONFIG["resetSolverMUS"]:
@@ -436,11 +432,11 @@ def cascadeMUS(solver, puzlits, repeats, musdict):
                     [
                         (
                             p,
-                            "{}{}{}".format(iter, p, minsize),
+                            "{}:{}:{}".format(r, p, minsize),
                             math.inf,
                             (minsize + 1) * CONFIG["cascadeMult"],
                         )
-                        for _ in range(repeats)
+                        for r in range(repeats)
                         for p in puzlits
                     ],
                 )
@@ -470,11 +466,11 @@ def cascadeMUS(solver, puzlits, repeats, musdict):
                     [
                         (
                             p,
-                            "{}{}{}".format(iter, p, minsize),
+                            "{}:{}:{}".format(r, p, minsize),
                             math.inf,
                             (minsize + 1) * CONFIG["cascadeMult"],
                         )
-                        for _ in range(repeats)
+                        for r in range(repeats)
                         for p in puzlits
                     ],
                 )

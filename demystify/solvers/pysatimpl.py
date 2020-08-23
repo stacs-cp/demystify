@@ -10,6 +10,7 @@ import inspect
 import time
 import multiprocessing
 import traceback
+import random
 
 # print(inspect.getfile(pysat))
 
@@ -45,12 +46,12 @@ class SATSolver:
             self._solver.add_clause(c + [-var])
 
     # Recreate solver, throwing away all learned clauses
-    def rebootSolver(self):
+    def reboot(self, seed):
         self._solver.delete()
         self._solver = Solver(
             name=CONFIG["solver"],
             incr=CONFIG["solverIncremental"],
-            bootstrap_with=self._clauses,
+            bootstrap_with=random.Random(seed).sample(self._clauses, len(self._clauses))
         )
 
     # SAT assignments look like a list of integers, where:
@@ -65,7 +66,7 @@ class SATSolver:
         #    print("!! solving in the main thread")
         #    traceback.print_stack()
         if CONFIG["resetSolverFull"]:
-            self.rebootSolver()
+            self.reboot()
 
         start_time = time.time()
         x = self._solver.solve(assumptions=chainlist(lits, self._knownlits))
@@ -84,7 +85,7 @@ class SATSolver:
         #    print("!! solveLimited in the main thread")
         #    traceback.print_stack()
         if CONFIG["resetSolverFull"]:
-            self.rebootSolver()
+            self.reboot()
 
         start_time = time.time()
         if CONFIG["solveLimited"]:

@@ -97,3 +97,9 @@ for oneclause in [False, True]:
     doSingleStep(
         [((0, i), [j for j in range(1, 5)]) for i in range(4, 9)], ((0, 1), -8)
     )
+
+    print("<hr><h2>Pointing Pair</h2>")
+
+    doSingleStep(
+        [((i, j), [3]) for i in range(1, 3) for j in range(6,9)] + [((0,8),[3])], ((0, 1), -3)
+    )
