@@ -22,7 +22,7 @@ logging.basicConfig(
 
 import pysolvers
 
-assert pysolvers.glucose41_set_argc(["-rnd-init", "-no-gr", "-rnd-freq=1"])
+#assert pysolvers.glucose41_set_argc(["-rnd-init", "-no-gr", "-rnd-freq=1"])
 
 demystify.config.LoadConfigFromDict({"cores": 12, "smallRepeats": 5, "repeats": 50, "gallopingMUSes": True})
 
