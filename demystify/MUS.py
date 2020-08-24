@@ -98,13 +98,15 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
         step = 1
         pos = 0
         badcount = 0
+        calls = 0
         while True:
             if pos >= len(core):
-                logging.debug("Core passed")
+                logging.debug("Core passed: %s %s %s", assume, len(core), calls)
                 return [solver._conmap[x] for x in core if x in solver._conmap]
             to_test = core[:pos] + core[(pos + step):]
             assert(len(to_test) < len(core))
             newcore = solver.basicCore(to_test)
+            calls += 1
             if newcore is not None:
                 core = to_test
                 step = step * 2
@@ -113,7 +115,7 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
                     badcount += 1
                     pos += 1
                     if badcount > minsize:
-                        logging.debug("Core failed")
+                        logging.debug("Core failed: %s %s %s", assume, badcount, calls)
                         return None
                 else:
                     step = step // 2
