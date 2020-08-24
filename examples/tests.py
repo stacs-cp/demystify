@@ -103,3 +103,5 @@ for oneclause in [False, True]:
     doSingleStep(
         [((i, j), [3]) for i in range(1, 3) for j in range(6,9)] + [((0,8),[3])], ((0, 1), -3)
     )
+
+

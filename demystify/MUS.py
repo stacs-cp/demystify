@@ -380,7 +380,6 @@ class ProcessPool:
 def _findSmallestMUS_func(tup):
     (p, randstr, shortcutsize, minsize) = tup
     #logging.info("Random str: '%s'", randstr)
-    print(tup)
     return (
         p,
         MUS(
