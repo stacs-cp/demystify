@@ -4,6 +4,8 @@ import math
 
 from .prettyprint import print_explanation
 
+from .MUS import musdict_minimum
+
 # Make a unique id
 id_counter = 0
 
@@ -66,16 +68,16 @@ def html_solve(outstream, solver, puzlits, MUS, steps=math.inf):
         logging.info("Starting Step %s", step)
         logging.info("Current state %s", solver.getCurrentDomain())
         musdict = MUS.smallestMUS(puzlits)
-        smallest = min([len(v) for v in musdict.values()])
+        smallest = musdict_minimum(musdict)
         print("<h3>Step {}</h3>".format(step))
         step += 1
         if smallest == 1:
-            lits = [k for k in sorted(musdict.keys()) if len(musdict[k]) == 1]
-            print_explanation(outstream, solver, [musdict[l] for l in lits], lits)
+            lits = [k for k in sorted(musdict.keys()) if len(musdict[k][0]) == 1]
+            print_explanation(outstream, solver, [musdict[l][0] for l in lits], lits)
 
             print("Doing", len(lits), " simple deductions ")
 
-            exps = "\n".join([explain(solver, p, musdict[p]) for p in sorted(lits)])
+            exps = "\n".join([explain(solver, p, musdict[p][0]) for p in sorted(lits)])
             print(hidden("Show why", exps))
 
             for p in lits:
@@ -83,21 +85,23 @@ def html_solve(outstream, solver, puzlits, MUS, steps=math.inf):
                 puzlits.remove(p)
         else:
             # Find first thing with smallest value
-            mins = [k for k in sorted(musdict.keys()) if len(musdict[k]) == smallest]
+            mins = [k for k in sorted(musdict.keys()) if len(musdict[k][0]) == smallest]
             p = mins[0]
-            print_explanation(outstream, solver, musdict[p], [p])
+            print_explanation(outstream, solver, musdict[p][0], [p])
             print("Smallest mus size:", smallest)
             trace.append((smallest, mins))
-            print(explain(solver, p, musdict[p]))
+            print(explain(solver, p, musdict[p][0]))
+            setmus = set([tuple(x) for x in musdict[p]])
             if len(mins) > 1:
                 print(
                     hidden(
                         "There were {} choices of the same size".format(len(mins) - 1),
-                        "\n".join([explain(solver, p, musdict[p]) for p in mins[1:]]),
+                        "\n".join([explain(solver, p, musdict[p][0]) for p in mins[1:]]),
                     )
                 )
             else:
                 print("<p>No other choices</p>")
+            print("Choice Info: {}".format([(lit,len(set(tuple(x) for x in musdict[lit])), len(musdict[lit])) for lit in mins]))
             solver.addLit(p)
             puzlits.remove(p)
 

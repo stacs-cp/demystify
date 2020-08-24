@@ -4,7 +4,7 @@ import random
 import logging
 import itertools
 import sys
-
+import math
 from time import time
 
 from .utils import flatten, chainlist, shuffledcopy
@@ -197,6 +197,26 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
 _global_solver_ref = None
 
 
+def update_musdict(musdict, p, mus):
+    if mus is None:
+        return
+    elif p not in musdict:
+        logging.info("XX found first {} {}".format(p, len(mus)))
+        musdict[p] = [tuple(sorted(mus))]
+    elif len(musdict[p][0]) > len(mus):
+        logging.info("XX found new best {} {} {}".format(p, len(musdict[p][0]), len(mus)))
+        musdict[p] = [tuple(sorted(mus))]
+    elif p in musdict and len(musdict[p][0]) == len(mus):
+        logging.info("XX add new best {} {} {}".format(p, len(musdict[p][0]), len(mus)))
+        musdict[p].append(tuple(sorted(mus)))
+    else:
+        assert len(musdict[p][0]) < len(mus)
+
+def musdict_minimum(musdict):
+    if len(musdict) == 0:
+        return math.inf
+    return min(len(v[0]) for v in musdict.values())
+
 def _parfunc_dotinymus(args):
     (p, distance) = args
     return (p, tinyMUS(_global_solver_ref, [p.neg()], distance))
@@ -216,8 +236,7 @@ def getTinyMUSes(solver, puzlits, musdict, *, distance, repeats):
             _parfunc_dotinymus, [(p, distance) for r in range(repeats) for p in puzlits]
         )
         for (p, mus) in res:
-            if mus is not None and (p not in musdict or len(musdict[p]) > len(mus)):
-                musdict[p] = mus
+            update_musdict(musdict, p, mus)
 
 def _parfunc_docheckmus(args):
     (p, oldmus) = args
@@ -241,13 +260,12 @@ def checkMUS(solver, puzlits, oldmus, musdict):
     if len(oldmus) > 0:
         with getPool(CONFIG["cores"]) as pool:
             res = pool.map(
-                _parfunc_docheckmus, [(p, oldmus[p]) for p in puzlits if p in oldmus]
+                _parfunc_docheckmus, [(p, mus) for p in puzlits if p in oldmus for mus in oldmus[p]]
             )
             for (p, newmus) in res:
                 # print("!!! {} :: {}".format(oldmus[p], newmus))
                 assert newmus is not None
-                if p not in musdict or len(musdict[p]) > len(newmus):
-                    musdict[p] = newmus
+                update_musdict(musdict, p, newmus)
 
 
 from multiprocessing import Pool, Process, get_start_method, Queue
@@ -402,7 +420,7 @@ def findSmallestMUS(solver, puzlits, repeats=3):
     getTinyMUSes(solver, puzlits, musdict, repeats)
 
     # Early exit for trivial case
-    if len(musdict) > 0 and min([len(v) for v in musdict.values()]) == 1:
+    if musdict_minimum(musdict) == 1:
         return musdict
 
     with getPool(CONFIG["cores"]) as pool:
@@ -427,12 +445,8 @@ def findSmallestMUS(solver, puzlits, repeats=3):
                     ],
                 )
                 for (p, mus) in res:
-                    if mus is not None and (
-                        p not in musdict or len(musdict[p]) > len(mus)
-                    ):
-                        assert len(mus) > 1
-                        musdict[p] = mus
-            if len(musdict) > 0 and min([len(v) for v in musdict.values()]) <= minsize:
+                    update_musdict(musdict, p, mus)
+            if musdict_minimum(musdict) <= minsize:
                 return musdict
         return musdict
 
@@ -468,14 +482,8 @@ def cascadeMUS(solver, puzlits, repeats, musdict):
                     ],
                 )
                 for (p, mus) in res:
-                    if mus is not None and (
-                        p not in musdict or len(musdict[p]) > len(mus)
-                    ):
-                        musdict[p] = mus
-                if (
-                    len(musdict) > 0
-                    and min([len(v) for v in musdict.values()]) <= minsize
-                ):
+                    update_musdict(musdict, p, mus)
+                if musdict_minimum(musdict) <= minsize:
                     return
     else:
         with getPool(CONFIG["cores"]) as pool:
@@ -502,14 +510,8 @@ def cascadeMUS(solver, puzlits, repeats, musdict):
                     ],
                 )
                 for (p, mus) in res:
-                    if mus is not None and (
-                        p not in musdict or len(musdict[p]) > len(mus)
-                    ):
-                        musdict[p] = mus
-                if (
-                    len(musdict) > 0
-                    and min([len(v) for v in musdict.values()]) <= minsize
-                ):
+                    update_musdict(musdict, p, mus)
+                if musdict_minimum(musdict) <= minsize:
                     return
 
 
@@ -539,7 +541,7 @@ class CascadeMUSFinder:
             )
 
         # Early exit for trivial case
-        if len(musdict) > 0 and min([len(v) for v in musdict.values()]) == 1:
+        if musdict_minimum(musdict) == 1:
             logging.info("Early exit from checkSmall1")
             return musdict
 
@@ -557,14 +559,14 @@ class CascadeMUSFinder:
             )
 
         if (not CONFIG["checkSmall2"]) or (
-            len(musdict) == 0 or min([len(v) for v in musdict.values()]) > 3
+           musdict_minimum(musdict) > 3
         ):
             cascadeMUS(self._solver, puzlits, CONFIG["repeats"], musdict)
         else:
             logging.info("Early exit: skipping cascade")
 
         if CONFIG["useCache"]:
+            # Only store first element, to stop excessive growth
             self._bestcache = copy.deepcopy(musdict)
 
-        # print("!! {} {}".format(min(len(v) for v in musdict.values()), max(len(v) for v in musdict.values())))
         return musdict
