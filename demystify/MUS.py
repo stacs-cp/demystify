@@ -79,7 +79,7 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
 
     # First try chopping big bits off
     if CONFIG["prechopMUSes"]:
-        step = int(len(core) / 4)
+        step = 80
         while step > 10 and len(core) > 2:
             i = 0
             while step > 1 and i < len(core) - step:
@@ -88,8 +88,6 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
                 if newcore is not None:
                     assert len(newcore) < len(core)
                     core = newcore
-                    i = 0
-                    step = int(len(core) / 4)
                 else:
                     i += step
             step = int(step / 2)
