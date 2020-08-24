@@ -26,8 +26,8 @@ class SATSolver:
 
     def Bool(self, name):
         newbool = self._boolcount
-        self._boolnames[newbool] = name
         self._boolcount += 1
+        self._boolnames[newbool] = name
         return newbool
 
     def negate(self, var):
@@ -48,6 +48,9 @@ class SATSolver:
     # Recreate solver, throwing away all learned clauses
     def reboot(self, seed):
         self._solver.delete()
+        if CONFIG["changeSolverSeed"]:
+            import pysolvers
+            assert pysolvers.glucose41_set_argc(["-rnd-seed="+ str(seed)])
         self._solver = Solver(
             name=CONFIG["solver"],
             incr=CONFIG["solverIncremental"],

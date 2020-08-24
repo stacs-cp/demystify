@@ -51,7 +51,16 @@ CONFIG = {
     "resetSolverFull": False,
 
     # Reset solver for each new fork
-    "resetSolverFork": True
+    "resetSolverFork": True,
+
+    # Change glucose's random seed at each solver reboot
+    "changeSolverSeed": True,
+
+    # Alternative, safer, MUS-finding algorithm
+    "gallopingMUSes": False,
+
+    # Start by chopping big bits off MUSes, to encourage variety
+    "prechopMUSes": False
 }
 
 

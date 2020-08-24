@@ -78,9 +78,9 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
     lens = [len(core)]
 
     # First try chopping big bits off
-    if False:
+    if CONFIG["prechopMUSes"]:
         step = int(len(core) / 4)
-        while step > 1 and len(core) > 2:
+        while step > 10 and len(core) > 2:
             i = 0
             while step > 1 and i < len(core) - step:
                 to_test = core[:i] + core[(i + step) :]
@@ -93,6 +93,33 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
                 else:
                     i += step
             step = int(step / 2)
+    
+    if CONFIG["gallopingMUSes"]:
+        step = 1
+        pos = 0
+        badcount = 0
+        while True:
+            if pos >= len(core):
+                logging.debug("Core passed")
+                return [solver._conmap[x] for x in core if x in solver._conmap]
+            to_test = core[:pos] + core[(pos + step):]
+            assert(len(to_test) < len(core))
+            newcore = solver.basicCore(to_test)
+            if newcore is not None:
+                core = to_test
+                step = step * 2
+            else:
+                if step == 1:
+                    badcount += 1
+                    pos += 1
+                    if badcount > minsize:
+                        logging.debug("Core failed")
+                        return None
+                else:
+                    step = step // 2
+                    assert step >= 1
+        
+
 
     # Final cleanup
     # We need to be prepared for things to disappear as
@@ -353,6 +380,7 @@ class ProcessPool:
 def _findSmallestMUS_func(tup):
     (p, randstr, shortcutsize, minsize) = tup
     #logging.info("Random str: '%s'", randstr)
+    print(tup)
     return (
         p,
         MUS(
