@@ -53,8 +53,8 @@ CONFIG = {
     # Reset solver for each new fork
     "resetSolverFork": True,
 
-    # Change glucose's random seed at each solver reboot
-    "changeSolverSeed": True,
+    # Change glucose's random seed at each solver reboot (requires chris' patched python-sat)
+    "changeSolverSeed": False,
 
     # Alternative, safer, MUS-finding algorithm
     "gallopingMUSes": False,
