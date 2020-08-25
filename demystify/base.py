@@ -167,9 +167,10 @@ def cellHasValue(var, dom):
 
 @functools.total_ordering
 class Var:
-    def __init__(self, name: str, dom: Sequence[int]):
+    def __init__(self, name: str, dom: Sequence[int], location):
         self._dom = dom
         self._name = str(name)
+        self._location = location
 
     def dom(self):
         return self._dom
@@ -230,7 +231,7 @@ class VarMatrix:
         self._dim = dim
         self._domain = tuple(dom)
         self._vars = [
-            [Var(varname((i, j)), dom) for j in range(dim[1])] for i in range(dim[0])
+            [Var(varname((i, j)), dom, (i,j)) for j in range(dim[1])] for i in range(dim[0])
         ]
         self._constraints = flatten([cellHasValue(v, dom) for v in flatten(self._vars)])
 

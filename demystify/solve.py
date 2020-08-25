@@ -38,7 +38,7 @@ def explain(solver, lit, reason):
     return exp
 
 
-def html_solve(outstream, solver, puzlits, MUS, steps=math.inf):
+def html_solve(outstream, solver, puzlits, MUS, steps=math.inf, *, gofast = False):
     trace = []
 
     # Set up Javascript
@@ -86,24 +86,28 @@ def html_solve(outstream, solver, puzlits, MUS, steps=math.inf):
         else:
             # Find first thing with smallest value
             mins = [k for k in sorted(musdict.keys()) if len(musdict[k][0]) == smallest]
-            p = mins[0]
-            print_explanation(outstream, solver, musdict[p][0], [p])
-            print("Smallest mus size:", smallest)
-            trace.append((smallest, mins))
-            print(explain(solver, p, musdict[p][0]))
-            setmus = set([tuple(x) for x in musdict[p]])
-            if len(mins) > 1:
-                print(
-                    hidden(
-                        "There were {} choices of the same size".format(len(mins) - 1),
-                        "\n".join([explain(solver, p, musdict[p][0]) for p in mins[1:]]),
+            if not gofast:
+                mins = [mins[0]]
+            for p in mins:
+                print_explanation(outstream, solver, musdict[p][0], [p])
+                print("Smallest mus size:", smallest)
+                trace.append((smallest, mins))
+                print(explain(solver, p, musdict[p][0]))
+                setmus = set([tuple(x) for x in musdict[p]])
+                solver.addLit(p)
+                puzlits.remove(p)
+
+            if not gofast:
+                if len(mins) > 1:
+                    print(
+                        hidden(
+                            "There were {} choices of the same size".format(len(mins) - 1),
+                            "\n".join([explain(solver, p, musdict[p][0]) for p in mins[1:]]),
+                        )
                     )
-                )
-            else:
-                print("<p>No other choices</p>")
+                else:
+                    print("<p>No other choices</p>")
             print("Choice Info: {}".format([(lit,len(set(tuple(x) for x in musdict[lit])), len(musdict[lit])) for lit in mins]))
-            solver.addLit(p)
-            puzlits.remove(p)
 
         print("<hr>")
 

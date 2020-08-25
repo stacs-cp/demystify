@@ -114,6 +114,22 @@ def alldiffRowsCols(varmat):
 
     return constraints
 
+def diagonalConstraints(varmat):
+    (x, y) = varmat.dim()
+    assert x == y
+    dom = varmat.domain()
+
+    constraints = []
+
+    constraints += buildCage(
+        "in \ diagonal", [varmat[i][i] for i in range(x)], dom
+    )
+
+    constraints += buildCage(
+        "in / diagonal", [varmat[x - 1 - i][i] for i in range(x)], dom
+    )
+
+    return constraints
 
 # This requires a square matrix, of length n*n for some n
 def boxConstraints(varmat):
@@ -211,6 +227,25 @@ def adjDiffByMat(varmat, diff):
                     )
     return constraints
 
+def diffByDist(varmat, dist, difference):
+    constraints = []
+    (x, y) = varmat.dim()
+
+    for i1 in range(x):
+        for j1 in range(y):
+            for diffi in range(-dist, dist+1):
+                for diffj in range(-dist, dist+1):
+                    other = (i1 + diffi, j1 + diffj)
+                    if (abs(diffi) + abs(diffj) == dist) and 0 <= other[0] < x and 0 <= other[1] < y:
+                        constraints += buildDiffBy(
+                            "dist {}".format(dist),
+                            varmat[i1][j1],
+                            varmat[other[0]][other[1]],
+                            difference,
+                            varmat.domain(),
+                        )
+    return constraints
+
 
 def thermometer(varmat, l):
     constraints = []
@@ -231,6 +266,15 @@ def basicSudoku(varmat):
 
     return constraints
 
+
+def basicXSudoku(varmat):
+    constraints = []
+
+    constraints += alldiffRowsCols(varmat)
+    constraints += boxConstraints(varmat)
+    constraints += diagonalConstraints(varmat)
+
+    return constraints
 
 def basicMiracle(varmat):
     constraints = []
