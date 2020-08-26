@@ -299,3 +299,25 @@ def basicMiracle2(varmat, thermometers):
         constraints += thermometer(varmat, t)
 
     return constraints
+
+def buildJigsaw(varmat, jigsaw):
+    constraints = []
+    constraints += alldiffRowsCols(varmat)
+    
+    size = 9
+
+    jigsawrows = [jigsaw[i:i+size] for i in range(0,size*size,size)]
+
+    for val in set(jigsaw):
+        cells = []
+        for i in range(9):
+            for j in range(9):
+                if jigsawrows[i][j] == val:
+                    cells.append(varmat[i][j])
+        constraints += buildCage(
+            "cage {}".format(val),
+            cells,
+            varmat.domain(),
+        )
+    
+    return constraints
