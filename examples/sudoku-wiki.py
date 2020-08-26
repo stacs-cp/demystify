@@ -16,7 +16,7 @@ import demystify.prettyprint
 import buildpuz
 
 logging.basicConfig(
-    level=logging.DEBUG, format="%(levelname)s:%(name)s:%(message)s"
+    level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s"
 #    level=logging.INFO, format="%(levelname)s:%(name)s:%(relativeCreated)d:%(message)s"
 )
 

@@ -69,7 +69,7 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
 
     # Need to use 'sample' as solver._conlits is a set
     # cons = r.sample(initial_conlits, len(initial_conlits))
-    core = cons + smtassume
+    core = smtassume + cons
 
     # We used to start with one 'core' calculation, stop that because
     # it might send us down a bad track
@@ -94,8 +94,9 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
     
     if CONFIG["gallopingMUSes"]:
         step = 1
-        pos = 0
-        badcount = 0
+        # We know we always need the 'smtassume' literal (reconsider if the size of the set is ever not 1)
+        assert len(assume) == 1
+        pos = 1
         calls = 0
         while True:
             if pos >= len(core):
@@ -104,17 +105,23 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
             to_test = core[:pos] + core[(pos + step):]
             assert(len(to_test) < len(core))
             newcore = solver.basicCore(to_test)
+            solvable = solver._solver.solveLimited(to_test)
+            logging.debug("Testing %s %s %s %s %s %s", len(core), pos, step, len(to_test),solvable, newcore is not None)
             calls += 1
-            if newcore is not None:
+            if solvable == False:
                 core = to_test
                 step = step * 2
             else:
                 if step == 1:
-                    badcount += 1
                     pos += 1
-                    if badcount > minsize:
-                        logging.debug("Core failed: %s %s %s", assume, badcount, calls)
-                        return None
+                    if pos >= minsize:
+                        to_test = core[:pos]
+                        if solver._solver.solveLimited(to_test) != False:
+                            logging.debug("Core failed: %s %s %s", assume, minsize, calls)
+                            return None
+                        else:
+                            logging.debug("Core found: %s %s %s", assume, minsize, calls)
+                            return [solver._conmap[x] for x in to_test if x in solver._conmap]
                 else:
                     step = step // 2
                     assert step >= 1
