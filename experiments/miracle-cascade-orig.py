@@ -22,8 +22,6 @@ demystify.config.LoadConfigFromDict(
     {
         "repeats": 5,
         "solverIncremental": False,
-        "earlyExitMaybe": True,
-        "earlyExitAllFailed": True,
         "cores": 5,
         "repeats": 20,
     }

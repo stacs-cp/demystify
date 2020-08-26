@@ -78,11 +78,11 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
     lens = [len(core)]
 
     # First try chopping big bits off
-    if CONFIG["prechopMUSes"]:
+    if False:
         step = len(core) // (minsize * minsize)
-        while step > 10 and len(core) > 2:
+        while step > 4 and len(core) > 3:
             i = 0
-            while step > 1 and i < len(core) - step:
+            while step > 1 and i < len(core):
                 to_test = core[:i] + core[(i + step) :]
                 newcore = solver.basicCore(to_test)
                 if newcore is not None:
@@ -91,7 +91,17 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
                 else:
                     i += step
             step = int(step / 2)
-    
+
+    if CONFIG["prechopMUSes"]:
+        step = len(core) / 2
+        while step > 1 and len(core) > minsize:
+            to_test = core[step:]
+            newcore = solver.basicCore(to_test)
+            if newcore is not None:
+                assert len(newcore) < len(core)
+                core = newcore
+            step = min(step//2, len(core//2))
+
     if CONFIG["gallopingMUSes"]:
         step = 1
         # We know we always need the 'smtassume' literal (reconsider if the size of the set is ever not 1)
@@ -172,20 +182,6 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
                         badcount,
                         stepcount,
                         minsize,
-                    )
-                    return None
-                if CONFIG["earlyExitMaybe"] and (
-                    badcount > minsize
-                    or (badcount / stepcount) > 5 * minsize / len(core)
-                ):
-                    logging.debug(
-                        "Core for %s %s: failed - minsize: %s / %s > 5 * %s / %s",
-                        assume,
-                        lens,
-                        badcount,
-                        stepcount,
-                        minsize,
-                        len(core),
                     )
                     return None
 
