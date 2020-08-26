@@ -57,7 +57,11 @@ CONFIG = {
     "gallopingMUSes": False,
 
     # Start by chopping big bits off MUSes, to encourage variety
-    "prechopMUSes": False
+    "prechopMUSes": False,
+
+    # Start by chopping the start of the MUS list, to encourage variety
+    "prediveMUSes": False,
+
 }
 
 

@@ -102,6 +102,12 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
                 core = newcore
             step = min(step//2, len(core//2))
 
+    if CONFIG["prediveMUSes"]:
+        step = 10
+        while solver.basicCore(core[step:]) is not None:
+            step *= 2
+        core = core[step:]
+
     if CONFIG["gallopingMUSes"]:
         step = 1
         # We know we always need the 'smtassume' literal (reconsider if the size of the set is ever not 1)
