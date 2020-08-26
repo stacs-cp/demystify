@@ -93,14 +93,14 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
             step = int(step / 2)
 
     if CONFIG["prechopMUSes"]:
-        step = len(core) / 2
+        step = len(core) // 2
         while step > 1 and len(core) > minsize:
             to_test = core[step:]
             newcore = solver.basicCore(to_test)
             if newcore is not None:
                 assert len(newcore) < len(core)
                 core = newcore
-            step = min(step//2, len(core//2))
+            step = min(step//2, len(core)//2)
 
     if CONFIG["prediveMUSes"]:
         step = 10
