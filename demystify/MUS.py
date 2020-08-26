@@ -144,7 +144,6 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
     # that
     stepcount = 0
     badcount = 0
-    probability = 1
     corecpy = list(core)
     for lit in corecpy:
         if lit in core and len(core) > 2:
@@ -157,23 +156,10 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
                 logging.debug("Can remove: %s", lit)
                 core = newcore
                 lens.append((lit,len(core)))
-                probability = 1
             else:
                 logging.debug("Failed to remove: %s", lit)
                 badcount += 1
-                probability *= minsize / len(core)
-                if CONFIG["earlyExitAllFailed"] and probability < 1 / 10000:
-                    logging.debug(
-                        "Core for %s %s: failed - probability: %s -- %s %s %s %s",
-                        assume,
-                        lens,
-                        probability,
-                        badcount,
-                        stepcount,
-                        minsize,
-                        len(core),
-                    )
-                    return None
+
                 if CONFIG["earlyExit"] and badcount > minsize:
                     logging.debug(
                         "Core for %s %s: failed - badcount too big: %s of %s failed towards %s",

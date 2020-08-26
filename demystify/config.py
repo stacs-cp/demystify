@@ -32,8 +32,6 @@ CONFIG = {
     "solverIncremental": False,
     # Exit when MUS is too big
     "earlyExit": True,
-    # Exit when MUS might be too big
-    "earlyExitAllFailed": False,
 
     # When "officially" looking for a mus of size k,
     # instead look for cascadeMult*k, because it is not too much
