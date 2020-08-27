@@ -68,6 +68,8 @@ CONFIG = {
     # Start Gallops with big steps
     "highGallop": False,
 
+    "quarterChopMUS": False,
+
     "minPrecheckMUS": False,
 
     "minPrecheckStepsMUS": False,

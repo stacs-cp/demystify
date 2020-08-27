@@ -16,6 +16,13 @@ from .config import CONFIG
 # This calculates Minimum Unsatisfiable Sets
 # It uses internals from solver, but is put in another file just for "neatness"
 
+# Deal with y being a infinity, or x being a fraction
+def safepow(x,y):
+    p = math.pow(float(x),float(y))
+    if p < 1000000:
+        return int(p)
+    else:
+        return p
 
 def tinyMUS(solver, assume, distance):
     smtassume = [solver._varlit2smtmap[l] for l in assume]
@@ -87,6 +94,29 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
                 assert len(newcore) < len(core)
                 core = newcore
             step = min(step//2, len(core)//2)
+
+
+    if CONFIG["quarterChopMUS"] and minsize < 200:
+        step = len(core)//4
+        loopsize = safepow(4/3, minsize + 1)
+        if loopsize > 100:
+            step = len(core)//8
+            loopsize = safepow(7/8, minsize + 1)
+            if loopsize > 100:
+                loopsize = 100
+
+        done = False
+        for tries in range(loopsize):
+            random.sample(core, len(core))
+            newcore = solver.basicCore(core[:-step])
+            if newcore is not None:
+                logging.debug("quarterchop: %s %s %s", tries, loopsize, len(newcore))
+                done = True
+                core = newcore
+                break
+        
+        if not done:
+            logging.debug("quarterchop miss")
 
     if CONFIG["prediveMUSes"]:
         step = 10
