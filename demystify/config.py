@@ -20,6 +20,9 @@ CONFIG = {
     "OneClauseAtMost": False,
     # Limit search to 100,000 conflicts
     "solveLimited": True,
+
+    "solveLimitedBudget": 100000,
+    
     # TO CHECK: Does this help?
     "setPhases": False,
     # Cache MUSes between steps
@@ -62,6 +65,12 @@ CONFIG = {
     # Start by chopping the start of the MUS list, to encourage variety
     "prediveMUSes": False,
 
+    # Start Gallops with big steps
+    "highGallop": False,
+
+    "minPrecheckMUS": False,
+
+    "minPrecheckStepsMUS": False,
 }
 
 

@@ -77,39 +77,75 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
 
     lens = [len(core)]
 
-    # First try chopping big bits off
-    if False:
-        step = len(core) // (minsize * minsize)
-        while step > 4 and len(core) > 3:
-            i = 0
-            while step > 1 and i < len(core):
-                to_test = core[:i] + core[(i + step) :]
-                newcore = solver.basicCore(to_test)
-                if newcore is not None:
-                    assert len(newcore) < len(core)
-                    core = newcore
-                else:
-                    i += step
-            step = int(step / 2)
-
     if CONFIG["prechopMUSes"]:
         step = len(core) // 2
         while step > 1 and len(core) > minsize:
-            to_test = core[step:]
+            to_test = core[:-step]
             newcore = solver.basicCore(to_test)
             if newcore is not None:
+                #print("Prechop %s -> %s with step %s", len(core), len(newcore), step)
                 assert len(newcore) < len(core)
                 core = newcore
             step = min(step//2, len(core)//2)
 
     if CONFIG["prediveMUSes"]:
         step = 10
-        while solver.basicCore(core[step:]) is not None:
+        while solver._solver.solveLimited(core[:-step]) == False:
             step *= 2
-        core = core[step:]
+        if step > 10: # We ever passed
+            #print("predive %s", step//2)
+            core = core[:-step//2]
+
+    if CONFIG["minPrecheckMUS"]:
+        step = len(core)//(minsize*2)
+        if step > 1:
+            # We know first value is required, so start at i=1
+            i = 1
+            badcount = 1
+            while i*step < len(core):
+                to_test = core[:(i*step)] + core[((i+1)*step):]
+                solvable = solver._solver.solveLimited(to_test)
+                logging.debug("minprecheck: %s %s %s %s %s %s %s", i, step, (i*step), ((i+1)*step), len(core), solvable, solver._solver._lasttime)
+                if solvable == False:
+                    core = to_test
+                else:
+                    i += 1
+                    if solvable is not None:
+                        badcount += 1
+                        if badcount > minsize:
+                            logging.debug("minprecheck reject: %s %s %s", i, step, len(core))
+                            return None
+
+    if CONFIG["minPrecheckStepsMUS"]:
+        step = len(core)//(minsize*2)
+        while step > 2:
+            # We know first value is required, so start at i=1
+            i = 1
+            badcount = 1
+            while i*step < len(core):
+                to_test = core[:(i*step)] + core[((i+1)*step):]
+                solvable = solver._solver.solveLimited(to_test)
+                logging.debug("minprecheckstep: %s %s %s %s %s %s %s", i, step, (i*step), ((i+1)*step), len(core), solvable, solver._solver._lasttime)
+                if solvable == False:
+                    core = to_test
+                else:
+                    i += 1
+                    if solvable is not None:
+                        badcount += 1
+                        if badcount > minsize:
+                            logging.info("minprecheckstep reject: %s %s %s", i, step, len(core))
+                            return None
+            if badcount == i:
+                # Got stuck
+                return None
+            step = len(core)//(minsize*2)
+
 
     if CONFIG["gallopingMUSes"]:
-        step = 1
+        if CONFIG["highGallop"]:
+            step = len(core)//2
+        else:
+            step = 1
         # We know we always need the 'smtassume' literal (reconsider if the size of the set is ever not 1)
         assert len(assume) == 1
         pos = 1
@@ -120,9 +156,9 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
                 return [solver._conmap[x] for x in core if x in solver._conmap]
             to_test = core[:pos] + core[(pos + step):]
             assert(len(to_test) < len(core))
-            newcore = solver.basicCore(to_test)
+            #newcore = solver.basicCore(to_test)
             solvable = solver._solver.solveLimited(to_test)
-            logging.debug("Testing %s %s %s %s %s %s", len(core), pos, step, len(to_test),solvable, newcore is not None)
+            #logging.debug("Testing %s %s %s %s %s %s", len(core), pos, step, len(to_test),solvable, newcore is not None)
             calls += 1
             if solvable == False:
                 core = to_test
@@ -138,6 +174,8 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
                         else:
                             logging.debug("Core found: %s %s %s", assume, minsize, calls)
                             return [solver._conmap[x] for x in to_test if x in solver._conmap]
+                    if CONFIG["highGallop"]:
+                        step == len(core)//2
                 else:
                     step = step // 2
                     assert step >= 1

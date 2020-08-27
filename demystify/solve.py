@@ -37,9 +37,15 @@ def explain(solver, lit, reason):
 
     return exp
 
+def list_counter(l):
+    d = dict()
+    for i in l:
+        d[i] = d.get(i, 0) + 1
+    return d
 
-def html_solve(outstream, solver, puzlits, MUS, steps=math.inf, *, gofast = False):
+def html_solve(outstream, solver, puzlits, MUS, steps=math.inf, *, gofast = False, fulltrace=False):
     trace = []
+    ftrace = []
 
     # Set up Javascript
     print(
@@ -86,6 +92,9 @@ def html_solve(outstream, solver, puzlits, MUS, steps=math.inf, *, gofast = Fals
         else:
             # Find first thing with smallest value
             mins = [k for k in sorted(musdict.keys()) if len(musdict[k][0]) == smallest]
+            fullinfo = {lit: list_counter(musdict[lit]) for lit in mins}
+            if fulltrace:
+                ftrace.append(fullinfo)
             if not gofast:
                 mins = [mins[0]]
             for p in mins:
@@ -107,7 +116,8 @@ def html_solve(outstream, solver, puzlits, MUS, steps=math.inf, *, gofast = Fals
                     )
                 else:
                     print("<p>No other choices</p>")
-            print("Choice Info: {}".format([(lit,len(set(tuple(x) for x in musdict[lit])), len(musdict[lit])) for lit in mins]))
+            
+            print("Choice Info: {}".format(fullinfo))
 
         print("<hr>")
 
@@ -115,4 +125,7 @@ def html_solve(outstream, solver, puzlits, MUS, steps=math.inf, *, gofast = Fals
     logging.info("Trace Quality: %s", [(i, len(j)) for (i, j) in trace])
     logging.info("Trace Sorted: %s", sorted([(i, len(j)) for (i, j) in trace]))
 
-    return trace
+    if fulltrace:
+        return (trace, ftrace)
+    else:
+        return trace

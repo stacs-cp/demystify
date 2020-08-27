@@ -23,6 +23,7 @@ class SATSolver:
         self._knownlits = set()
         self._stack = []
         self._clauses = []
+        self._lasttime = -1
 
     def Bool(self, name):
         newbool = self._boolcount
@@ -74,7 +75,8 @@ class SATSolver:
         start_time = time.time()
         x = self._solver.solve(assumptions=chainlist(lits, self._knownlits))
         end_time = time.time()
-        if end_time - start_time > 5:
+        self._lasttime = end_time - start_time
+        if self._lasttime > 5:
             logging.info("Long time solve: %s %s", len(lits), end_time - start_time)
         if getsol == False:
             return x
@@ -91,13 +93,16 @@ class SATSolver:
             self.reboot()
 
         start_time = time.time()
+        start_stats = self._solver.accum_stats()
         if CONFIG["solveLimited"]:
-            self._solver.conf_budget(100000)
+            self._solver.prop_budget(CONFIG["solveLimitedBudget"])
             x = self._solver.solve_limited(assumptions=chainlist(lits, self._knownlits))
         else:
             x = self._solver.solve(assumptions=chainlist(lits, self._knownlits))
         end_time = time.time()
-        if end_time - start_time > 5:
+        end_stats = self._solver.accum_stats()
+        self._lasttime = end_time - start_time
+        if self._lasttime > 5:
             logging.info(
                 "Long time solveLimited: %s %s", len(lits), end_time - start_time
             )

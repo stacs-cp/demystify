@@ -4,6 +4,8 @@ import z3
 class Z3Solver:
     def __init__(self):
         self._solver = z3.Solver()
+        # TODO
+        self._lasttime = -1
 
     def Bool(self, name):
         return z3.Bool(name)
