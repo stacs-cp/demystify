@@ -62,9 +62,6 @@ CONFIG = {
     # Start by chopping big bits off MUSes, to encourage variety
     "prechopMUSes": False,
 
-    # Start by chopping the start of the MUS list, to encourage variety
-    "prediveMUSes": False,
-
     # Start Gallops with big steps
     "highGallop": False,
 

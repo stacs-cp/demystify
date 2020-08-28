@@ -121,14 +121,6 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
         if not done:
             logging.debug("quarterchop miss")
 
-    if CONFIG["prediveMUSes"]:
-        step = 10
-        while solver._solver.solveLimited(core[:-step]) == False:
-            step *= 2
-        if step > 10: # We ever passed
-            #print("predive %s", step//2)
-            core = core[:-step//2]
-
     if CONFIG["minPrecheckMUS"]:
         step = len(core)//(minsize*2)
         if step > 1:
