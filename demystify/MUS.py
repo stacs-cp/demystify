@@ -85,7 +85,7 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
     lens = [len(core)]
 
     if CONFIG["prechopMUSes"]:
-        step = len(core) // 2
+        step = int(len(core) * 3 / 4)
         while step > 1 and len(core) > minsize:
             to_test = core[:-step]
             newcore = solver.basicCore(to_test)
@@ -93,17 +93,20 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
                 #print("Prechop %s -> %s with step %s", len(core), len(newcore), step)
                 assert len(newcore) < len(core)
                 core = newcore
-            step = min(step//2, len(core)//2)
+            step = min(int(step*3/4), int(len(core)*3/4))
 
 
-    if CONFIG["quarterChopMUS"] and minsize < 200:
+    if CONFIG["quarterChopMUS"]:
         step = len(core)//4
         loopsize = safepow(4/3, minsize + 1)
-        if loopsize > 100:
+        if loopsize > 50:
             step = len(core)//8
             loopsize = safepow(7/8, minsize + 1)
-            if loopsize > 100:
-                loopsize = 100
+            if loopsize > 50:
+                step = len(core)//16
+                loopsize = safepow(17/16, minsize + 1)
+                if loopsize > 50:
+                    loopsize = 50
 
         done = False
         for tries in range(loopsize):
@@ -149,8 +152,10 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
     if CONFIG["minPrecheckStepsMUS"]:
         step = len(core)//(minsize*2)
         while step > 2:
+            oldsize = len(core)
             # We know first value is required, so start at i=1
             i = 1
+            # Record how many times we know we can remove a block
             badcount = 1
             while i*step < len(core):
                 to_test = core[:(i*step)] + core[((i+1)*step):]
@@ -163,11 +168,12 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
                     if solvable is not None:
                         badcount += 1
                         if badcount > minsize:
-                            logging.info("minprecheckstep reject: %s %s %s", i, step, len(core))
+                            logging.debug("minprecheckstep reject: %s %s %s", i, step, len(core))
                             return None
-            if badcount == i:
+            if len(core) == oldsize:
                 # Got stuck
                 return None
+            logging.debug("minprecheckstep loop: %s %s %s %s %s %s", oldsize, len(core), step, len(core)//(minsize*2), i, badcount)
             step = len(core)//(minsize*2)
 
 

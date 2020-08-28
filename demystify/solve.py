@@ -95,7 +95,7 @@ def html_solve(outstream, solver, puzlits, MUS, steps=math.inf, *, gofast = Fals
             fullinfo = {lit: list_counter(musdict[lit]) for lit in mins}
             if fulltrace:
                 ftrace.append(fullinfo)
-            if not gofast:
+            if gofast:
                 mins = [mins[0]]
             for p in mins:
                 print_explanation(outstream, solver, musdict[p][0], [p])
