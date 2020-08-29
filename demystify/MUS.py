@@ -170,10 +170,7 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
 
 
     if CONFIG["gallopingMUSes"]:
-        if CONFIG["highGallop"]:
-            step = len(core)//2
-        else:
-            step = 1
+        step = 1
         # We know we always need the 'smtassume' literal (reconsider if the size of the set is ever not 1)
         assert len(assume) == 1
         pos = 1
@@ -205,8 +202,6 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
                         else:
                             logging.debug("Core found: %s %s %s", assume, minsize, calls)
                             return [solver._conmap[x] for x in to_test if x in solver._conmap]
-                    if CONFIG["highGallop"]:
-                        step == len(core)//2
                 else:
                     step = step // 2
                     logging.debug("Core step down: %s %s %s", pos, len(core), step)
@@ -475,47 +470,6 @@ def _findSmallestMUS_func(tup):
     )
 
 
-def findSmallestMUS(solver, puzlits, repeats=3):
-    musdict = {}
-
-    # We need this to be accessible by child processes
-    global _global_solver_ref
-    _global_solver_ref = solver
-
-    getTinyMUSes(solver, puzlits, musdict, repeats)
-
-    # Early exit for trivial case
-    if musdict_minimum(musdict) == 1:
-        return musdict
-
-    with getPool(CONFIG["cores"]) as pool:
-        for (shortcutsize, minsize) in [
-            (50, 3),
-            (200, 5),
-            (500, 8),
-            (1000, 20),
-            (math.inf, math.inf),
-        ]:
-            for iter in range(repeats):
-                res = pool.map(
-                    _findSmallestMUS_func,
-                    [
-                        (
-                            p,
-                            "{}{}{}".format(iter, p, shortcutsize),
-                            shortcutsize,
-                            minsize,
-                        )
-                        for p in puzlits
-                    ],
-                )
-                for (p, mus) in res:
-                    update_musdict(musdict, p, mus)
-            if musdict_minimum(musdict) <= minsize:
-                return musdict
-        return musdict
-
-
 def cascadeMUS(solver, puzlits, repeats, musdict):
     # We need this to be accessible by the pool
     global _global_solver_ref
@@ -578,15 +532,6 @@ def cascadeMUS(solver, puzlits, repeats, musdict):
                     update_musdict(musdict, p, mus)
                 if musdict_minimum(musdict) <= minsize:
                     return
-
-
-class BasicMUSFinder:
-    def __init__(self, solver):
-        self._solver = solver
-
-    def smallestMUS(self, puzlits):
-        return findSmallestMUS(self._solver, puzlits, CONFIG["repeats"])
-
 
 class CascadeMUSFinder:
     def __init__(self, solver):
