@@ -19,7 +19,7 @@ logging.basicConfig(
 )
 
 demystify.config.LoadConfigFromDict(
-    {"solverIncremental": False, "cores": 12, "repeats": 30}
+    {"solverIncremental": False, "cores": 3, "repeats": 5}
 )
 
 # Make a matrix of variables (we can make more than one)

@@ -63,6 +63,7 @@ class Z3Solver:
     def unsat_core(self):
         return self._solver.unsat_core()
 
+    # TODO: Make these more efficient, if we need them
     def push(self):
         self._solver.push()
 
@@ -78,3 +79,8 @@ class Z3Solver:
 
     def solveLimited(self, lits):
         return self.solve(lits, getsol=False)
+
+    # TODO: In SAT we do this to flush learned clauses
+    def reboot(self, seed):
+        pass
+ 

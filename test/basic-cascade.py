@@ -18,7 +18,7 @@ logging.basicConfig(
     level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s"
 )
 
-demystify.config.LoadConfigFromDict({"repeats": 5, "cores": 12})
+demystify.config.LoadConfigFromDict({"repeats": 5, "cores": 4})
 
 # Make a matrix of variables (we can make more than one)
 vars = demystify.base.VarMatrix(lambda t: (t[0] + 1, t[1] + 1), (9, 9), range(1, 9 + 1))

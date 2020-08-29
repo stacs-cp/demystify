@@ -14,12 +14,17 @@ import demystify.MUS
 import demystify.solve
 import demystify.prettyprint
 import buildpuz
+import resource
 
 logging.basicConfig(
     level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s"
 #    level=logging.INFO, format="%(levelname)s:%(name)s:%(relativeCreated)d:%(message)s"
 )
 
+def get_cpu_time_with_children():
+    time_self = resource.getrusage(resource.RUSAGE_SELF)
+    time_children = resource.getrusage(resource.RUSAGE_CHILDREN)
+    return time_self.ru_utime + time_self.ru_stime + time_children.ru_utime + time_children.ru_stime
 
 import pysolvers
 
@@ -128,9 +133,9 @@ def dotest(doms, name, pos, *, sudokutype = buildpuz.basicSudoku, sudokuarg = No
         demystify.config.LoadConfigFromDict(solver)
         logging.info("Trying %s", solver)
         print("<hr><h2>{} - {}</h2>".format(name, solver))
-        start_time = time.time()
+        start_time = get_cpu_time_with_children()
         trace = doSingleStep(doms, pos, sudokutype = sudokutype, sudokuarg = sudokuarg)
-        end_time = time.time()
+        end_time = get_cpu_time_with_children()
         out["stats"].append({"time": end_time - start_time, "trace": trace})
     results.append(out)
     print_table([results[-1]])

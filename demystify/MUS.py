@@ -191,9 +191,12 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
             if solvable == False:
                 core = to_test
                 step = step * 2
+                logging.debug("Core step up: %s %s %s", pos, len(core), step)
             else:
                 if step == 1:
                     pos += 1
+                    logging.debug("Core pos up: %s %s %s", pos, len(core), step)
+
                     if pos >= minsize:
                         to_test = core[:pos]
                         if solver._solver.solveLimited(to_test) != False:
@@ -206,6 +209,7 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
                         step == len(core)//2
                 else:
                     step = step // 2
+                    logging.debug("Core step down: %s %s %s", pos, len(core), step)
                     assert step >= 1
         
 
