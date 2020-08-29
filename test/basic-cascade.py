@@ -15,7 +15,7 @@ import demystify.solve
 import buildpuz
 
 logging.basicConfig(
-    level=logging.INFO, format="%(levelname)s:%(name)s:%(relativeCreated)d:%(message)s"
+    level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s"
 )
 
 demystify.config.LoadConfigFromDict({"repeats": 5, "cores": 12})

@@ -17,7 +17,7 @@ import buildpuz
 import time
 
 logging.basicConfig(
-    level=logging.INFO, format="%(levelname)s:%(name)s:%(relativeCreated)d:%(message)s"
+    level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s"
 )
 
 for solvername in ["cd", "g3", "g4", "lgl", "mcb", "mcm", "mpl", "mc", "m22", "mgh"]:
