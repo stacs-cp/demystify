@@ -118,7 +118,7 @@ def print_table(results):
 results = []
 def dotest(doms, name, pos, *, sudokutype = buildpuz.basicSudoku, sudokuarg = None):
     out = {"name": name, "stats":[]}
-    baseconfig = {"cores": 1, "smallRepeats": 1, "repeats": 10, "solver": "cadical", "solveLimited": False,
+    baseconfig = {"cores": 24, "smallRepeats": 1, "repeats": 100, "solver": "cadical", "solveLimited": False,
       "prechopMUSes12": False, "gallopingMUSes": False, "minPrecheckMUS": False, "minPrecheckStepsMUS": False, "tryManyChopMUS": False}
     for solver in [
         {},
