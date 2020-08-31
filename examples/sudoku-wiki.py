@@ -17,7 +17,7 @@ import buildpuz
 import resource
 
 logging.basicConfig(
-    level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s"
+    level=logging.DEBUG, format="%(levelname)s:%(name)s:%(message)s"
 #    level=logging.INFO, format="%(levelname)s:%(name)s:%(relativeCreated)d:%(message)s"
 )
 
@@ -118,12 +118,12 @@ def print_table(results):
 results = []
 def dotest(doms, name, pos, *, sudokutype = buildpuz.basicSudoku, sudokuarg = None):
     out = {"name": name, "stats":[]}
-    baseconfig = {"cores": 12, "smallRepeats": 1, "repeats": 100, "solver": "cadical", "solveLimited": False,
-      "prechopMUSes": False, "gallopingMUSes": False, "minPrecheckMUS": False, "minPrecheckStepsMUS": False, "quarterChopMUS": False}
+    baseconfig = {"cores": 1, "smallRepeats": 1, "repeats": 10, "solver": "cadical", "solveLimited": False,
+      "prechopMUSes12": False, "gallopingMUSes": False, "minPrecheckMUS": False, "minPrecheckStepsMUS": False, "tryManyChopMUS": False}
     for solver in [
         {},
-        {"prechopMUSes": True },
-        {"quarterChopMUS": True},
+        {"prechopMUSes12": True },
+        {"tryManyChopMUS": True},
         {"minPrecheckMUS": True},
         {"gallopingMUSes": True},
         {"minPrecheckStepsMUS": True},

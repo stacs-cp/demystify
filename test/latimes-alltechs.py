@@ -39,11 +39,11 @@ for i in range(9):
             sudoku[i][j] = int(grid[i][j])
 
 baseconfig = {"cores": 4, "smallRepeats": 1, "repeats": 5, "solver": "cadical", "solveLimited": False,
-    "prechopMUSes": False, "gallopingMUSes": False, "minPrecheckMUS": False, "minPrecheckStepsMUS": False, "quarterChopMUS": False}
+    "prechopMUSes": False, "gallopingMUSes": False, "minPrecheckMUS": False, "minPrecheckStepsMUS": False, "tryManyChopMUS": False}
 for solver in [
         {},
         {"prechopMUSes": True },
-        {"quarterChopMUS": True},
+        {"tryManyChopMUS": True},
         {"minPrecheckMUS": True},
         {"gallopingMUSes": True},
         {"minPrecheckStepsMUS": True},

@@ -84,8 +84,8 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
 
     lens = [len(core)]
 
-    if CONFIG["prechopMUSes"]:
-        step = int(len(core) * 3 / 4)
+    if CONFIG["prechopMUSes12"]:
+        step = len(core) // 2
         while step > 1 and len(core) > minsize:
             to_test = core[:-step]
             newcore = solver.basicCore(smtassume + to_test)
@@ -93,33 +93,33 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
                 #print("Prechop %s -> %s with step %s", len(core), len(newcore), step)
                 assert len(newcore) < len(core)
                 core = newcore
-            step = min(int(step*3/4), int(len(core)*3/4))
+            step = min(step//2, len(core)//2)
 
-
-    if CONFIG["quarterChopMUS"]:
-        step = len(core)//4
-        loopsize = safepow(4/3, minsize + 1)
-        if loopsize > 50:
-            step = len(core)//8
-            loopsize = safepow(7/8, minsize + 1)
-            if loopsize > 50:
-                step = len(core)//16
-                loopsize = safepow(17/16, minsize + 1)
-                if loopsize > 50:
-                    loopsize = 50
+    if CONFIG["tryManyChopMUS"]:
+        for squash in [1/2, 1/4, 1/8, 1/16, 1/32, 1/64, 1/128, 1/256, 1/512, 1/1024, 1/2048, 1/4096]:
+            step = int(len(core)*squash)
+            loopsize = safepow(1/(1-squash), minsize + 1)
+            if loopsize <= 10:
+                break
+        
+        
+        logging.debug("tryManyChop: %s %s %s %s %s", squash, step, loopsize, len(core), minsize)
 
         done = False
-        for tries in range(loopsize):
+        for tries in range(loopsize*2):
             random.sample(core, len(core))
             newcore = solver.basicCore(smtassume + core[:-step])
             if newcore is not None:
-                logging.debug("quarterchop: %s %s %s", tries, loopsize, len(newcore))
+                logging.debug("prechop: %s %s %s", tries, loopsize, len(newcore))
                 done = True
                 core = newcore
                 break
         
         if not done:
-            logging.debug("quarterchop miss")
+            logging.debug("tryManyChop miss")
+            return None
+        else:
+            logging.debug("tryManyChop hit : %s", len(core))
 
     if CONFIG["minPrecheckMUS"]:
         step = len(core)//(minsize*2)

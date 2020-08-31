@@ -41,7 +41,7 @@ CONFIG = {
     # more work and we might want it later
     "cascadeMult": 1,
     "checkSmall1": True,
-    "checkSmall2": True,
+    "checkSmall2": False,
     "checkCloseFirst": False,
     # Make use of unsat cores when shrinking MUSes
     "useUnsatCores": True,
@@ -60,12 +60,12 @@ CONFIG = {
     "gallopingMUSes": False,
 
     # Start by chopping big bits off MUSes, to encourage variety
-    "prechopMUSes": False,
+    "prechopMUSes12": False,
 
     # Start Gallops with big steps
     "highGallop": False,
 
-    "quarterChopMUS": False,
+    "tryManyChopMUS": False,
 
     "minPrecheckMUS": False,
 
