@@ -19,7 +19,7 @@ from .config import CONFIG
 # Deal with y being a infinity, or x being a fraction
 def safepow(x,y):
     p = math.pow(float(x),float(y))
-    if p < 1000000:
+    if p is not math.inf:
         return int(p)
     else:
         return p
