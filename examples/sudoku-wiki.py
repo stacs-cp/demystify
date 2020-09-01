@@ -17,7 +17,7 @@ import buildpuz
 import resource
 
 logging.basicConfig(
-    level=logging.DEBUG, format="%(levelname)s:%(name)s:%(message)s"
+    level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s"
 #    level=logging.INFO, format="%(levelname)s:%(name)s:%(relativeCreated)d:%(message)s"
 )
 
@@ -122,15 +122,16 @@ def dotest(doms, name, pos, *, sudokutype = buildpuz.basicSudoku, sudokuarg = No
       "baseSizeMUS": 3,
       "prechopMUSes12": False, "gallopingMUSes": False, "minPrecheckMUS": False, "minPrecheckStepsMUS": False, "tryManyChopMUS": False}
     for solver in [
-        {},
-        {"prechopMUSes12": True },
-        #{"prechopMUSes12": True, "useUnsatCores": False },
-        {"tryManyChopMUS": True},
-        {"minPrecheckMUS": True},
-        {"gallopingMUSes": True},
-        #{"gallopingMUSes": True, "baseSizeMUS": 1000},
-        {"minPrecheckStepsMUS": True},
-        {"gallopingMUSes": True, "minPrecheckMUS": True},
+            {},
+            {"prechopMUSes12": True },
+            {"prechopMUSes12": True, "baseSizeMUS": 10000 },
+            {"prechopMUSes12": True, "useUnsatCores": False },
+            {"tryManyChopMUS": True},
+            {"minPrecheckMUS": True},
+            {"gallopingMUSes": True},
+            {"gallopingMUSes": True, "baseSizeMUS": 10000},
+            {"minPrecheckStepsMUS": True},
+            {"gallopingMUSes": True, "minPrecheckMUS": True},
     ]:
         demystify.config.LoadConfigFromDict(baseconfig)
         demystify.config.LoadConfigFromDict(solver)
