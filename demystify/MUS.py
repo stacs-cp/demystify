@@ -93,6 +93,7 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
                 #print("Prechop %s -> %s with step %s", len(core), len(newcore), step)
                 assert len(newcore) < len(core)
                 core = newcore
+                break
             step = min(step//2, len(core)//2)
 
     if CONFIG["tryManyChopMUS"]:
@@ -484,7 +485,7 @@ def cascadeMUS(solver, puzlits, repeats, musdict):
 
     # Have to duplicate code, to swap loops around
     if CONFIG["resetSolverMUS"]:
-        for minsize in range(CONFIG["baseSizeMUS"], 200, 1):
+        for minsize in range(CONFIG["baseSizeMUS"], max(CONFIG["baseSizeMUS"]+1,10000), 1):
             with getPool(CONFIG["cores"]) as pool:
                 # Do 'range(repeats)' first, so when we distribute we get an even spread of literals on different cores
                 # minsize+1 for MUS size, as the MUS will include 'p'
@@ -517,7 +518,7 @@ def cascadeMUS(solver, puzlits, repeats, musdict):
                     return
     else:
         with getPool(CONFIG["cores"]) as pool:
-            for minsize in range(CONFIG["baseSizeMUS"], 200, 1):
+            for minsize in range(CONFIG["baseSizeMUS"], max(CONFIG["baseSizeMUS"]+1,10000), 1):
                 # Do 'range(repeats)' first, so when we distribute we get an even spread of literals on different cores
                 # minsize+1 for MUS size, as the MUS will include 'p'
                 logging.info(
