@@ -223,7 +223,7 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
     badcount = 0
     corecpy = list(core)
     for lit in corecpy:
-        if lit in core and len(core) > 2:
+        if lit in core:
             logging.debug("Trying to remove %s", lit)
             to_test = list(core)
             to_test.remove(lit)
@@ -249,11 +249,12 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
                     return None
 
     logging.debug(
-        "Core for %s : %s to %s, with %s steps, %s bad",
+        "Core for %s : %s to %s, with %s steps, %s bad (minsize %s)",
         assume,
         lens,
         len(core),
         stepcount,
+        minsize,
         badcount,
     )
     return [solver._conmap[x] for x in core if x in solver._conmap]
@@ -483,7 +484,7 @@ def cascadeMUS(solver, puzlits, repeats, musdict):
 
     # Have to duplicate code, to swap loops around
     if CONFIG["resetSolverMUS"]:
-        for minsize in range(3, 200, 1):
+        for minsize in range(CONFIG["baseSizeMUS"], 200, 1):
             with getPool(CONFIG["cores"]) as pool:
                 # Do 'range(repeats)' first, so when we distribute we get an even spread of literals on different cores
                 # minsize+1 for MUS size, as the MUS will include 'p'
@@ -500,19 +501,23 @@ def cascadeMUS(solver, puzlits, repeats, musdict):
                             p,
                             "{}:{}:{}".format(r, p, minsize),
                             math.inf,
-                            (minsize + 1) * CONFIG["cascadeMult"],
+                            minsize * CONFIG["cascadeMult"],
                         )
                         for r in range(repeats)
                         for p in puzlits
                     ],
                 )
                 for (p, mus) in res:
+                    if mus is not None and len(mus) < minsize:
+                        logging.info("!! Found smaller !!!! {} {}".format(len(mus), minsize))
+                    if mus is not None and len(mus) > minsize:
+                        logging.info("!! Found bigger !!!! {} {}".format(len(mus), minsize))
                     update_musdict(musdict, p, mus)
                 if musdict_minimum(musdict) <= minsize:
                     return
     else:
         with getPool(CONFIG["cores"]) as pool:
-            for minsize in range(3, 200, 1):
+            for minsize in range(CONFIG["baseSizeMUS"], 200, 1):
                 # Do 'range(repeats)' first, so when we distribute we get an even spread of literals on different cores
                 # minsize+1 for MUS size, as the MUS will include 'p'
                 logging.info(
@@ -528,13 +533,17 @@ def cascadeMUS(solver, puzlits, repeats, musdict):
                             p,
                             "{}:{}:{}".format(r, p, minsize),
                             math.inf,
-                            (minsize + 1) * CONFIG["cascadeMult"],
+                            minsize * CONFIG["cascadeMult"],
                         )
                         for r in range(repeats)
                         for p in puzlits
                     ],
                 )
                 for (p, mus) in res:
+                    if mus is not None and len(mus) < minsize:
+                        logging.info("!! Found smaller !!!! {} {}".format(len(mus), minsize))
+                    if mus is not None and len(mus) > minsize:
+                        logging.info("!! Found bigger !!!! {} {}".format(len(mus), minsize))
                     update_musdict(musdict, p, mus)
                 if musdict_minimum(musdict) <= minsize:
                     return

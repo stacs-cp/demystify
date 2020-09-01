@@ -118,20 +118,23 @@ def print_table(results):
 results = []
 def dotest(doms, name, pos, *, sudokutype = buildpuz.basicSudoku, sudokuarg = None):
     out = {"name": name, "stats":[]}
-    baseconfig = {"cores": 24, "smallRepeats": 1, "repeats": 100, "solver": "cadical", "solveLimited": False,
+    baseconfig = {"cores": 20, "smallRepeats": 1, "repeats": 100, "solver": "cadical", "solveLimited": False, "useUnsatCores": True,
+      "baseSizeMUS": 3,
       "prechopMUSes12": False, "gallopingMUSes": False, "minPrecheckMUS": False, "minPrecheckStepsMUS": False, "tryManyChopMUS": False}
     for solver in [
         {},
         {"prechopMUSes12": True },
+        #{"prechopMUSes12": True, "useUnsatCores": False },
         {"tryManyChopMUS": True},
         {"minPrecheckMUS": True},
         {"gallopingMUSes": True},
+        #{"gallopingMUSes": True, "baseSizeMUS": 1000},
         {"minPrecheckStepsMUS": True},
         {"gallopingMUSes": True, "minPrecheckMUS": True},
     ]:
         demystify.config.LoadConfigFromDict(baseconfig)
         demystify.config.LoadConfigFromDict(solver)
-        logging.info("Trying %s", solver)
+        logging.info("Trying Solver %s", solver)
         print("<hr><h2>{} - {}</h2>".format(name, solver))
         start_time = get_cpu_time_with_children()
         trace = doSingleStep(doms, pos, sudokutype = sudokutype, sudokuarg = sudokuarg)

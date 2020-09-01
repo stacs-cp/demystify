@@ -43,6 +43,9 @@ CONFIG = {
     "checkSmall1": True,
     "checkSmall2": False,
     "checkCloseFirst": False,
+
+    # Smallest size of MUS to look for
+    "baseSizeMUS": 3,
     # Make use of unsat cores when shrinking MUSes
     "useUnsatCores": True,
     # Reset solver for each size of MUS
