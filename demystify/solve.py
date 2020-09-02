@@ -165,7 +165,7 @@ hide = function(id) {
                 else:
                     print("<p>No other choices</p>")
             
-            print(hidden("verbose choice info", "<pre>" + pprint.PrettyPrinter(compact=True, sort_dicts=True).pformat(fullinfo) + "</pre>"))
+            print(hidden("verbose choice info", "<pre>" + pprint.PrettyPrinter(compact=True).pformat(fullinfo) + "</pre>"))
 
         print("<hr>")
 
