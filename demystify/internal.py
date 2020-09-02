@@ -220,3 +220,12 @@ class Solver:
 
     def explain(self, c):
         return c.explain(self._knownlits)
+
+    def reset_stats(self):
+        self._solver.reset_stats()
+    
+    def get_stats(self):
+        return self._solver.get_stats()
+    
+    def add_stats(self, d):
+        self._solver.add_stats(d)

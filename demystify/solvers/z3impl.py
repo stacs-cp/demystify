@@ -6,6 +6,7 @@ class Z3Solver:
         self._solver = z3.Solver()
         # TODO
         self._lasttime = -1
+        self.reset_stats()
 
     def Bool(self, name):
         return z3.Bool(name)
@@ -28,6 +29,7 @@ class Z3Solver:
         self._solver.add(z3.Implies(var, con))
 
     def solve(self, lits, *, getsol):
+        self._stats["solveCount"] += 1
         result = self._solver.check(list(lits))
         if getsol == False:
             return result == z3.sat
@@ -84,3 +86,15 @@ class Z3Solver:
     def reboot(self, seed):
         pass
  
+    def reset_stats(self):
+        self._stats = {
+            "solveCount": 0,
+            "solveTime": 0
+        }
+
+    def get_stats(self):
+        return self._stats
+
+    def add_stats(self, d):
+        self._stats["solveCount"] += d["solveCount"]
+        self._stats["solveTime"] += d["solveTime"]

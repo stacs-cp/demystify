@@ -5,6 +5,9 @@ from multiprocessing import Pool, Process, get_start_method, Queue
 
 from .config import CONFIG
 
+# Needs to be global so we can call it from a child process
+_global_solver_ref = None
+
 # Magic from https://stackoverflow.com/questions/2130016/splitting-a-list-into-n-parts-of-approximately-equal-length
 def split(a, n):
     k, m = divmod(len(a), n)
@@ -51,6 +54,8 @@ def doprocess(id, inqueue, outqueue):
         (func, msg) = inqueue.get()
         # print("! {} Got task {}".format(id,count))
         if func is None:
+            if msg == "stats":
+                outqueue.put()
             # print("! {} exit".format(id))
             break
         outqueue.put(func(msg))

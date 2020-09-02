@@ -25,6 +25,8 @@ class SATSolver:
         self._clauses = []
         self._lasttime = -1
 
+        self.reset_stats()
+
     def Bool(self, name):
         newbool = self._boolcount
         self._boolcount += 1
@@ -75,6 +77,8 @@ class SATSolver:
         start_time = time.time()
         x = self._solver.solve(assumptions=chainlist(lits, self._knownlits))
         end_time = time.time()
+        self._stats["solveCount"] += 1
+        self._stats["solveTime"] += end_time - start_time
         self._lasttime = end_time - start_time
         if self._lasttime > 5:
             logging.info("Long time solve: %s %s", len(lits), end_time - start_time)
@@ -100,7 +104,8 @@ class SATSolver:
         else:
             x = self._solver.solve(assumptions=chainlist(lits, self._knownlits))
         end_time = time.time()
-        end_stats = self._solver.accum_stats()
+        self._stats["solveCount"] += 1
+        self._stats["solveTime"] += end_time - start_time
         self._lasttime = end_time - start_time
         if self._lasttime > 5:
             logging.info(
@@ -145,3 +150,16 @@ class SATSolver:
         if CONFIG["setPhases"]:
             l = [-x for x in negative]
             self._solver.set_phases(l)
+
+    def reset_stats(self):
+        self._stats = {
+            "solveCount": 0,
+            "solveTime": 0
+        }
+
+    def get_stats(self):
+        return self._stats
+
+    def add_stats(self, d):
+        self._stats["solveCount"] += d["solveCount"]
+        self._stats["solveTime"] += d["solveTime"]

@@ -13,13 +13,12 @@ from .base import EqVal, NeqVal
 
 from .config import CONFIG
 
-from .parallel import getPool
+from .parallel import getPool, _global_solver_ref
 
 # This calculates Minimum Unsatisfiable Sets
 # It uses internals from solver, but is put in another file just for "neatness"
 
-# Needs to be global so we can call it from a child process
-_global_solver_ref = None
+
 
 # Deal with y being too large, or x being a fraction
 def safepow(x,y):
