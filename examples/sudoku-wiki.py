@@ -109,7 +109,7 @@ def print_table(results):
 
         for t in r:
             count = sum(count for (lit,musdict) in t["trace"][0].items() for (mus,count) in musdict.items() if len(mus)==globalmin)
-            print("   & {} & {:.1f}  & {:.1f} & {} & {:.3f} ".format( count,  t["time"], t["solveTime"],t["solveCount"],  t["solveTime"]/t["solveCount"]), end="")
+            print("   & {} & {:.1f}  &  {} ".format( count,  t["time"], t["solveCount"]), end="")
         print("\\\\")
 
 results = []
