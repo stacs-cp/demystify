@@ -65,23 +65,37 @@ def html_solve(outstream, solver, puzlits, MUS, steps=math.inf, *, gofast = Fals
     ftrace = []
 
     # Set up Javascript
-    print(
-        """
-    <script>
-    toggle = function(id) {
-        div = document.getElementById(id)
-        if( div.style.display == "none" ) {
-           div.style.display = "block";
-        } else {
-           div.style.display = "none";
-        }
-    };
+    print("""
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+.nit {background-color: red}
+.pit {background-color: green}
+.nik {color:white}
+.pii {background-color:blue}
+.nii {background-color: orange}
+.pik {font-weight: bolder}
+</style>
 
-    hide = function(id) {
-        div = document.getElementById(id)
+       
+<script>
+toggle = function(id) {
+    div = document.getElementById(id)
+    if( div.style.display == "none" ) {
+        div.style.display = "block";
+    } else {
         div.style.display = "none";
-    };
-    </script>
+    }
+};
+
+hide = function(id) {
+    div = document.getElementById(id)
+    div.style.display = "none";
+};
+</script>
+</head>
+<body>
     """
     )
 

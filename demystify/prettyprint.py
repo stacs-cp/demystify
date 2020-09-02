@@ -14,26 +14,26 @@ def print_var(f, variable, known, involved, targets):
 
     print("<table>", file=f)
     for dsublist in [dom[i : i + splitsize] for i in range(0, len(dom), splitsize)]:
-        print("<tr>", file=f)
+        print("<tr>", end="", file=f)
         for d in dsublist:
-            style = ""
+            style = []
             poslit = EqVal(variable, d)
             neglit = NeqVal(variable, d)
             if neglit in targets:
-                style = "background-color:red"
+                style.append("nit")
             elif poslit in targets:
-                style = "background-color:green"
+                style.append("pit")
             # Put this neglit check here, as we want to skip displaying it we already know it is gone
             elif neglit in known:
-                style = "color:white"
+                style.append("nik")
             elif poslit in involved:
-                style = "background-color:blue"
+                style.append("pii")
             elif neglit in involved:
-                style = "background-color:orange"
+                style.append("nii")
 
             if poslit in known:
-                style += "; font-weight: bolder"
-            print('<td style="{}">{}</td>'.format(style, d), file=f)
+                style.append("pik")
+            print('<td class="{}">{}</td>'.format(" ".join(style), d), file=f, end="")
         print("</tr>", file=f)
     print("</table>", file=f)
 
