@@ -53,9 +53,6 @@ CONFIG = {
     # Reset solver for every call (VERY slow)
     "resetSolverFull": False,
 
-    # Reset solver for each new fork
-    "resetSolverFork": True,
-
     # Change glucose's random seed at each solver reboot (requires chris' patched python-sat)
     "changeSolverSeed": False,
 
