@@ -81,7 +81,7 @@ class Clause:
         return self.clauseset() < other.clauseset()
 
     def __repr__(self):
-        return self._name + ":" + str(self.clauseset()) + "\n"
+        return self._name + ":" + str(self.clauseset())
 
 
 class ClauseList:
@@ -126,7 +126,7 @@ class ClauseList:
         return self.clauseset() < other.clauseset()
 
     def __repr__(self):
-        return self._name + ":\n" + "\n".join([str(c) for c in self.clauseset()])
+        return self._name + ": ".join([str(c) for c in self.clauseset()])
 
 
 # Constraints to say each variable takes a single value

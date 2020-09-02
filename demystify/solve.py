@@ -1,6 +1,8 @@
 import logging
 import sys
 import math
+import io
+import pprint
 
 from .prettyprint import print_explanation
 
@@ -43,10 +45,20 @@ def list_counter(l):
         d[i] = d.get(i, 0) + 1
     return d
 
-def html_step(outstream, solver, p, mus):
-    print_explanation(outstream, solver, mus, [p])
-    print("Smallest mus size:", len(mus),  file=outstream)
-    print(explain(solver, p, mus), file=outstream)
+def html_step(outstream, solver, p, choices):
+    print_explanation(outstream, solver, choices[0], [p])
+    print("Smallest mus size:", len(choices[0]),  file=outstream)
+    print(explain(solver, p, choices[0]), file=outstream)
+
+    if len(choices) > 1:
+            others = io.StringIO()
+            for c in choices[1:]:
+                print_explanation(others, solver, c, [p])
+                print("Smallest mus size:", len(c),  file=others)
+                print(explain(solver, p, c), file=others)
+            print(hidden("{} methods of deducing the same value were found:".format(len(choices)),
+                    others.getvalue()
+                    ))
 
 def html_solve(outstream, solver, puzlits, MUS, steps=math.inf, *, gofast = False, fulltrace=False):
     trace = []
@@ -107,8 +119,8 @@ def html_solve(outstream, solver, puzlits, MUS, steps=math.inf, *, gofast = Fals
                 mins = [basemins[0]]
 
             for p in mins:
-                choices = tuple(sorted(set(list(musdict[p]))))
-                html_step(outstream, solver, p, choices[0])
+                choices = tuple(sorted(set(musdict[p])))
+                html_step(outstream, solver, p, choices)
 
                 trace.append((smallest, mins))
                 solver.addLit(p)
@@ -116,16 +128,23 @@ def html_solve(outstream, solver, puzlits, MUS, steps=math.inf, *, gofast = Fals
 
             if not gofast:
                 if len(basemins) > 1:
+                    others = io.StringIO()
+                    for p in basemins[1:]:
+                        choices = tuple(sorted(set(musdict[p])))
+                        html_step(others, solver, p, choices)
+                        print("<br>\n", file=others)
+                    
+
                     print(
                         hidden(
-                            "There were {} choices of the same size".format(len(basemins) - 1),
-                            "\n".join([explain(solver, p, musdict[p][0]) for p in basemins[1:]]),
+                            "There were {} other literals we could have chosen".format(len(basemins) - 1),
+                            others.getvalue()
                         )
                     )
                 else:
                     print("<p>No other choices</p>")
             
-            print("Choice Info: {}".format(fullinfo))
+            print(hidden("verbose choice info", "<pre>" + pprint.PrettyPrinter(compact=True, sort_dicts=True).pformat(fullinfo) + "</pre>"))
 
         print("<hr>")
 
