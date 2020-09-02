@@ -16,13 +16,13 @@ from .config import CONFIG
 # This calculates Minimum Unsatisfiable Sets
 # It uses internals from solver, but is put in another file just for "neatness"
 
-# Deal with y being a infinity, or x being a fraction
+# Deal with y being too large, or x being a fraction
 def safepow(x,y):
     p = math.pow(float(x),float(y))
-    if p is not math.inf:
+    if p < 1000000:
         return int(p)
     else:
-        return p
+        return math.inf
 
 def tinyMUS(solver, assume, distance):
     smtassume = [solver._varlit2smtmap[l] for l in assume]
@@ -103,24 +103,26 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
             if loopsize <= 10:
                 break
         
-        
         logging.debug("tryManyChop: %s %s %s %s %s", squash, step, loopsize, len(core), minsize)
 
-        done = False
-        for tries in range(loopsize*2):
-            random.sample(core, len(core))
-            newcore = solver.basicCore(smtassume + core[:-step])
-            if newcore is not None:
-                logging.debug("prechop: %s %s %s", tries, loopsize, len(newcore))
-                done = True
-                core = newcore
-                break
-        
-        if not done:
-            logging.debug("tryManyChop miss")
-            return None
+        if loopsize <= 10:
+            done = False
+            for tries in range(loopsize*2):
+                random.sample(core, len(core))
+                newcore = solver.basicCore(smtassume + core[:-step])
+                if newcore is not None:
+                    logging.debug("prechop: %s %s %s", tries, loopsize, len(newcore))
+                    done = True
+                    core = newcore
+                    break
+            
+            if not done:
+                logging.debug("tryManyChop miss")
+                return None
+            else:
+                logging.debug("tryManyChop hit : %s", len(core))
         else:
-            logging.debug("tryManyChop hit : %s", len(core))
+            logging.debug("Skip tryManyChop")
 
     if CONFIG["minPrecheckMUS"]:
         step = len(core)//(minsize*2)
