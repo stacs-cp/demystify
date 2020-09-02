@@ -104,9 +104,16 @@ hide = function(id) {
     while len(puzlits) > 0 and step <= steps:
         logging.info("Starting Step %s", step)
         logging.info("Current state %s", solver.getCurrentDomain())
+
+        begin_stats = solver.get_stats()
         musdict = MUS.smallestMUS(puzlits)
+        end_stats = solver.get_stats()
+
+        stats_diff = {"solveCount": end_stats["solveCount"] - begin_stats["solveCount"],
+                      "solveTime": end_stats["solveTime"] - begin_stats["solveTime"] }
         smallest = musdict_minimum(musdict)
         print("<h3>Step {}</h3>".format(step))
+        print("Solver Calls: {}<br>".format(stats_diff["solveCount"]))
         step += 1
         if smallest == 1:
             lits = [k for k in sorted(musdict.keys()) if len(musdict[k][0]) == 1]

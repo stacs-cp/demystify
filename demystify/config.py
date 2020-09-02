@@ -52,6 +52,8 @@ CONFIG = {
     "resetSolverMUS": False,
     # Reset solver for every call (VERY slow)
     "resetSolverFull": False,
+    # Use same pool of solvers throughout
+    "reusePool": False,
 
     # Change glucose's random seed at each solver reboot (requires chris' patched python-sat)
     "changeSolverSeed": False,

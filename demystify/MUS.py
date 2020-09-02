@@ -13,7 +13,7 @@ from .base import EqVal, NeqVal
 
 from .config import CONFIG
 
-from .parallel import getPool, _global_solver_ref
+from .parallel import getPool, setChildSolver, getChildSolver
 
 # This calculates Minimum Unsatisfiable Sets
 # It uses internals from solver, but is put in another file just for "neatness"
@@ -289,12 +289,11 @@ def musdict_minimum(musdict):
 
 def _parfunc_dotinymus(args):
     (p, distance) = args
-    return (p, tinyMUS(_global_solver_ref, [p.neg()], distance))
+    return (p, tinyMUS(getChildSolver(), [p.neg()], distance))
 
 
 def getTinyMUSes(solver, puzlits, musdict, *, distance, repeats):
-    global _global_solver_ref
-    _global_solver_ref = solver
+    setChildSolver(solver)
     logging.info(
         "Getting tiny MUSes, distance %s, for %s puzlits, %s repeats",
         distance,
@@ -314,7 +313,7 @@ def _parfunc_docheckmus(args):
         p,
         MUS(
             random.Random("X"),
-            _global_solver_ref,
+            getChildSolver(),
             [p.neg()],
             math.inf,
             math.inf,
@@ -325,8 +324,7 @@ def _parfunc_docheckmus(args):
 
 # Check an existing dictionary. Reject any invalid MUS and squash any good MUS
 def checkMUS(solver, puzlits, oldmus, musdict):
-    global _global_solver_ref
-    _global_solver_ref = solver
+    setChildSolver(solver)
     if len(oldmus) > 0:
         with getPool(CONFIG["cores"]) as pool:
             res = pool.map(
@@ -345,7 +343,7 @@ def _findSmallestMUS_func(tup):
         p,
         MUS(
             random.Random(randstr),
-            _global_solver_ref,
+            getChildSolver(),
             [p.neg()],
             shortcutsize,
             minsize,
@@ -354,8 +352,7 @@ def _findSmallestMUS_func(tup):
 
 def cascadeMUS(solver, puzlits, repeats, musdict):
     # We need this to be accessible by the pool
-    global _global_solver_ref
-    _global_solver_ref = solver
+    setChildSolver(solver)
 
     # Have to duplicate code, to swap loops around
     if CONFIG["resetSolverMUS"]:

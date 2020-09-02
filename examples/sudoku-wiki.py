@@ -13,18 +13,13 @@ import demystify.internal
 import demystify.MUS
 import demystify.solve
 import demystify.prettyprint
+import demystify.utils
 import buildpuz
-import resource
 
 logging.basicConfig(
     level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s"
 #    level=logging.INFO, format="%(levelname)s:%(name)s:%(relativeCreated)d:%(message)s"
 )
-
-def get_cpu_time_with_children():
-    time_self = resource.getrusage(resource.RUSAGE_SELF)
-    time_children = resource.getrusage(resource.RUSAGE_CHILDREN)
-    return time_self.ru_utime + time_self.ru_stime + time_children.ru_utime + time_children.ru_stime
 
 import pysolvers
 
@@ -75,13 +70,15 @@ def doSingleStep(domains, targets = None, *, sudokutype = None, sudokuarg = None
 
     MUS = demystify.MUS.CascadeMUSFinder(solver)
 
+    start_time = demystify.utils.get_cpu_time_with_children()
     (trace, ftrace) = demystify.solve.html_solve(sys.stdout, solver, targets, MUS, steps=1, fulltrace=True)
+    end_time = demystify.utils.get_cpu_time_with_children()
 
     print("Minitrace: ", [(s, mins[0], len(mins)) for (s, mins) in trace])
 
     logging.info("Finished")
     logging.info("Full Trace %s", trace)
-    return ftrace
+    return (solver.get_stats(),end_time - start_time, ftrace)
 
 # https://www.sudokuwiki.org/X_Wing_Strategy
 #sudokudoms = [[[1],[3,7,8],[3,7],[2,3,4,7,8],[2,7,8],[2,3,4,7,8],[5],[6],[9]],[[4],[9],[2],[3,7],[5],[6],[1],[3,7],[8]],[[3,7,8],[5],[6],[1],[7,8],[9],[2],[4],[3,7]],[[3,5,7],[3,7],[9],[6],[4],[2,7],[8],[2,5],[1]],[[5,7],[6],[4],[2,7,8,9],[1],[2,7,8],[3,7,9],[2,5],[3,7]],[[2],[1],[8],[7,9],[3],[5],[6],[7,9],[4]],[[3,7,8],[4],[3,7],[5],[2,7,8,9],[2,3,7,8],[3,7,9],[1],[6]],[[9],[3,7,8],[5],[3,7,8],[6],[1],[4],[3,7,8],[2]],[[6],[2],[1],[3,4,7,8],[7,8,9],[3,4,7,8],[3,7,9],[3,7,8,9],[5]]]
@@ -112,7 +109,7 @@ def print_table(results):
 
         for t in r:
             count = sum(count for (lit,musdict) in t["trace"][0].items() for (mus,count) in musdict.items() if len(mus)==globalmin)
-            print("& {:.1f} & {}".format(t["time"], count), end="")
+            print("   & {} & {:.1f}  & {:.1f} & {} & {:.3f} ".format( count,  t["time"], t["solveTime"],t["solveCount"],  t["solveTime"]/t["solveCount"]), end="")
         print("\\\\")
 
 results = []
@@ -124,12 +121,12 @@ def dotest(doms, name, pos, *, sudokutype = buildpuz.basicSudoku, sudokuarg = No
     for solver in [
             {},
             {"prechopMUSes12": True },
-            {"prechopMUSes12": True, "baseSizeMUS": 10000 },
-            {"prechopMUSes12": True, "useUnsatCores": False },
+            #{"prechopMUSes12": True, "baseSizeMUS": 10000 },
+            #{"prechopMUSes12": True, "useUnsatCores": False },
             {"tryManyChopMUS": True},
             {"minPrecheckMUS": True},
             {"gallopingMUSes": True},
-            {"gallopingMUSes": True, "baseSizeMUS": 10000},
+            #{"gallopingMUSes": True, "baseSizeMUS": 10000},
             {"minPrecheckStepsMUS": True},
             {"gallopingMUSes": True, "minPrecheckMUS": True},
     ]:
@@ -137,10 +134,12 @@ def dotest(doms, name, pos, *, sudokutype = buildpuz.basicSudoku, sudokuarg = No
         demystify.config.LoadConfigFromDict(solver)
         logging.info("Trying Solver %s", solver)
         print("<hr><h2>{} - {}</h2>".format(name, solver))
-        start_time = get_cpu_time_with_children()
-        trace = doSingleStep(doms, pos, sudokutype = sudokutype, sudokuarg = sudokuarg)
-        end_time = get_cpu_time_with_children()
-        out["stats"].append({"time": end_time - start_time, "trace": trace})
+
+        (solver_stats, child_time, trace) = doSingleStep(doms, pos, sudokutype = sudokutype, sudokuarg = sudokuarg)
+
+        out["stats"].append({"time": child_time, "trace": trace,
+                            "solveTime": solver_stats["solveTime"],
+                            "solveCount": solver_stats["solveCount"]})
     results.append(out)
     print_table([results[-1]])
 
@@ -456,7 +455,6 @@ if True:
 
  
 
-    print("<h2>CONFIG: {} TIME: {}</h2>".format(solver, time.time() - start_time))
 
 
 # Law of Leftovers examples never trigger 'Law of Leftovers'

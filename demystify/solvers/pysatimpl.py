@@ -2,12 +2,11 @@ import copy
 import logging
 
 from pysat.solvers import Solver
-from ..utils import chainlist
+from ..utils import chainlist, get_cpu_time
 from ..config import CONFIG
 
 import pysat
 import inspect
-import time
 import multiprocessing
 import traceback
 import random
@@ -74,9 +73,9 @@ class SATSolver:
         if CONFIG["resetSolverFull"]:
             self.reboot()
 
-        start_time = time.time()
+        start_time = get_cpu_time()
         x = self._solver.solve(assumptions=chainlist(lits, self._knownlits))
-        end_time = time.time()
+        end_time = get_cpu_time()
         self._stats["solveCount"] += 1
         self._stats["solveTime"] += end_time - start_time
         self._lasttime = end_time - start_time
@@ -96,14 +95,14 @@ class SATSolver:
         if CONFIG["resetSolverFull"]:
             self.reboot()
 
-        start_time = time.time()
+        start_time = get_cpu_time()
         start_stats = self._solver.accum_stats()
         if CONFIG["solveLimited"]:
             self._solver.prop_budget(CONFIG["solveLimitedBudget"])
             x = self._solver.solve_limited(assumptions=chainlist(lits, self._knownlits))
         else:
             x = self._solver.solve(assumptions=chainlist(lits, self._knownlits))
-        end_time = time.time()
+        end_time = get_cpu_time()
         self._stats["solveCount"] += 1
         self._stats["solveTime"] += end_time - start_time
         self._lasttime = end_time - start_time

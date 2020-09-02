@@ -225,7 +225,7 @@ class Solver:
         self._solver.reset_stats()
     
     def get_stats(self):
-        return self._solver.get_stats()
+        return copy.deepcopy(self._solver.get_stats())
     
     def add_stats(self, d):
         self._solver.add_stats(d)

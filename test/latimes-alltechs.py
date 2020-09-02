@@ -52,8 +52,7 @@ for solver in [
 
     demystify.config.LoadConfigFromDict(baseconfig)
     demystify.config.LoadConfigFromDict(solver)
-    
-    start_time = time.time()
+
     # Make a matrix of variables (we can make more than one)
     vars = demystify.base.VarMatrix(
         lambda t: (t[0] + 1, t[1] + 1), (9, 9), range(1, 9 + 1)
