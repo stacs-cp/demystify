@@ -128,7 +128,7 @@ def dotest(doms, name, pos, *, sudokutype = buildpuz.basicSudoku, sudokuarg = No
             {"gallopingMUSes": True},
             #{"gallopingMUSes": True, "baseSizeMUS": 10000},
             {"minPrecheckStepsMUS": True},
-            {"gallopingMUSes": True, "minPrecheckMUS": True},
+            #{"gallopingMUSes": True, "minPrecheckMUS": True},
     ]:
         demystify.config.LoadConfigFromDict(baseconfig)
         demystify.config.LoadConfigFromDict(solver)

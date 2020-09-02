@@ -2,7 +2,7 @@ import copy
 import logging
 
 from pysat.solvers import Solver
-from ..utils import chainlist, get_cpu_time
+from ..utils import chainlist, get_cpu_time, randomFromSeed
 from ..config import CONFIG
 
 import pysat
@@ -56,7 +56,7 @@ class SATSolver:
         self._solver = Solver(
             name=CONFIG["solver"],
             incr=CONFIG["solverIncremental"],
-            bootstrap_with=random.Random(seed).sample(self._clauses, len(self._clauses))
+            bootstrap_with=randomFromSeed(seed).sample(self._clauses, len(self._clauses))
         )
 
     # SAT assignments look like a list of integers, where:

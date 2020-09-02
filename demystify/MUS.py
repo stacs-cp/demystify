@@ -5,9 +5,11 @@ import logging
 import itertools
 import sys
 import math
+import numpy
+
 from time import time
 
-from .utils import flatten, chainlist, shuffledcopy
+from .utils import flatten, chainlist, shuffledcopy, randomFromSeed
 
 from .base import EqVal, NeqVal
 
@@ -112,7 +114,7 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
         if loopsize <= 10:
             done = False
             for tries in range(loopsize*2):
-                random.sample(core, len(core))
+                r.shuffle(core)
                 newcore = solver.basicCore(smtassume + core[:-step])
                 if newcore is not None:
                     logging.debug("prechop: %s %s %s", tries, loopsize, len(newcore))
@@ -312,7 +314,7 @@ def _parfunc_docheckmus(args):
     return (
         p,
         MUS(
-            random.Random("X"),
+            randomFromSeed("X"),
             getChildSolver(),
             [p.neg()],
             math.inf,
@@ -342,7 +344,7 @@ def _findSmallestMUS_func(tup):
     return (
         p,
         MUS(
-            random.Random(randstr),
+            randomFromSeed(randstr),
             getChildSolver(),
             [p.neg()],
             shortcutsize,

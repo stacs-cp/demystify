@@ -4,6 +4,7 @@ import logging
 from multiprocessing import Pool, Process, get_start_method, Queue
 
 from .config import CONFIG
+from .utils import randomFromSeed
 
 # Needs to be global so we can call it from a child process
 _global_solver_ref = None
@@ -94,7 +95,7 @@ class ProcessPool:
 
     def map(self, func, args):
         # Make this repeatable, but shuffled differently on each call
-        random.Random(getGlobalProcessCounter()).shuffle(args)
+        randomFromSeed(getGlobalProcessCounter()).shuffle(args)
         # TODO: This can be unbalanced
         chunks = split(args, self._processcount)
         logging.info("Chunked %s in %s", len(args), [len(c) for c in chunks])

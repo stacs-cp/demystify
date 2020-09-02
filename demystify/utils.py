@@ -48,3 +48,11 @@ def get_cpu_time_with_children():
 def get_cpu_time():
     time_self = resource.getrusage(resource.RUSAGE_SELF)
     return time_self.ru_utime + time_self.ru_stime
+
+import numpy
+
+def randomFromSeed(seed):
+    if isinstance(seed, str):
+        seed = [ord(c) for c in seed]
+    return numpy.random.RandomState(seed)
+    # return random.Random(seed)

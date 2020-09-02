@@ -5,7 +5,7 @@ import types
 import random
 import logging
 
-from .utils import flatten, chainlist
+from .utils import flatten, chainlist, randomFromSeed
 
 from .base import EqVal, NeqVal
 
@@ -26,7 +26,7 @@ class Solver:
             self._solver = SATSolver()
 
         # We want a reliable random source
-        self.random = random.Random(1)
+        self.random = randomFromSeed(1)
 
         # Map from internal booleans to constraints and vice versa
         self._conmap = {}
