@@ -91,12 +91,16 @@ def html_solve(outstream, solver, puzlits, MUS, steps=math.inf, *, gofast = Fals
                 puzlits.remove(p)
         else:
             # Find first thing with smallest value
-            mins = [k for k in sorted(musdict.keys()) if len(musdict[k][0]) == smallest]
-            fullinfo = {lit: list_counter(musdict[lit]) for lit in mins}
+            basemins = [k for k in sorted(musdict.keys()) if len(musdict[k][0]) == smallest]
+            fullinfo = {lit: list_counter(musdict[lit]) for lit in basemins}
             if fulltrace:
                 ftrace.append(fullinfo)
-            if not gofast:
-                mins = [mins[0]]
+
+            if gofast:
+                mins = basemins
+            else:
+                mins = [basemins[0]]
+
             for p in mins:
                 print_explanation(outstream, solver, musdict[p][0], [p])
                 print("Smallest mus size:", smallest)
@@ -107,11 +111,11 @@ def html_solve(outstream, solver, puzlits, MUS, steps=math.inf, *, gofast = Fals
                 puzlits.remove(p)
 
             if not gofast:
-                if len(mins) > 1:
+                if len(basemins) > 1:
                     print(
                         hidden(
-                            "There were {} choices of the same size".format(len(mins) - 1),
-                            "\n".join([explain(solver, p, musdict[p][0]) for p in mins[1:]]),
+                            "There were {} choices of the same size".format(len(basemins) - 1),
+                            "\n".join([explain(solver, p, musdict[p][0]) for p in basemins[1:]]),
                         )
                     )
                 else:
