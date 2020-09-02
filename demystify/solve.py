@@ -43,6 +43,11 @@ def list_counter(l):
         d[i] = d.get(i, 0) + 1
     return d
 
+def html_step(outstream, solver, p, mus):
+    print_explanation(outstream, solver, mus, [p])
+    print("Smallest mus size:", len(mus),  file=outstream)
+    print(explain(solver, p, mus), file=outstream)
+
 def html_solve(outstream, solver, puzlits, MUS, steps=math.inf, *, gofast = False, fulltrace=False):
     trace = []
     ftrace = []
@@ -102,11 +107,10 @@ def html_solve(outstream, solver, puzlits, MUS, steps=math.inf, *, gofast = Fals
                 mins = [basemins[0]]
 
             for p in mins:
-                print_explanation(outstream, solver, musdict[p][0], [p])
-                print("Smallest mus size:", smallest)
+                choices = tuple(sorted(set(list(musdict[p]))))
+                html_step(outstream, solver, p, choices[0])
+
                 trace.append((smallest, mins))
-                print(explain(solver, p, musdict[p][0]))
-                setmus = set([tuple(x) for x in musdict[p]])
                 solver.addLit(p)
                 puzlits.remove(p)
 
