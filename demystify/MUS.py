@@ -176,9 +176,9 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
             step = len(core)//(minsize*2)
 
     if CONFIG["gallopingMUSes"]:
+        calls = 0
         step = 1
         pos = 0
-        calls = 0
         while True:
 
             # Stage 1: Look for something to delete
@@ -246,16 +246,15 @@ def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
                 logging.debug("Failed to remove: %s", lit)
                 badcount += 1
 
-                if CONFIG["earlyExit"] and badcount > minsize:
-                    logging.debug(
-                        "Core for %s %s: failed - badcount too big: %s of %s failed towards %s",
-                        assume,
-                        lens,
-                        badcount,
-                        stepcount,
-                        minsize,
-                    )
-                    return None
+                if badcount == minsize:
+                    cutcore = core[:minsize]
+                    # Check if the core is already minimal first
+                    if cutcore != core and (solver._solver.solve(smtassume + to_test,getsol=False) != False):
+                        logging.debug("Core failed: %s %s %s %s", assume, minsize, badcount, stepcount)
+                        return None
+                    else:
+                        logging.debug("Core found: %s %s %s %s", assume, minsize, badcount, stepcount)
+                        return [solver._conmap[x] for x in to_test if x in solver._conmap]
 
     logging.debug(
         "Core for %s : %s to %s, with %s steps, %s bad (minsize %s)",
