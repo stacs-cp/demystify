@@ -146,7 +146,7 @@ def printrow(name):
 
 def dotest(doms, name, pos, *, sudokutype = buildpuz.basicSudoku, sudokuarg = None):
     out = {"name": name, "stats":[]}
-    baseconfig = {"cores": 20, "smallRepeats": 1, "repeats": 500, "solver": "cadical", "solveLimited": False, "useUnsatCores": True,
+    baseconfig = {"cores": 20, "smallRepeats": 1, "repeats": 100, "solver": "cadical", "solveLimited": False, "useUnsatCores": True,
       "baseSizeMUS": 3,
       "prechopMUSes12": False, "gallopingMUSes": False, "minPrecheckMUS": False, "minPrecheckStepsMUS": False, "tryManyChopMUS": False}
     for solver in [
