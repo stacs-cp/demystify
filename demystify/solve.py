@@ -63,6 +63,7 @@ def html_step(outstream, solver, p, choices):
 def html_solve(outstream, solver, puzlits, MUS, steps=math.inf, *, gofast = False, fulltrace=False):
     trace = []
     ftrace = []
+    total_calls = 0
 
     # Set up Javascript
     print("""
@@ -112,8 +113,9 @@ hide = function(id) {
         stats_diff = {"solveCount": end_stats["solveCount"] - begin_stats["solveCount"],
                       "solveTime": end_stats["solveTime"] - begin_stats["solveTime"] }
         smallest = musdict_minimum(musdict)
-        print("<h3>Step {}</h3>".format(step))
-        print("Solver Calls: {}<br>".format(stats_diff["solveCount"]))
+        print("<h3>Step {} </h3>".format(step))
+        print("Solver Calls: {} <br>".format(stats_diff["solveCount"]))
+        total_calls += stats_diff["solveCount"]
         step += 1
         if smallest == 1:
             lits = [k for k in sorted(musdict.keys()) if len(musdict[k][0]) == 1]
@@ -169,6 +171,7 @@ hide = function(id) {
 
         print("<hr>")
 
+    logging.info("Total Solver Calls %d", total_calls)
     logging.info("Trace: %s", trace)
     logging.info("Trace Quality: %s", [(i, len(j)) for (i, j) in trace])
     logging.info("Trace Sorted: %s", sorted([(i, len(j)) for (i, j) in trace]))
