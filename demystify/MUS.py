@@ -62,7 +62,7 @@ def tinyMUS(solver, assume, distance):
     return [solver._conmap[x] for x in core if x in solver._conmap]
 
 
-def MUS(r, solver, assume, earlycutsize, minsize, *, initial_cons=None):
+def MUS(r, solver, assume, minsize, *, initial_cons=None):
     smtassume = [solver._varlit2smtmap[a] for a in assume]
 
     r.shuffle(smtassume)
@@ -317,7 +317,6 @@ def _parfunc_docheckmus(args):
             getChildSolver(),
             [p.neg()],
             math.inf,
-            math.inf,
             initial_cons=oldmus,
         ),
     )
@@ -338,7 +337,7 @@ def checkMUS(solver, puzlits, oldmus, musdict):
 
 
 def _findSmallestMUS_func(tup):
-    (p, randstr, shortcutsize, minsize) = tup
+    (p, randstr, minsize) = tup
     #logging.info("Random str: '%s'", randstr)
     return (
         p,
@@ -346,7 +345,6 @@ def _findSmallestMUS_func(tup):
             randomFromSeed(randstr),
             getChildSolver(),
             [p.neg()],
-            shortcutsize,
             minsize,
         ),
     )
@@ -373,7 +371,6 @@ def cascadeMUS(solver, puzlits, repeats, musdict):
                         (
                             p,
                             "{}:{}:{}".format(r, p, minsize),
-                            math.inf,
                             minsize * CONFIG["cascadeMult"],
                         )
                         for r in range(repeats)
@@ -405,7 +402,6 @@ def cascadeMUS(solver, puzlits, repeats, musdict):
                         (
                             p,
                             "{}:{}:{}".format(r, p, minsize),
-                            math.inf,
                             minsize * CONFIG["cascadeMult"],
                         )
                         for r in range(repeats)
