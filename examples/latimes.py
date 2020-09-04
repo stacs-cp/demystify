@@ -27,7 +27,7 @@ logging.basicConfig(
     level=logging.INFO, format="%(levelname)s:%(name)s:%(relativeCreated)d:%(message)s"
 )
 
-demystify.config.LoadConfigFromDict({"cores": 2, "smallRepeats": 1, "repeats": 100, "solver": "cadical", "solveLimited": False})
+demystify.config.LoadConfigFromDict({"cores": 16, "smallRepeats": 1, "repeats": 100, "solver": "cadical", "solveLimited": False})
 demystify.config.LoadConfigFromDict(json.loads(args.config))
 
 # Make a matrix of variables (we can make more than one)
