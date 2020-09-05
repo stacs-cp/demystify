@@ -60,7 +60,7 @@ def html_step(outstream, solver, p, choices):
                     others.getvalue()
                     ))
 
-def html_solve(outstream, solver, puzlits, MUS, steps=math.inf, *, gofast = False, fulltrace=False):
+def html_solve(outstream, solver, puzlits, MUS, steps=math.inf, *, gofast = False, fulltrace=False, forcechoices = None):
     trace = []
     ftrace = []
     total_calls = 0
@@ -101,6 +101,7 @@ hide = function(id) {
     )
 
     step = 1
+    forcestep = 0
     # Now, we need to check each one in turn to see which is 'cheapest'
     while len(puzlits) > 0 and step <= steps:
         logging.info("Starting Step %s", step)
@@ -146,8 +147,10 @@ hide = function(id) {
                 html_step(outstream, solver, p, choices)
 
                 trace.append((smallest, mins))
-                solver.addLit(p)
-                puzlits.remove(p)
+                if forcechoices is None:
+                    logging.info("Choosing {}".format(p))
+                    solver.addLit(p)
+                    puzlits.remove(p)
 
             if not gofast:
                 if len(basemins) > 1:
@@ -160,14 +163,21 @@ hide = function(id) {
 
                     print(
                         hidden(
-                            "There were {} other literals we could have chosen".format(len(basemins) - 1),
+                            "Found {} candidates with MUS size {} (see other choices)".format(len(basemins), smallest),
                             others.getvalue()
                         )
                     )
                 else:
-                    print("<p>No other choices</p>")
+                    print("<p>Only 1 candidate with MUS size {} found</p>".format(smallest))
+                logging.info("Minimal choices : {} {}".format(len(basemins), basemins))
             
-            print(hidden("verbose choice info", "<pre>" + pprint.PrettyPrinter(compact=True).pformat(fullinfo) + "</pre>"))
+            if forcechoices is not None:
+                print("<h3>FORCING CHOICE TO {}</h3>".format(forcechoices[forcestep]))
+                solver.addLit(forcechoices[forcestep])
+                puzlits.remove(forcechoices[forcestep])
+                forcestep += 1
+
+            print(hidden("verbose choices info", "<pre>" + pprint.PrettyPrinter(compact=True).pformat(fullinfo) + "</pre>"))
 
         print("<hr>")
 

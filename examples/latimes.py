@@ -40,9 +40,52 @@ puz.addConstraints(buildpuz.basicSudoku(vars))
 
 solver = demystify.internal.Solver(puz)
 
-#Diaboloical - 21 Aug 2020
-gridtypes= [
-    [
+gridtypes= [ 
+    ([# Tough - 30 Aug 2020
+    "000567000",
+    "080000000",
+    "090408501",
+    "470000002",
+    "009000800",
+    "600000039",
+    "804302075",
+    "000000060",
+    "000970000"
+    ],[((2,1),1),((2,1),2),((2,3),1),((2,3),2),((4,7),1)] ),
+    ([# Diabolical - 28 Aug 2020
+    "500009006",
+    "300108000",
+    "604000020",
+    "008900500",
+    "050000030",
+    "001004900",
+    "000000705",
+    "000802004",
+    "000700003"
+    ],[((1,2),2),((1,3),2),((3,4),3)] ),
+    ([# Tough - 27 Aug 2020
+    "000094060",
+    "710502000",
+    "000000020",
+    "108000352",
+    "200000008",
+    "945000706",
+    "020000000",
+    "000705031",
+    "070480000"
+    ],[((2,3),3)]  ),
+    ([# Tough - 23 Aug 2020
+    "300700400",
+    "080003910",
+    "000000000",
+    "950070004",
+    "400001006",
+    "000060023",
+    "000000000",
+    "020507030",
+    "008004009"
+    ],[((7,5),1),((7,7),8)] ),
+    ([#Diaboloical - 21 Aug 2020
     "070003060",
     "000102000",
     "005000709",
@@ -52,8 +95,8 @@ gridtypes= [
     "704000900",
     "000708000",
     "090600050"
-    ],
-    [ # Tough Thu, 20-Aug-2020
+    ],[((8,7),3), ((5,9),3), ((6,2),3), ((6,3),3), ((9,5),3)]  ),
+    ([ # Tough Thu, 20-Aug-2020
     "850020000",
     "020000003",
     "009108000",
@@ -63,8 +106,11 @@ gridtypes= [
     "000605800",
     "200000030",
     "000090047"
-    ],
-    [ # Moderate Wed 19-Aug-2020
+    ], [((3,5),3)] )
+]
+
+tooeasygrids = [
+        [ # Moderate Wed 19-Aug-2020
     "040000120",
     "300107000",
     "080000073",
@@ -88,7 +134,9 @@ gridtypes= [
     ]
 ]
 
-grid = gridtypes[args.sudoku]
+(grid, moves) = gridtypes[args.sudoku]
+
+lits = [demystify.base.NeqVal(vars[x-1][y-1], d) for ((x,y),d) in moves]
 
 sudoku = [[None] * 9 for _ in range(9)]
 for i in range(9):
@@ -112,7 +160,7 @@ puzlits = [p for p in fullsolution if p not in sudokumodel]
 
 MUS = demystify.MUS.CascadeMUSFinder(solver)
 
-trace = demystify.solve.html_solve(sys.stdout, solver, puzlits, MUS)
+trace = demystify.solve.html_solve(sys.stdout, solver, puzlits, MUS, forcechoices = lits)
 
 print("Minitrace: ", [(s, mins[0], len(mins)) for (s, mins) in trace])
 
