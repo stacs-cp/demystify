@@ -139,7 +139,7 @@ def printrow(name):
 
     for t in range(0, len(merged), 4):
         args = merged[t:t+4]
-        print("   & {:,} & {:,} & {:,.1f}  &  {:,} ".format(args[0], args[1], args[2], args[3]), end="")
+        print("   & {:,} & {:.3g} & {:,} ".format(args[1], args[2], int(round(args[3]/1000))), end="")
 
     print("\\\\")
 
