@@ -58,7 +58,7 @@ def html_step(outstream, solver, p, choices):
                 print(explain(solver, p, c), file=others)
             print(hidden("{} methods of deducing the same value were found:".format(len(choices)),
                     others.getvalue()
-                    ))
+                    ), file=others)
 
 def html_solve(outstream, solver, puzlits, MUS, steps=math.inf, *, gofast = False, fulltrace=False, forcechoices = None):
     trace = []
@@ -98,7 +98,7 @@ hide = function(id) {
 </head>
 <body>
     """
-    )
+    , file=outstream)
 
     step = 1
     forcestep = 0
@@ -114,18 +114,18 @@ hide = function(id) {
         stats_diff = {"solveCount": end_stats["solveCount"] - begin_stats["solveCount"],
                       "solveTime": end_stats["solveTime"] - begin_stats["solveTime"] }
         smallest = musdict_minimum(musdict)
-        print("<h3>Step {} </h3>".format(step))
-        print("Solver Calls: {} <br>".format(stats_diff["solveCount"]))
+        print("<h3>Step {} </h3>".format(step), file=outstream)
+        print("Solver Calls: {} <br>".format(stats_diff["solveCount"]), file=outstream)
         total_calls += stats_diff["solveCount"]
         step += 1
         if smallest == 1:
             lits = [k for k in sorted(musdict.keys()) if len(musdict[k][0]) == 1]
             print_explanation(outstream, solver, [musdict[l][0] for l in lits], lits)
 
-            print("Doing", len(lits), " simple deductions ")
+            print("Doing", len(lits), " simple deductions ", file=outstream)
 
             exps = "\n".join([explain(solver, p, musdict[p][0]) for p in sorted(lits)])
-            print(hidden("Show why", exps))
+            print(hidden("Show why", exps), file=outstream)
 
             for p in lits:
                 solver.addLit(p)
@@ -165,21 +165,21 @@ hide = function(id) {
                         hidden(
                             "Found {} candidates with MUS size {} (see other choices)".format(len(basemins), smallest),
                             others.getvalue()
-                        )
+                        ), file=outstream
                     )
                 else:
-                    print("<p>Only 1 candidate with MUS size {} found</p>".format(smallest))
+                    print("<p>Only 1 candidate with MUS size {} found</p>".format(smallest), file=outstream)
                 logging.info("Minimal choices : {} {}".format(len(basemins), basemins))
             
             if forcechoices is not None:
-                print("<h3>FORCING CHOICE TO {}</h3>".format(forcechoices[forcestep]))
+                print("<h3>FORCING CHOICE TO {}</h3>".format(forcechoices[forcestep]), file=outstream)
                 solver.addLit(forcechoices[forcestep])
                 puzlits.remove(forcechoices[forcestep])
                 forcestep += 1
 
-            print(hidden("verbose choices info", "<pre>" + pprint.PrettyPrinter(compact=True).pformat(fullinfo) + "</pre>"))
+            print(hidden("verbose choices info", "<pre>" + pprint.PrettyPrinter(compact=True).pformat(fullinfo) + "</pre>"), file=outstream)
 
-        print("<hr>")
+        print("<hr>", file=outstream)
 
     logging.info("Total Solver Calls %d", total_calls)
     logging.info("Trace: %s", trace)
