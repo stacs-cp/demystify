@@ -22,6 +22,8 @@ class SATSolver:
         self._knownlits = set()
         self._stack = []
         self._clauses = []
+        if CONFIG["dumpSAT"]:
+            self._rawclauses = []
         self._lasttime = -1
 
         self.reset_stats()
@@ -40,12 +42,17 @@ class SATSolver:
 
     def addConstraint(self, clause):
         self._clauses.append(clause)
+        if CONFIG["dumpSAT"]:
+            self._rawclauses.append(clause)
         self._solver.add_clause(clause)
 
     def addImplies(self, var, clauses):
         for c in clauses:
             self._clauses.append(c + [-var])
             self._solver.add_clause(c + [-var])
+            if CONFIG["dumpSAT"]:
+                assert len(clauses) == 1
+                self._rawclauses.append(c)
 
     # Recreate solver, throwing away all learned clauses
     def reboot(self, seed):
@@ -58,6 +65,19 @@ class SATSolver:
             incr=CONFIG["solverIncremental"],
             bootstrap_with=randomFromSeed(seed).sample(self._clauses, len(self._clauses))
         )
+    
+    def dumpSAT(self, filename, assume):
+        assert len(assume) == 1
+        known = set(list(self._knownlits) + assume)
+        needed = [c for c in self._rawclauses if len(known.intersection(c)) == 0]
+        simplified = [ [x for x in c if (-x) not in known ] for c in needed ]
+        #simplified = set([ tuple(s) for s in simplified if len(s) > 0 ])
+        with open(filename, "w") as f:
+            print("p cnf {} {}".format(max(abs(x) for c in self._clauses for x in c), len(simplified) ), file=f)
+            for c in simplified:
+                print(" ".join(str(x) for x in c) + " 0", file=f)
+
+
 
     # SAT assignments look like a list of integers, where:
     # '5' means variable 5 is true

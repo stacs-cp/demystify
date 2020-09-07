@@ -18,11 +18,14 @@ CONFIG = {
     "repeats": 5,
     # Encode "at most one thing is true" as a single clause
     "OneClauseAtMost": False,
-    # Limit search to 100,000 conflicts
+    # Limit search to searchLimitedBudget conflicts
     "solveLimited": True,
-
     "solveLimitedBudget": 100000,
     
+    # Dump out SAT instances, for other MUS solvers
+    # WHen using this, set cores=0 and repeats=1
+    "dumpSAT": False,
+
     # TO CHECK: Does this help?
     "setPhases": False,
     # Cache MUSes between steps

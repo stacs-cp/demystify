@@ -62,8 +62,15 @@ def tinyMUS(solver, assume, distance):
     return [solver._conmap[x] for x in core if x in solver._conmap]
 
 
+count = 0
+
 def MUS(r, solver, assume, minsize, *, initial_cons=None):
     smtassume = [solver._varlit2smtmap[a] for a in assume]
+
+    if CONFIG["dumpSAT"]:
+        global count
+        count += 1
+        solver._solver.dumpSAT(str(count) + "-" + str(assume)+".cnf", smtassume)
 
     r.shuffle(smtassume)
 
