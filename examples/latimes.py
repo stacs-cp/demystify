@@ -158,7 +158,10 @@ tooeasygrids = [
 
 (grid, moves) = gridtypes[args.sudoku]
 
-lits = [demystify.base.NeqVal(vars[x-1][y-1], d) for ((x,y),d) in moves]
+if moves is not None:
+    lits = [demystify.base.NeqVal(vars[x-1][y-1], d) for ((x,y),d) in moves]
+else:
+    lits = None
 
 sudoku = [[None] * 9 for _ in range(9)]
 for i in range(9):
