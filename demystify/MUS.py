@@ -64,10 +64,10 @@ def tinyMUS(solver, assume, distance):
 
 count = 0
 
-def MUS(r, solver, assume, minsize, *, initial_cons=None):
+def MUS(r, solver, assume, minsize, *, config, initial_cons=None):
     smtassume = [solver._varlit2smtmap[a] for a in assume]
 
-    if CONFIG["dumpSAT"]:
+    if config["dumpSAT"]:
         global count
         count += 1
         solver._solver.dumpSAT(str(count) + "-" + str(assume)+".cnf", smtassume)
@@ -75,7 +75,7 @@ def MUS(r, solver, assume, minsize, *, initial_cons=None):
     r.shuffle(smtassume)
 
     if initial_cons is None:
-        if CONFIG["checkCloseFirst"]:
+        if config["checkCloseFirst"]:
             closecons = set(flatten([solver._varlit2con[l] for l in assume]))
             farcons = solver._conlits - closecons
             cons = r.sample(closecons, len(closecons)) + r.sample(farcons, len(farcons))
@@ -97,7 +97,7 @@ def MUS(r, solver, assume, minsize, *, initial_cons=None):
 
     lens = [len(core)]
 
-    if CONFIG["prechopMUSes12"]:
+    if config["prechopMUSes12"]:
         step = len(core) // 2
         while step > 1 and len(core) > minsize:
             to_test = core[:-step]
@@ -109,7 +109,7 @@ def MUS(r, solver, assume, minsize, *, initial_cons=None):
                 break
             step = min(step//2, len(core)//2)
 
-    if CONFIG["tryManyChopMUS"]:
+    if config["tryManyChopMUS"]:
         for squash in [1/2, 1/4, 1/8, 1/16, 1/32, 1/64, 1/128, 1/256, 1/512, 1/1024, 1/2048, 1/4096]:
             step = int(len(core)*squash)
             loopsize = safepow(1/(1-squash), minsize + 1)
@@ -137,7 +137,7 @@ def MUS(r, solver, assume, minsize, *, initial_cons=None):
         else:
             logging.debug("Skip tryManyChop")
 
-    if CONFIG["minPrecheckMUS"]:
+    if config["minPrecheckMUS"]:
         step = len(core)//(minsize*2)
         if step > 1:
             i = 0
@@ -156,7 +156,7 @@ def MUS(r, solver, assume, minsize, *, initial_cons=None):
                             logging.debug("minprecheck reject: %s %s %s", i, step, len(core))
                             return None
 
-    if CONFIG["minPrecheckStepsMUS"]:
+    if config["minPrecheckStepsMUS"]:
         step = len(core)//(minsize*2)
         while step > 2:
             oldsize = len(core)
@@ -182,7 +182,7 @@ def MUS(r, solver, assume, minsize, *, initial_cons=None):
             logging.debug("minprecheckstep loop: %s %s %s %s %s %s", oldsize, len(core), step, len(core)//(minsize*2), i, badcount)
             step = len(core)//(minsize*2)
 
-    if CONFIG["gallopingMUSes"]:
+    if config["gallopingMUSes"]:
         calls = 0
         step = 1
         pos = 0
@@ -325,6 +325,7 @@ def _parfunc_docheckmus(args):
             [p.neg()],
             math.inf,
             initial_cons=oldmus,
+            config=CONFIG
         ),
     )
 
@@ -344,7 +345,7 @@ def checkMUS(solver, puzlits, oldmus, musdict):
 
 
 def _findSmallestMUS_func(tup):
-    (p, randstr, minsize) = tup
+    (p, randstr, minsize, config) = tup
     #logging.info("Random str: '%s'", randstr)
     return (
         p,
@@ -353,16 +354,17 @@ def _findSmallestMUS_func(tup):
             getChildSolver(),
             [p.neg()],
             minsize,
+            config=config,
         ),
     )
 
-def cascadeMUS(solver, puzlits, repeats, musdict):
+def cascadeMUS(solver, puzlits, repeats, musdict, config):
     # We need this to be accessible by the pool
     setChildSolver(solver)
 
     # Have to duplicate code, to swap loops around
     if CONFIG["resetSolverMUS"]:
-        for minsize in range(CONFIG["baseSizeMUS"], max(CONFIG["baseSizeMUS"]+1,10000), 1):
+        for minsize in range(config["baseSizeMUS"], max(config["baseSizeMUS"]+1,10000), 1):
             with getPool(CONFIG["cores"]) as pool:
                 # Do 'range(repeats)' first, so when we distribute we get an even spread of literals on different cores
                 # minsize+1 for MUS size, as the MUS will include 'p'
@@ -379,6 +381,7 @@ def cascadeMUS(solver, puzlits, repeats, musdict):
                             p,
                             "{}:{}:{}".format(r, p, minsize),
                             minsize * CONFIG["cascadeMult"],
+                            config
                         )
                         for r in range(repeats)
                         for p in puzlits
@@ -394,7 +397,7 @@ def cascadeMUS(solver, puzlits, repeats, musdict):
                     return
     else:
         with getPool(CONFIG["cores"]) as pool:
-            for minsize in range(CONFIG["baseSizeMUS"], max(CONFIG["baseSizeMUS"]+1,10000), 1):
+            for minsize in range(config["baseSizeMUS"], max(config["baseSizeMUS"]+1,10000), 1):
                 # Do 'range(repeats)' first, so when we distribute we get an even spread of literals on different cores
                 # minsize+1 for MUS size, as the MUS will include 'p'
                 logging.info(
@@ -410,6 +413,7 @@ def cascadeMUS(solver, puzlits, repeats, musdict):
                             p,
                             "{}:{}:{}".format(r, p, minsize),
                             minsize * CONFIG["cascadeMult"],
+                            config
                         )
                         for r in range(repeats)
                         for p in puzlits
@@ -462,7 +466,7 @@ class CascadeMUSFinder:
         if (not CONFIG["checkSmall2"]) or (
            musdict_minimum(musdict) > 3
         ):
-            cascadeMUS(self._solver, puzlits, CONFIG["repeats"], musdict)
+            cascadeMUS(self._solver, puzlits, CONFIG["repeats"], musdict, CONFIG)
         else:
             logging.info("Early exit: skipping cascade")
 
