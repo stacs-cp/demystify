@@ -12,7 +12,7 @@ import demystify.internal
 import demystify.MUS
 import demystify.solve
 import demystify.prettyprint
-import buildpuz
+import demystify.buildpuz
 
 logging.basicConfig(
     level=logging.INFO, format="%(levelname)s:%(name)s:%(relativeCreated)d:%(message)s"
@@ -45,9 +45,9 @@ thermometers = [
 
 
 constraints = []
-constraints += buildpuz.basicSudoku(vars)
+constraints += demystify.buildpuz.basicSudoku(vars)
 for t in thermometers:
-    constraints += buildpuz.thermometer(vars, t)
+    constraints += demystify.buildpuz.thermometer(vars, t)
 
 puz.addConstraints(constraints)
 

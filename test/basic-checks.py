@@ -12,7 +12,7 @@ import demystify.internal
 import demystify.MUS
 import demystify.prettyprint
 import demystify.solve
-import buildpuz
+import demystify.buildpuz
 
 import demystify.config
 
@@ -29,7 +29,7 @@ def doSingleStep(delvals, target):
 
     # Build the puzzle (we can pass multiple matrices, depending on the puzzle)
     puz = demystify.base.Puzzle([vars])
-    puz.addConstraints(buildpuz.basicSudoku(vars))
+    puz.addConstraints(demystify.buildpuz.basicSudoku(vars))
 
     solver = demystify.internal.Solver(puz)
 

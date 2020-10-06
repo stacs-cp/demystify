@@ -12,7 +12,7 @@ import demystify.internal
 import demystify.MUS
 import demystify.solve
 import demystify.prettyprint
-import buildpuz
+import demystify.buildpuz
 
 logging.basicConfig(
     level=logging.INFO, format="%(levelname)s:%(name)s:%(relativeCreated)d:%(message)s"
@@ -27,13 +27,13 @@ vars = demystify.base.VarMatrix(lambda t: (t[0] + 1, t[1] + 1), (9, 9), range(1,
 puz = demystify.base.Puzzle([vars])
 
 constraints = []
-constraints += buildpuz.alldiffRowsCols(vars)
-constraints += buildpuz.buildCage(
+constraints += demystify.buildpuz.alldiffRowsCols(vars)
+constraints += demystify.buildpuz.buildCage(
     "Cage 1",
     [vars[x][y] for (x, y) in [(i, j) for i in range(3) for j in range(3)]],
     vars.domain(),
 )
-constraints += buildpuz.buildCage(
+constraints += demystify.buildpuz.buildCage(
     "Cage 2",
     [
         vars[x][y]

@@ -14,7 +14,7 @@ import demystify.internal
 import demystify.MUS
 import demystify.solve
 import demystify.prettyprint
-import buildpuz
+import demystify.buildpuz
 
 
 parser = argparse.ArgumentParser()
@@ -35,7 +35,7 @@ vars = demystify.base.VarMatrix(lambda t: (t[0] + 1, t[1] + 1), (9, 9), range(1,
 
 # Build the puzzle (we can pass multiple matrices, depending on the puzzle)
 puz = demystify.base.Puzzle([vars])
-puz.addConstraints(buildpuz.basicSudoku(vars))
+puz.addConstraints(demystify.buildpuz.basicSudoku(vars))
 
 
 solver = demystify.internal.Solver(puz)

@@ -2,7 +2,7 @@
 
 import demystify
 import demystify.internal
-import buildpuz
+import demystify.buildpuz
 
 import copy
 import sys
@@ -14,7 +14,7 @@ vars = demystify.base.VarMatrix(lambda t: (t[0] + 1, t[1] + 1), (9, 9), range(1,
 puz = demystify.base.Puzzle([vars])
 
 
-puz.addConstraints(buildpuz.basicSudoku(vars))
+puz.addConstraints(demystify.buildpuz.basicSudoku(vars))
 
 
 solver = demystify.internal.Solver(puz)

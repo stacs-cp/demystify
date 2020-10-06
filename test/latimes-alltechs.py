@@ -13,7 +13,7 @@ import demystify.MUS
 import demystify.prettyprint
 import demystify.solve
 import demystify.config
-import buildpuz
+import demystify.buildpuz
 import time
 
 logging.basicConfig(
@@ -60,7 +60,7 @@ for solver in [
 
     # Build the puzzle (we can pass multiple matrices, depending on the puzzle)
     puz = demystify.base.Puzzle([vars])
-    puz.addConstraints(buildpuz.basicSudoku(vars))
+    puz.addConstraints(demystify.buildpuz.basicSudoku(vars))
 
     solver = demystify.internal.Solver(puz)
 
