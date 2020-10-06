@@ -257,6 +257,11 @@ def thermometer(varmat, l):
         )
     return constraints
 
+def thermometers(varmat, l):
+    constraints = []
+    for t in l:
+        constraints += thermometer(varmat, t)
+    return constraints
 
 def basicSudoku(varmat):
     constraints = []
