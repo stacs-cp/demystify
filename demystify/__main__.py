@@ -84,6 +84,15 @@ with open(args.puzzle) as json_data:
     
     fullsolution = solver.solveSingle(model)
 
+    if fullsolution is None:
+        print("Your problem has no solution!")
+        sys.exit(1)
+    
+    if fullsolution == "Multiple":
+        print("Your problem has multiple solutions!")
+        sys.exit(1)
+
+
     for s in model:
         solver.addLit(s)
     
