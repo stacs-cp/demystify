@@ -3,6 +3,7 @@ import sys
 import math
 import io
 import pprint
+import uuid
 
 from .prettyprint import print_explanation
 
@@ -29,12 +30,13 @@ def hidden(name, content):
     return s
 
 
-def explain(solver, lit, reason):
+def explain(solver, lit, reason, classid):
     exp = ""
     exp += "<p>Setting " + str(lit) + " because:</p>\n"
     exp += "<ul>\n"
-    for clause in sorted(reason):
-        exp += "<li>" + str(solver.explain(clause)) + "</li>\n"
+    for i,clause in enumerate(sorted(reason)):
+        exp += "<li class='" + classid + str(i) + "'>" + str(solver.explain(clause)) + "</li>\n"
+        exp += '<script>hoverByClass("{}","pink")</script>\n'.format(classid+str(i))
     exp += "</ul>\n"
 
     return exp
@@ -46,16 +48,18 @@ def list_counter(l):
     return d
 
 def html_step(outstream, solver, p, choices):
-    print_explanation(outstream, solver, choices[0], [p])
+    classid = uuid.uuid4().hex[:8]
+    print_explanation(outstream, solver, choices[0], [p], classid)
     print("Smallest mus size:", len(choices[0]),  file=outstream)
-    print(explain(solver, p, choices[0]), file=outstream)
+    print(explain(solver, p, choices[0], classid), file=outstream)
 
     if len(choices) > 1:
             others = io.StringIO()
+            classid = uuid.uuid4().hex[:8]
             for c in choices[1:]:
-                print_explanation(others, solver, c, [p])
+                print_explanation(others, solver, c, [p], classid)
                 print("Smallest mus size:", len(c),  file=others)
-                print(explain(solver, p, c), file=others)
+                print(explain(solver, p, c, classid), file=others)
             print(hidden("{} methods of deducing the same value were found:".format(len(choices)),
                     others.getvalue()
                     ), file=others)
@@ -77,8 +81,29 @@ def html_solve(outstream, solver, puzlits, MUS, steps=math.inf, *, gofast = Fals
 .pii {background-color:blue}
 .nii {background-color: orange}
 .pik {font-weight: bolder}
-</style>
+td {border-width: 3; border-style: solid; border-color:transparent}
 
+</style>
+<!-- from https://stackoverflow.com/questions/12786810/hover-on-element-and-highlight-all-elements-with-the-same-class -->
+<script>
+function hoverByClass(classname,colorover,colorout="transparent"){
+	var elms=document.getElementsByClassName(classname);
+	for(var i=0;i<elms.length;i++){
+		elms[i].onmouseover = function(){
+			for(var k=0;k<elms.length;k++){
+				elms[k].style.borderColor=colorover;
+                elms[k].style.borderWidth=3
+                elms[k].style.borderStyle="solid"
+			}
+		};
+		elms[i].onmouseout = function(){
+			for(var k=0;k<elms.length;k++){
+				elms[k].style.borderColor=colorout;
+			}
+		};
+	}
+}
+</script>
        
 <script>
 toggle = function(id) {
@@ -119,12 +144,14 @@ hide = function(id) {
         total_calls += stats_diff["solveCount"]
         step += 1
         if smallest == 1:
+            classid = uuid.uuid4().hex[:8]
+
             lits = [k for k in sorted(musdict.keys()) if len(musdict[k][0]) == 1]
-            print_explanation(outstream, solver, [musdict[l][0] for l in lits], lits)
+            print_explanation(outstream, solver, [musdict[l][0] for l in lits], lits, classid)
 
             print("Doing", len(lits), " simple deductions ", file=outstream)
 
-            exps = "\n".join([explain(solver, p, musdict[p][0]) for p in sorted(lits)])
+            exps = "\n".join([explain(solver, p, musdict[p][0], classid) for p in sorted(lits)])
             print(hidden("Show why", exps), file=outstream)
 
             for p in lits:

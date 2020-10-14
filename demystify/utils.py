@@ -56,3 +56,37 @@ def randomFromSeed(seed):
         seed = [ord(c) for c in seed]
     return numpy.random.RandomState(seed)
     # return random.Random(seed)
+
+def parseSavileRowName(n):
+    splits = n.split("_")
+    args = []
+    for arg in splits[1:]:
+        if arg.startswith("n"):
+            c = -1 * int(arg[1:])
+        else:
+            c = int(arg)
+        args.append(c)
+    return (splits[0], tuple(args))
+
+
+def getConnectedVars(clauses, con, varlits_in):
+    varlits = set(varlits_in.union([-v for v in varlits_in]))
+
+    lit2conmap = dict()
+    for c in clauses:
+        for l in c:
+            if -l not in lit2conmap:
+                lit2conmap[-l] = set()
+            lit2conmap[-l].update(c)
+    
+    todo = lit2conmap[con]
+    found = set(todo)
+    while len(todo) > 0:
+        val = todo.pop()
+        for v in lit2conmap[-val]:
+            if v not in found:
+                found.add(v)
+                if v not in varlits:
+                    todo.add(v)
+    return found.intersection(varlits)
+            

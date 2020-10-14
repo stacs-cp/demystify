@@ -42,6 +42,45 @@ def EqVal(var, val: int) -> Lit:
 def NeqVal(var, val: int) -> Lit:
     return Lit(var, val, False)
 
+class DummyClause:
+    def __init__(self, name: str, clause: Sequence[str], clausenames=None):
+        self._name = name
+        self._clause = clause
+        self._clausenames = clausenames
+        self._frozen = tuple([tuple(sorted(self._clause))])
+        self._lits = tuple(sorted(set(flatten(self._frozen))))
+
+    def explain(self, knownvars):
+        if self._clausenames is None:
+            return self._name
+
+        remainingchoices = []
+
+        for i in range(len(self._clause)):
+            if self._clause[i].neg() not in knownvars:
+                remainingchoices.append(self._clausenames[i])
+
+        exp = self._name + " (Choices are: " + ", ".join(remainingchoices) + ")"
+
+        return exp
+
+    def clauseset(self):
+        return self._frozen
+
+    def lits(self):
+        return self._lits
+
+    def __eq__(self, other):
+        return self._name == other._name
+
+    def __hash__(self):
+        return self._name.__hash__()
+
+    def __lt__(self, other):
+        return self._name < other._name
+
+    def __repr__(self):
+        return self._name + "!"
 
 class Clause:
     def __init__(self, name: str, clause: Sequence[str], clausenames=None):
@@ -226,13 +265,16 @@ class Var:
 
 
 class VarMatrix:
-    def __init__(self, varname, dim, dom):
+    def __init__(self, varname, dim, dom, *, varmat=None):
         self.varname = varname
         self._dim = dim
         self._domain = tuple(dom)
-        self._vars = [
-            [Var(varname((i, j)), dom, (i,j)) for j in range(dim[1])] for i in range(dim[0])
-        ]
+        if varmat is None:
+            self._vars = [
+                [Var(varname((i, j)), dom, (i,j)) for j in range(dim[1])] for i in range(dim[0])
+            ]
+        else:
+            self._vars = varmat
         self._constraints = flatten([cellHasValue(v, dom) for v in flatten(self._vars)])
 
     def varmat(self):
@@ -271,6 +313,23 @@ class VarMatrix:
             for (row, arow) in zip(self._vars, assignment)
         ]
 
+class SavileRowVars:
+    def __init__(self, vars):
+        self._vars = [vars]
+
+    def varmat(self):
+        return self._vars
+    
+    def modelToAssignment(self, model, partial=False):
+        return [
+            [var.modelToAssignment(model, partial) for var in row] for row in self._vars
+        ]
+
+    def assignmentToModel(self, assignment, partial=False):
+        return [
+            [var.assignmentToModel(avar, partial) for (var, avar) in zip(row, arow)]
+            for (row, arow) in zip(self._vars, assignment)
+        ]
 
 class Puzzle:
     def __init__(self, vars):

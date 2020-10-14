@@ -18,7 +18,9 @@ from .solvers.pysatimpl import SATSolver
 
 
 class Solver:
-    def __init__(self, puzzle):
+    def __init__(self, puzzle,*,cnf=None,litmap=None,conmap=None):
+        assert puzzle is not None
+
         self._puzzle = puzzle
         if CONFIG["solver"] == "z3":
             self._solver = Z3Solver()
@@ -50,6 +52,19 @@ class Solver:
 
         # Set, so we quickly know is an internal variable represents a variable
         self._varsmt = set([])
+
+        # Used for tracking in push/pop/addLits
+        self._stackknownlits = []
+        self._knownlits = []
+
+        # For benchmarking
+        self._corecount = 0
+
+        if cnf is not None:
+            self.init_fromCNF(cnf,litmap,conmap)
+
+            self.init_litmappings()
+            return
 
         for mat in self._puzzle.vars():
             for v in mat.varlist():
@@ -92,14 +107,28 @@ class Solver:
             self._conlit2conmap[c] = var
             self._conlits.add(var)
 
-        # Used for tracking in push/pop/addLits
-        self._stackknownlits = []
-        self._knownlits = []
-
-        # For benchmarking
-        self._corecount = 0
-
         self.init_litmappings()
+
+    def init_fromCNF(self,cnf,litmap,conmap):
+        assert(CONFIG["solver"] != "z3")
+        self._solver = SATSolver(cnf)
+        for (lit, b) in litmap.items():
+            neglit = lit.neg()
+            if b < 0:
+                neglit,lit=lit,neglit
+                b = b * -1
+            self._varlit2smtmap[lit] = b
+            self._varlit2smtmap[neglit] = self._solver.negate(b)
+            self._varsmt2litmap[b] = lit
+            self._varsmt2neglitmap[b] = neglit
+            self._varsmt.add(b)
+        
+        for (con, var) in conmap.items():
+            self._conmap[var] = con
+            self._conlit2conmap[con] = var
+            self._conlits.add(var)
+
+
 
     def init_litmappings(self):
         # Set up some mappings for efficient finding of tiny MUSes
@@ -121,7 +150,7 @@ class Solver:
         # Map from a var lit to all constraints it is distance 2 from
         self._varlit2con2 = {}  # {l : set() for l in self._varlit2smtmap.keys() }
         for (lit, connected) in self._varlit2negconnectedlits.items():
-            allcon = set.union(*[self._varlit2con[x] for x in connected]).union(
+            allcon = set.union(*[self._varlit2con[x] for x in connected],set()).union(
                 self._varlit2con[lit]
             )
             self._varlit2con2[lit] = allcon

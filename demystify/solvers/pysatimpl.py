@@ -15,14 +15,22 @@ import random
 
 
 class SATSolver:
-    def __init__(self):
-        self._solver = Solver(name=CONFIG["solver"], incr=CONFIG["solverIncremental"])
-        self._boolcount = 1
+    def __init__(self, cnf=None):
+        if cnf is None:
+            self._solver = Solver(name=CONFIG["solver"], incr=CONFIG["solverIncremental"])
+            self._boolcount = 1
+            self._clauses = []
+        else:
+            self._boolcount = cnf.nv
+            self._solver = Solver(name=CONFIG["solver"], incr=CONFIG["solverIncremental"],bootstrap_with=cnf.clauses)
+            self._clauses = cnf.clauses
+                    
+
+        self._stack = []
         self._boolnames = {}
         self._knownlits = set()
-        self._stack = []
-        self._clauses = []
         if CONFIG["dumpSAT"]:
+            assert(cnf is None)
             self._rawclauses = []
         self._lasttime = -1
 
