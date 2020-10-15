@@ -36,7 +36,6 @@ parser.add_argument("--repeats", type=int, default=5, help="Number of times to t
 
 parser.add_argument("--cores", type=int, default=4, help="Number of CPU cores to use")
 
-
 args = parser.parse_args()
 
 if args.puzzle is None and args.eprime is None:
@@ -51,6 +50,10 @@ if args.eprime is not None and args.eprimedimacs is None:
     print("--eprime requires --eprimedimacs")
     sys.exit(1)
 
+if args.debuginfo:
+    logging.basicConfig(
+    level=logging.DEBUG, format="%(levelname)s:%(name)s:%(relativeCreated)d:%(message)s"
+)
 demystify.config.LoadConfigFromDict({"repeats" : args.repeats, "cores": args.cores})
 
 varmap = {}
@@ -168,6 +171,8 @@ else:
                 for (dom, sat) in varmap[v][loc].items():
                     litmap[demystify.base.EqVal(var, dom)] = sat
                     invlitmap[sat] = demystify.base.EqVal(var,dom)
+                    if -sat not in invlitmap:
+                        invlitmap[-sat] = demystify.base.NeqVal(var, dom)
                     varlits.add(sat)
 
 
@@ -175,13 +180,16 @@ else:
         # Only want matching '1'
         for k in varmap[v].keys():
             # This should be a boolean -- if this fails, check with Chris
-            assert(set(varmap[v][k].keys()) == set([0,1]))
-            # Note that 'a' can be accessed in the f string
-            a = tuple(k)
-            constraintname = eval('f"' + cons[v] + '"', locals())
-            logging.debug(constraintname)
-            connected = [invlitmap[s] for s in demystify.utils.getConnectedVars(formula.clauses, varmap[v][k][1], varlits)]
-            constraintmap[demystify.base.DummyClause(constraintname, connected)] = varmap[v][k][1]
+            assert(set(varmap[v][k].keys()).issubset(set([0,1])))
+            assert(0 in varmap[v][k].keys())
+            # If this boolean is always false, skip it!
+            if 1 in varmap[v][k].keys():
+                # Note that 'a' can be accessed in the f string
+                a = tuple(k)
+                constraintname = eval('f"' + cons[v] + '"', locals())
+                logging.debug(constraintname)
+                connected = [invlitmap[s] for s in demystify.utils.getConnectedVars(formula.clauses, varmap[v][k][1], varlits)]
+                constraintmap[demystify.base.DummyClause(constraintname, connected)] = varmap[v][k][1]
 
     printvarlist = []
     # Horrible code to fold matrices back into nice python matrices
@@ -206,6 +214,7 @@ else:
     solver = demystify.internal.Solver(puz, cnf=formula, litmap=litmap, conmap=constraintmap)
 
     logging.debug(solver.solve(getsol=True))
+    print(solver.solve(getsol=True))
     fullsolution = solver.solveSingle([])
     logging.debug(fullsolution)
     puzlits = fullsolution

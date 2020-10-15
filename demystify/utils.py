@@ -78,9 +78,21 @@ def getConnectedVars(clauses, con, varlits_in):
             if -l not in lit2conmap:
                 lit2conmap[-l] = set()
             lit2conmap[-l].update(c)
-    
-    todo = lit2conmap[con]
-    found = set(todo)
+
+    # Blank out counts for variables in unit clauses
+    for c in clauses:
+        if len(c) == 1:
+            lit2conmap[c[0]] = set()
+            lit2conmap[-c[0]] = set()
+
+    if con not in lit2conmap:
+        return set()
+        
+    found = set(lit2conmap[con])
+    todo = set()
+    for v in found:
+        if v not in varlits:
+            todo.add(v)
     while len(todo) > 0:
         val = todo.pop()
         for v in lit2conmap[-val]:

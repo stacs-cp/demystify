@@ -75,8 +75,8 @@ class Solver:
 
                     self._varlit2smtmap[lit] = b
                     self._varlit2smtmap[neglit] = self._solver.negate(b)
-                    self._varsmt2litmap[b] = lit
-                    self._varsmt2neglitmap[b] = neglit
+                    self._varsmt2litmap.setdefault(b,set()).add(lit)
+                    self._varsmt2neglitmap.setdefault(b,set()).add(neglit)
                     self._varsmt.add(b)
 
         # Unique identifier for each introduced variable
@@ -119,8 +119,9 @@ class Solver:
                 b = b * -1
             self._varlit2smtmap[lit] = b
             self._varlit2smtmap[neglit] = self._solver.negate(b)
-            self._varsmt2litmap[b] = lit
-            self._varsmt2neglitmap[b] = neglit
+            
+            self._varsmt2litmap.setdefault(b,set()).add(lit)
+            self._varsmt2neglitmap.setdefault(b,set()).add(neglit)
             self._varsmt.add(b)
         
         for (con, var) in conmap.items():
@@ -165,6 +166,7 @@ class Solver:
 
     # Check if there is a single solution, or return 'None'
     def _solve(self, smtassume=tuple(), *, getsol):
+        print("conlits:", self._conlits)
         return self._solver.solve(chainlist(self._conlits, smtassume), getsol=getsol)
 
     # Check if there is a single solution and return True/False, or return 'None' if timeout
@@ -186,13 +188,14 @@ class Solver:
         ret = []
         for l in self._varsmt:
             if model[l]:
-                ret.append(self._varsmt2litmap[l])
+                ret.extend(self._varsmt2litmap[l])
             else:
-                ret.append(self._varsmt2neglitmap[l])
+                ret.extend(self._varsmt2neglitmap[l])
         return ret
 
     def solve(self, assume=tuple(), *, getsol):
         smtassume = [self._varlit2smtmap[l] for l in assume]
+        print("smtassume: ", smtassume)
         sol = self._solve(smtassume, getsol=getsol)
         if getsol == False:
             return sol

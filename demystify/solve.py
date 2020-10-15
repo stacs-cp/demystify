@@ -33,11 +33,14 @@ def hidden(name, content):
 def explain(solver, lit, reason, classid):
     exp = ""
     exp += "<p>Setting " + str(lit) + " because:</p>\n"
-    exp += "<ul>\n"
-    for i,clause in enumerate(sorted(reason)):
-        exp += "<li class='" + classid + str(i) + "'>" + str(solver.explain(clause)) + "</li>\n"
-        exp += '<script>hoverByClass("{}","pink")</script>\n'.format(classid+str(i))
-    exp += "</ul>\n"
+    if len(reason) == 0:
+        exp += "<p>The basic design of the problem</p>"
+    else:
+        exp += "<ul>\n"
+        for i,clause in enumerate(sorted(reason)):
+            exp += "<li class='" + classid + str(i) + "'>" + str(solver.explain(clause)) + "</li>\n"
+            exp += '<script>hoverByClass("{}","black")</script>\n'.format(classid+str(i))
+        exp += "</ul>\n"
 
     return exp
 
@@ -78,7 +81,7 @@ def html_solve(outstream, solver, puzlits, MUS, steps=math.inf, *, gofast = Fals
 .nit {background-color: red}
 .pit {background-color: green}
 .nik {color:white}
-.pii {background-color:blue}
+.pii {background-color:lightblue}
 .nii {background-color: orange}
 .pik {font-weight: bolder}
 td {border-width: 3; border-style: solid; border-color:transparent}
@@ -143,10 +146,10 @@ hide = function(id) {
         print("Solver Calls: {} <br>".format(stats_diff["solveCount"]), file=outstream)
         total_calls += stats_diff["solveCount"]
         step += 1
-        if smallest == 1:
+        if smallest <= 1:
             classid = uuid.uuid4().hex[:8]
 
-            lits = [k for k in sorted(musdict.keys()) if len(musdict[k][0]) == 1]
+            lits = [k for k in sorted(musdict.keys()) if len(musdict[k][0]) <= 1]
             print_explanation(outstream, solver, [musdict[l][0] for l in lits], lits, classid)
 
             print("Doing", len(lits), " simple deductions ", file=outstream)

@@ -1,0 +1,65 @@
+language ESSENCE' 1.0
+
+given grid: int
+letting griddim be int(1..grid)
+given starcount: int
+given numblocks: int
+given blocks: matrix indexed by [griddim, griddim] of int(1..numblocks)
+
+
+$#VAR stars
+find stars: matrix indexed by [griddim, griddim] of bool
+
+
+$#CON adj "({a[0]}, {a[1]}) and ({a[0]+a[2]}, {a[1]+a[3]}) are adjacent"
+$ Check adjacent constraint
+find adj: matrix indexed by [griddim, griddim, int(-1..1), int(-1..1)] of bool
+
+$#CON rowup "at least one star in row ({a[0]})"
+$#CON rowdown "at most one star in row ({a[0]})"
+$ rows sum up, and down, to starcount
+find rowup: matrix indexed by [griddim] of bool
+find rowdown: matrix indexed by [griddim] of bool
+
+$#CON colup "at least one star in column ({a[0]})"
+$#CON coldown "at most one star in column ({a[0]})"
+
+$ columns sum up, and down, to starcount
+find colup: matrix indexed by [griddim] of bool
+find coldown: matrix indexed by [griddim] of bool
+
+$#CON blockup "at least one star in box ({a[0]})"
+$#CON blockdown "at most one star in box ({a[0]})"
+
+$ columns sum up, and down, to starcount
+find blockup: matrix indexed by [griddim] of bool
+find blockdown: matrix indexed by [griddim] of bool
+
+
+such that
+forAll i,j: griddim. forAll k: int(0..1). forAll l: int(-1..1). $ We only need to check 4 directions (we do backwards and the downwards)
+( !(k=0 /\ l = 0) /\ !(k=0 /\ l=1)  ) -> $ We do not need to explictly check 'off board', as those constraints will just be false
+(adj[i,j,k,l] -> !(stars[i,j] /\ stars[i+k,j+l])),
+
+
+
+forAll i: griddim.
+rowup[i] -> (sum(stars[i,..]) >= starcount),
+
+forAll i: griddim.
+rowdown[i] -> (sum(stars[i,..]) <= starcount),
+
+forAll i: griddim.
+colup[i] -> (sum(stars[..,i]) >= starcount),
+
+forAll i: griddim.
+coldown[i] -> (sum(stars[..,i]) <= starcount),
+
+forAll i: griddim.
+blockup[i] -> (sum([stars[x,y] /\ blocks[x,y]=i | x,y:griddim]) >= starcount),
+
+forAll i: int(1..numblocks).
+blockdown[i] -> (sum([stars[x,y] /\ blocks[x,y]=i | x,y:griddim]) <= starcount)
+
+$ Check problem is solvable!
+$and([and(rowup),and(rowdown),and(colup),and(coldown),and(blockup),and(blockdown)])

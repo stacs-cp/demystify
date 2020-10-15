@@ -169,8 +169,10 @@ class SATSolver:
         self._knownlits = self._stack.pop()
 
     def addLit(self, var):
-        assert var not in self._knownlits
-        self._knownlits.add(var)
+        # We used to check this, but now one high-level variable can be named with multiple lits
+        #assert var not in self._knownlits
+        if var not in self._knownlits:
+            self._knownlits.add(var)
 
     def set_phases(self, positive, negative):
         # TODO: Ignore the positive ones seems to be best
