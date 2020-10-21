@@ -1,0 +1,58 @@
+language ESSENCE' 1.0
+$ Futoshiki puzzle solver, originally modelled by Andras Salamon
+$ see http://en.wikipedia.org/wiki/Futoshiki
+$ Adapted by Joan Espasa Arxer to have parametric size grid and reified constraints for the demistify tool
+
+$ we are assuming always a square grid.
+given SIZE: int(1..)
+
+$ the numeric values specified in the puzzle
+given     values : matrix indexed by [int(1..SIZE),int(1..SIZE)] of int(0..SIZE) 
+
+letting   VALUES be domain int( 0..SIZE )
+letting   RANGE  be domain int( 1..SIZE )
+
+$ index of last lt entry
+given     lastdx : int( 1..((2*SIZE*(SIZE-1)-1)) )
+
+letting   NUMQD  be domain int( 0..lastdx )
+
+
+$ list of < relations in the problem
+given     lt     : matrix indexed by [NUMQD, int(0..3)] of RANGE
+
+find      field  : matrix indexed by [RANGE, RANGE] of RANGE
+
+
+$ -------- Reified variables -----------------------------
+$#CON row_alldiff "all elements in row ({a[0]}) must be different"
+find row_alldiff : matrix indexed by [RANGE] of bool
+
+$#CON col_alldiff "all elements in column ({a[0]}) must be different"
+find col_alldiff : matrix indexed by [RANGE] of bool
+
+$#CON less_than "cell ({a[0]}),({a[1]}) must be less than cell ({a[2]}),({a[3]})"
+find less_than : matrix indexed by [NUMQD] of bool
+
+such that
+$ all rows have to be different
+    forAll row : RANGE .
+	row_alldiff[row] -> allDiff(field[row,..]),
+
+$ all columns have to be different
+    forAll col : RANGE .
+	col_alldiff[col] -> allDiff(field[..,col]),	 
+
+$ all < constraints are satisfied
+    forAll i : NUMQD .
+	less_than[i] -> ( field[ lt[i,0], lt[i,1] ] < field[ lt[i,2], lt[i,3] ] ),
+
+$ set initial values
+    forAll row,col : RANGE . 
+	( values[row,col] > 0) ->
+	    (field[row,col] = values[row,col] ),
+
+$ check if problem is sat
+and([and(row_alldiff), and(col_alldiff), and(less_than)]),
+
+true
