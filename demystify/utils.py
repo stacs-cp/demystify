@@ -27,6 +27,8 @@ def intsqrt(i: int) -> int:
     else:
         return root
 
+def lowsqrt(i: int) -> int:
+    return int(math.sqrt(i))
 
 def chainlist(*lists):
     return list(itertools.chain(*lists))
@@ -57,16 +59,27 @@ def randomFromSeed(seed):
     return numpy.random.RandomState(seed)
     # return random.Random(seed)
 
-def parseSavileRowName(n):
+def parseSavileRowName(vars, n):
+    varmatch = [v for v in vars if n.startswith(v)]
+    if len(varmatch) == 0:
+        print("Cannot find {} in the VAR list {}".format(n, vars))
+    if len(varmatch) > 1:
+        print("Variables cannot have a common prefix: Can't tell if {} is {}".format(n, varmatch))
+    
+    varmatch = varmatch[0]
+
+    
+    n = n[len(varmatch) + 1:]
+
     splits = n.split("_")
     args = []
-    for arg in splits[1:]:
+    for arg in splits:
         if arg.startswith("n"):
             c = -1 * int(arg[1:])
         else:
             c = int(arg)
         args.append(c)
-    return (splits[0], tuple(args))
+    return (varmatch, tuple(args))
 
 
 def getConnectedVars(clauses, con, varlits_in):

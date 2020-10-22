@@ -1,4 +1,4 @@
-from .utils import flatten, intsqrt
+from .utils import flatten, intsqrt, lowsqrt
 from .base import EqVal, NeqVal
 
 
@@ -11,6 +11,8 @@ def print_var(f, variable, known, involved, involvedset, classprefix, targets):
         splitsize = intsqrt(domsize)
     elif domsize % 2 == 0:
         splitsize = domsize // 2
+    else:
+        splitsize = lowsqrt(domsize)
 
     print("<table>", file=f)
     for dsublist in [dom[i : i + splitsize] for i in range(0, len(dom), splitsize)]:
