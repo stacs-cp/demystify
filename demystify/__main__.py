@@ -8,6 +8,7 @@ import json
 import os
 import re
 import logging
+import subprocess
 
 from pysat.formula import CNF
 
@@ -27,7 +28,7 @@ import demystify.utils
 parser = argparse.ArgumentParser(description = "Demystify")
 parser.add_argument("--puzzle", type=str, help="File containing JSON description of puzzle")
 
-parser.add_argument("--eprimedimacs", type=str, help="dimacs output from savilerow")
+parser.add_argument("--eprimeparam", type=str, help="savilerow param file")
 parser.add_argument("--eprime", type=str, help="savilerow eprime file")
 
 parser.add_argument("--debuginfo", action="store_true", help="Print (lots) of debugging info")
@@ -46,8 +47,8 @@ if args.puzzle is not None and args.eprime is not None:
     print("Can only give one of --puzzle or --eprime")
     sys.exit(1)
 
-if args.eprime is not None and args.eprimedimacs is None:
-    print("--eprime requires --eprimedimacs")
+if args.eprime is not None and args.eprimeparam is None:
+    print("--eprime requires --eprimeparam")
     sys.exit(1)
 
 if args.debuginfo:
@@ -109,24 +110,24 @@ if args.puzzle is not None:
         puzlits = [p for p in fullsolution if p not in model]
 
 else:
-    formula = CNF(from_file=args.eprimedimacs)
-    varmatch = re.compile("c Var '(.*)' represents '(.*)' with '(.*)'")
+    paramjson = subprocess.run(["conjure", "pretty", "--output-format", "json", args.eprimeparam], capture_output=True)
+    if paramjson.returncode != 0:
+        print("Conjure pretty-printing of params failed")
+        print(paramjson.stdout)
+        print(paramjson.stderr)
+    params = json.loads(paramjson.stdout)
 
-    with open(args.eprimedimacs) as sat_data:
-        varmap = dict()
-        for line in sat_data:
-            if line.startswith("c Var"):
-                match = varmatch.match(line)
-                assert match is not None
-                var = demystify.utils.parseSavileRowName(match[1])
-                #logging.debug("{} {} {}\n".format(demystify.utils.parseSavileRowName(match[1]),match[2],match[3]))
-                if not var[0].startswith("aux"):
-                    if var[0] not in varmap:
-                        varmap[var[0]] = dict()
-                    if var[1] not in varmap[var[0]]:
-                        varmap[var[0]][var[1]] = dict()
-                    varmap[var[0]][var[1]][int(match[2])] = int(match[3])
-        logging.debug(varmap)
+    makedimacs = subprocess.run(["savilerow", "-in-eprime", args.eprime, "-in-param", args.eprimeparam, "-sat-output-mapping", "-sat", "-sat-family","lingeling","-S0","-O0","-reduce-domains","-aggregate"])
+    if makedimacs.returncode != 0:
+        print("savile row failed")
+        print(makedimacs.stdout)
+        print(makedimacs.stderr)
+        sys.exit(1)
+
+    formula = CNF(from_file=args.eprimeparam+".dimacs")
+    dvarmatch = re.compile("c Var '(.*)' direct represents '(.*)' with '(.*)'")
+    ovarmatch = re.compile("c Var '(.*)' order represents '(.*)' with '(.*)'")
+
     with open(args.eprime) as eprime_data:
         vars = set()
         cons = dict()
@@ -150,6 +151,26 @@ else:
                         sys.exit(1)
                     cons[match[1]] = match[2]
 
+    identifiers = set.union(vars, cons.keys())
+
+    with open(args.eprimeparam+".dimacs") as sat_data:
+        varmap = dict()
+        for line in sat_data:
+            if line.startswith("c Var"):
+                dmatch = dvarmatch.match(line)
+                omatch = ovarmatch.match(line)
+                assert dmatch is not None or omatch is not None
+                # At the moment, only care about direct match
+                if dmatch is not None:
+                    if not dmatch[1].startswith("aux"):
+                        var = demystify.utils.parseSavileRowName(identifiers, dmatch[1])
+                        if var[0] not in varmap:
+                            varmap[var[0]] = dict()
+                        if var[1] not in varmap[var[0]]:
+                            varmap[var[0]][var[1]] = dict()
+                        varmap[var[0]][var[1]][int(dmatch[2])] = int(dmatch[3])
+        logging.debug(varmap)
+
     printvarmap = dict()
     litmap = dict()
     invlitmap = dict()
@@ -165,7 +186,7 @@ else:
     for v in set(varmap.keys()).intersection(vars):
             printvarmap[v] = dict()
             for loc in varmap[v]:
-                var = demystify.base.Var(str((v,loc)), tuple(varmap[v][loc].keys()), loc)
+                var = demystify.base.Var(f'{v}[{",".join(str(l) for l in loc)}]', tuple(varmap[v][loc].keys()), loc)
                 printvarmap[v][loc] = var
                 varlist.append(var)
                 for (dom, sat) in varmap[v][loc].items():

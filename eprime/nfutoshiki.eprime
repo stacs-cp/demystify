@@ -21,6 +21,7 @@ letting   NUMQD  be domain int( 0..lastdx )
 $ list of < relations in the problem
 given     lt     : matrix indexed by [NUMQD, int(0..3)] of RANGE
 
+$#VAR field
 find      field  : matrix indexed by [RANGE, RANGE] of RANGE
 
 
@@ -31,7 +32,7 @@ find row_alldiff : matrix indexed by [RANGE] of bool
 $#CON col_alldiff "all elements in column ({a[0]}) must be different"
 find col_alldiff : matrix indexed by [RANGE] of bool
 
-$#CON less_than "cell ({a[0]}),({a[1]}) must be less than cell ({a[2]}),({a[3]})"
+$#CON less_than "cell ({params['lt'][a[0]][0]},{params['lt'][a[0]][1]}), must be less than cell ({params['lt'][a[0]][2]},{params['lt'][a[0]][3]})"
 find less_than : matrix indexed by [NUMQD] of bool
 
 such that
@@ -53,6 +54,6 @@ $ set initial values
 	    (field[row,col] = values[row,col] ),
 
 $ check if problem is sat
-and([and(row_alldiff), and(col_alldiff), and(less_than)]),
+$and([and(row_alldiff), and(col_alldiff), and(less_than)]),
 
 true
