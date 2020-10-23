@@ -201,14 +201,17 @@ else:
         # Only want matching '1'
         for k in varmap[v].keys():
             # This should be a boolean -- if this fails, check with Chris
-            assert set(varmap[v][k].keys()) == set([0,1])
-
-            # Note that 'a' can be accessed in the f string
-            a = tuple(k)
-            constraintname = eval('f"' + cons[v] + '"', locals())
-            logging.debug(constraintname)
-            connected = [invlitmap[s] for s in demystify.utils.getConnectedVars(formula.clauses, varmap[v][k][1], varlits)]
-            constraintmap[demystify.base.DummyClause(constraintname, connected)] = varmap[v][k][1]
+            assert set(varmap[v][k].keys()).issubset(set([0,1]))
+            assert 0 in varmap[v][k].keys()
+            if 1 in varmap[v][k].keys():
+                # Note that 'a' can be accessed in the f string
+                a = tuple(k)
+                constraintname = eval('f"' + cons[v] + '"', locals())
+                logging.debug(constraintname)
+                connected = [invlitmap[s] for s in demystify.utils.getConnectedVars(formula.clauses, varmap[v][k][1], varlits)]
+                constraintmap[demystify.base.DummyClause(constraintname, connected)] = varmap[v][k][1]
+            else:
+                print("Never true constraint:", v,k)
 
     printvarlist = []
     # Horrible code to fold matrices back into nice python matrices

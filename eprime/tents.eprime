@@ -1,0 +1,72 @@
+language ESSENCE' 1.0
+
+$ Grid size
+given x,y, treecount: int
+
+letting X be int(0..x-1)
+letting Y be int(0..y-1)
+given rowsums: matrix indexed by [X] of int
+given colsums: matrix indexed by [Y] of int
+
+given trees: matrix indexed by [X,Y] of int(0..treecount)
+
+
+$ Tree is negative number, tent is positive, -i is connected to i
+$#VAR grid
+find grid : matrix indexed by [X,Y] of int(-treecount..treecount)
+
+$#CON adj "({a[0]}, {a[1]}) and ({a[0]+a[2]}, {a[1]+a[3]}) cannot both contain tents"
+$ Check adjacent constraint
+find adj: matrix indexed by [X,Y, int(-1..1), int(-1..1)] of bool
+
+$#CON rowup "at least {params['rowsums'][a[0]]} tents(s) in row {a[0]}"
+$#CON rowdown "at most {params['rowsums'][a[0]]} tents(s) in row {a[0]}"
+find rowup: matrix indexed by [X] of bool
+find rowdown: matrix indexed by [X] of bool
+
+$#CON colup "at least {params['colsums'][a[0]]} tents(s) in column {a[0]}"
+$#CON coldown "at most {params['colsums'][a[0]]} tents(s) in column {a[0]}"
+find colup: matrix indexed by [Y] of bool
+find coldown: matrix indexed by [Y] of bool
+
+$#CON treetent "tree {a[0]} must have exactly one tent"
+find treetent: matrix indexed by [int(1..treecount)] of bool
+such that
+
+forAll i:X. forAll j:Y. forAll k: int(0..1). forAll l: int(-1..1). $ We only need to check 4 directions (we do backwards and the downwards)
+( !(k=0 /\ l = 0) /\ !(k=0 /\ l=1)  ) -> $ We do not need to explictly check 'off board', as those constraints will trivially true
+(adj[i,j,k,l] -> !(grid[i,j]>0 /\ grid[i+k,j+l]>0)),
+
+$ Set up trees:
+forAll i:X. forAll j:Y.
+(trees[i,j]<0 -> grid[i,j]=trees[i,j]),
+
+$ Make sure no unexpected trees
+forAll i:X. forAll j:Y.
+(trees[i,j]=0 -> grid[i,j]>=0),
+
+$ Tent for each tree must be next to that tree
+forAll i:X. forAll j:Y. forAll t: int(1..treecount).
+(trees[i-1,j]!=t /\ trees[i+1,j]!=t /\ trees[i,j-1]!=t /\ trees[i,j+1]!=t) -> grid[i,j]!=t,
+
+$ Every tree must have a tent
+forAll t:int(1..treecount). 
+treetent[t] -> ((sum i:X. sum j:Y. toInt(grid[i,j]=treecount))=t),
+
+
+$ Column sums
+forAll i:X.
+rowsums[i] != 0 -> (rowup[i] -> ((sum j:Y. toInt(grid[i,j]>0)) >= rowsums[i])),
+
+forAll i:X.
+rowsums[i] != 0 -> (rowdown[i] -> ((sum j:Y. toInt(grid[i,j]>0)) <= rowsums[i])),
+
+$ Row sums
+forAll j:Y.
+colsums[j] != 0 -> (colup[j] -> ((sum i:X. toInt(grid[i,j]>0)) >= colsums[j])),
+
+forAll j:Y.
+colsums[j] != 0 -> (coldown[j] -> ((sum i:X. toInt(grid[i,j]>0)) >= colsums[j])),
+
+
+1=1
