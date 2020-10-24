@@ -1,0 +1,126 @@
+$ Chris: First try at nongram -- the MUSes are awful :(
+
+language ESSENCE' 1.0
+
+$ Grid size
+given xdim,ydim,maxnum: int
+
+letting X be int(0..xdim-1)
+letting Y be int(0..ydim-1)
+letting M be int(0..maxnum-1)
+given rowcounts: matrix indexed by [X,M] of int
+given colcounts: matrix indexed by [Y,M] of int
+
+$#VAR grid
+find grid : matrix indexed by [X,Y] of bool
+
+find rowstarts: matrix indexed by [X,M] of Y
+find colstarts: matrix indexed by [Y,M] of X
+
+$#CON sumrow "row {a[0]} has right number of black squares"
+find sumrow: matrix indexed by [X] of bool
+
+$#CON sumcol "col {a[0]} has right number of black squares"
+find sumcol: matrix indexed by [Y] of bool
+
+$#CON rowbefore "block {a[1]} comes before block{a[1]+1} in row {a[0]}"
+find rowbefore: matrix indexed by [X,M] of bool
+$#CON colbefore "block {a[1]} comes before block{a[1]+1} in col {a[0]}"
+find colbefore: matrix indexed by [Y,M] of bool
+
+$#CON rowblack "cells in block {a[2]} of row {a[0]} are black ({a[0]},{a[1]})"
+find rowblack: matrix indexed by [X,Y,M] of bool
+$#CON colblack "cells in block {a[2]} of col {a[1]} are black ({a[0]},{a[1]})"
+find colblack: matrix indexed by [X,Y,M] of bool
+
+$#CON rowwhite "cells between block {a[2]} and {a[2]+1} of row {a[0]} are white ({a[0]},{a[1]})"
+find rowwhite: matrix indexed by [X,Y,M] of bool
+$#CON colwhite "cells between block {a[2]} and {a[2]+1} of col {a[1]} are white ({a[0]},{a[1]})"
+find colwhite: matrix indexed by [X,Y,M] of bool
+
+$#CON cellblackrow "({a[0]},{a[1]}) is black if it is in a row rule"
+find cellblackrow: matrix indexed by [X,Y] of bool
+$#CON cellblackcol "({a[0]},{a[1]}) is black if it is in a col rule"
+find cellblackcol: matrix indexed by [X,Y] of bool
+$#CON cellwhiterow "({a[0]},{a[1]}) is white if it is not in a row rule"
+find cellwhiterow: matrix indexed by [X,Y] of bool
+$#CON cellwhitecol "({a[0]},{a[1]}) is white if it is not in a col rule"
+find cellwhitecol: matrix indexed by [X,Y] of bool
+
+
+such that
+
+$ Deal with rowstarts and colstarts which are not used, and set basic limits
+forAll x:X. forAll m:M.
+(
+(rowcounts[x,m] = 0 -> rowstarts[x,m] = 0)
+/\ (rowcounts[x,m] > 0 -> rowstarts[x,m] <= ydim-rowcounts[x,m])
+),
+
+forAll y:Y. forAll m:M.
+(
+(colcounts[y,m] = 0 -> colstarts[y,m] = 0) 
+/\ (colcounts[y,m] > 0 -> colstarts[y,m] <= xdim-colcounts[y,m])
+),
+
+forAll x:X.
+sumrow[x] -> (sum([toInt(grid[x,y]) | y:Y]) = sum(rowcounts[x,..])),
+
+forAll y:Y.
+sumcol[y] -> (sum([toInt(grid[x,y]) | x:X]) = sum(colcounts[y,..])),
+
+
+forAll x:X. forAll m:M.
+(rowcounts[x,m]>0 /\ rowcounts[x,m+1]>0) ->
+(rowbefore[x,m] -> (rowstarts[x,m] + rowcounts[x,m] < rowstarts[x,m+1])),
+
+forAll y:Y. forAll m:M.
+(colcounts[y,m]>0 /\ colcounts[y,m+1]>0) ->
+(colbefore[y,m] -> (colstarts[y,m] + colcounts[y,m] < colstarts[y,m+1])),
+
+
+
+forAll x: X. forAll y:Y. forAll m:M.
+(rowcounts[x,m]>0 /\ rowcounts[x,m+1]>0) ->
+(rowblack[x,y,m] -> ((rowstarts[x,m] <= y /\ y < rowstarts[x,m] + rowcounts[x,m]) -> grid[x,y])),
+
+forAll x: X. forAll y:Y. forAll m:M.
+(colcounts[y,m]>0) ->
+(colblack[x,y,m] -> ((colstarts[y,m] <= x /\ x  < colstarts[y,m] + colcounts[y,m]) -> grid[x,y])),
+
+forAll x: X. forAll y:Y. forAll m:M.
+(rowcounts[x,m]>0 /\ rowcounts[x,m+1]>0) ->
+(rowwhite[x,y,m] -> ((rowstarts[x,m] + rowcounts[x,m] <= y /\ y < rowstarts[x,m+1]) -> !grid[x,y])),
+
+forAll x: X. forAll y:Y. forAll m:M.
+(colcounts[y,m]>0) ->
+(colwhite[x,y,m] -> ((colstarts[y,m] + colcounts[y,m] <= x /\ x < colstarts[y,m+1]) -> !grid[x,y])),
+
+
+forAll x:X. forAll y:Y.
+cellblackrow[x,y] ->
+(grid[x,y] -> exists m: M. (rowstarts[x,m] <= y /\ y < rowstarts[x,m] + rowcounts[x,m])),
+
+forAll x:X. forAll y:Y.
+cellwhiterow[x,y] ->
+(!grid[x,y] -> !exists m: M. (rowstarts[x,m] <= y /\ y < rowstarts[x,m] + rowcounts[x,m])),
+
+
+forAll x:X. forAll y:Y.
+cellblackcol[x,y] ->
+(grid[x,y] -> exists m: M. (colstarts[y,m] <= x /\ x < colstarts[y,m] + colcounts[y,m])),
+
+forAll x:X. forAll y:Y.
+cellwhitecol[x,y] ->
+(!grid[x,y] -> !exists m: M. (colstarts[y,m] <= x /\ x < colstarts[y,m] + colcounts[y,m])),
+
+
+$and(flatten(rowbefore)),and(flatten(colbefore)),
+
+$and(flatten(rowblack)),and(flatten(colblack)),
+
+$and(flatten(rowwhite)),and(flatten(colwhite)),
+
+$and(flatten(cellblackrow)),and(flatten(cellblackcol)),and(flatten(cellwhiterow)),and(flatten(cellwhitecol)),
+
+1=1
