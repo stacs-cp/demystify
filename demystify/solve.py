@@ -67,7 +67,7 @@ def html_step(outstream, solver, p, choices):
                     others.getvalue()
                     ), file=others)
 
-def html_solve(outstream, solver, puzlits, MUS, steps=math.inf, *, gofast = False, fulltrace=False, forcechoices = None):
+def html_solve(outstream, solver, puzlits, MUS, steps=math.inf, *, gofast = False, fulltrace=False, forcechoices = None, skip=-1):
     trace = []
     ftrace = []
     total_calls = 0
@@ -146,7 +146,16 @@ hide = function(id) {
         print("Solver Calls: {} <br>".format(stats_diff["solveCount"]), file=outstream)
         total_calls += stats_diff["solveCount"]
         step += 1
-        if smallest <= 1:
+
+        if smallest <= skip:
+            # Skip over some cases
+            lits = [k for k in sorted(musdict.keys()) if len(musdict[k][0]) <= smallest]
+            print("Skipping tiny MUSes..")
+            for p in lits:
+                solver.addLit(p)
+                puzlits.remove(p)
+
+        elif smallest <= 1:
             classid = uuid.uuid4().hex[:8]
 
             lits = [k for k in sorted(musdict.keys()) if len(musdict[k][0]) <= 1]

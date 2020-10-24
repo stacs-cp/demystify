@@ -63,8 +63,10 @@ def parseSavileRowName(vars, n):
     varmatch = [v for v in vars if n.startswith(v)]
     if len(varmatch) == 0:
         print("Cannot find {} in the VAR list {}".format(n, vars))
+        return None
     if len(varmatch) > 1:
         print("Variables cannot have a common prefix: Can't tell if {} is {}".format(n, varmatch))
+        sys.exit(1)
     
     varmatch = varmatch[0]
 

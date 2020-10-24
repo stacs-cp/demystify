@@ -37,6 +37,8 @@ parser.add_argument("--repeats", type=int, default=5, help="Number of times to t
 
 parser.add_argument("--cores", type=int, default=4, help="Number of CPU cores to use")
 
+parser.add_argument("--skip", type=int, default=-1,help="Skip displaying MUSes of <= this size")
+
 args = parser.parse_args()
 
 if args.puzzle is None and args.eprime is None:
@@ -164,11 +166,12 @@ else:
                 if dmatch is not None:
                     if not dmatch[1].startswith("aux"):
                         var = demystify.utils.parseSavileRowName(identifiers, dmatch[1])
-                        if var[0] not in varmap:
-                            varmap[var[0]] = dict()
-                        if var[1] not in varmap[var[0]]:
-                            varmap[var[0]][var[1]] = dict()
-                        varmap[var[0]][var[1]][int(dmatch[2])] = int(dmatch[3])
+                        if var is not None:
+                            if var[0] not in varmap:
+                                varmap[var[0]] = dict()
+                            if var[1] not in varmap[var[0]]:
+                                varmap[var[0]][var[1]] = dict()
+                            varmap[var[0]][var[1]][int(dmatch[2])] = int(dmatch[3])
         logging.debug(varmap)
 
     printvarmap = dict()
@@ -203,15 +206,16 @@ else:
             # This should be a boolean -- if this fails, check with Chris
             assert set(varmap[v][k].keys()).issubset(set([0,1]))
             assert 0 in varmap[v][k].keys()
-            if 1 in varmap[v][k].keys():
-                # Note that 'a' can be accessed in the f string
-                a = tuple(k)
-                constraintname = eval('f"' + cons[v] + '"', locals())
-                logging.debug(constraintname)
-                connected = [invlitmap[s] for s in demystify.utils.getConnectedVars(formula.clauses, varmap[v][k][1], varlits)]
-                constraintmap[demystify.base.DummyClause(constraintname, connected)] = varmap[v][k][1]
-            else:
-                print("Never true constraint:", v,k)
+            if 1 not in varmap[v][k].keys():
+                print(f"ERROR: Constraint {v}{k} cannot be satisfied..")
+                sys.exit(1)
+
+            # Note that 'a' can be accessed in the f string
+            a = tuple(k)
+            constraintname = eval('f"' + cons[v] + '"', locals())
+            logging.debug(constraintname)
+            connected = [invlitmap[s] for s in demystify.utils.getConnectedVars(formula.clauses, varmap[v][k][1], varlits)]
+            constraintmap[demystify.base.DummyClause(constraintname, connected)] = varmap[v][k][1]
 
     printvarlist = []
     # Horrible code to fold matrices back into nice python matrices
@@ -254,7 +258,7 @@ if fullsolution == "Multiple":
 
 MUS = demystify.MUS.CascadeMUSFinder(solver)
 
-trace = demystify.solve.html_solve(sys.stdout, solver, puzlits, MUS)
+trace = demystify.solve.html_solve(sys.stdout, solver, puzlits, MUS, skip=args.skip)
 
 print("Minitrace: ", [(s, mins[0], len(mins)) for (s, mins) in trace])
 
