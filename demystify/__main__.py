@@ -80,13 +80,13 @@ if args.puzzle is not None:
                 print("Invalid constraint: ", name)
                 sys.exit(1)
             
-            args = []
+            cargs = []
             for a in con[1:]:
                 if type(a) is str:
                     a = varmap[a]
-                args.append(a)
+                cargs.append(a)
             
-            constraints += getattr(demystify.buildpuz, name)(*args)
+            constraints += getattr(demystify.buildpuz, name)(*cargs)
 
         puz.addConstraints(constraints)
 
