@@ -112,6 +112,7 @@ if args.puzzle is not None:
 
         if fullsolution == "Multiple":
             print("Your problem has multiple solutions!")
+            print("One solution is:", solver.solve(model,getsol=True))
             sys.exit(1)
 
         for s in model:

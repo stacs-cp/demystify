@@ -166,7 +166,7 @@ class Solver:
 
     # Check if there is a single solution, or return 'None'
     def _solve(self, smtassume=tuple(), *, getsol):
-        print("conlits:", self._conlits)
+        #print("conlits:", self._conlits)
         return self._solver.solve(chainlist(self._conlits, smtassume), getsol=getsol)
 
     # Check if there is a single solution and return True/False, or return 'None' if timeout
@@ -195,7 +195,7 @@ class Solver:
 
     def solve(self, assume=tuple(), *, getsol):
         smtassume = [self._varlit2smtmap[l] for l in assume]
-        print("smtassume: ", smtassume)
+        #print("smtassume: ", smtassume)
         sol = self._solve(smtassume, getsol=getsol)
         if getsol == False:
             return sol
