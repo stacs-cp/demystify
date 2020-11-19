@@ -1,12 +1,12 @@
 language ESSENCE' 1.0
 
-given ops : matrix indexed by [int(0..19)] of [1,2,3] $ 1 is plus, 2 is minus, 3 is multiply.
+given op : matrix indexed by [int(0..19)] of int(1..3) $ 1 is plus, 2 is minus, 3 is multiply.
 given presetvals : matrix indexed by [int(0..8),int(0..6)] of int(-2..9)
 
 
 letting VALUES be domain int(-2..9)
-letting NROWS be int(0..8)
-letting NCOLS be int(0..6)
+letting NROWS be domain int(0..8)
+letting NCOLS be domain int(0..6)
 
 find res : matrix indexed by [NROWS,NCOLS] of VALUES
 
@@ -14,11 +14,11 @@ such that
 $ set initial values
     forAll row : NROWS .
 		forAll col : NCOLS . 
-			(values[row,col] >= -2) ->
-	    		(res[row,col] = values[row,col]),
+			(presetvals[row,col] > -2) ->
+	    		(res[row,col] >= presetvals[row,col]),
 	forAll row : NROWS .
 		forAll col : NCOLS .
-			(values[row,col] > -2) -> (res[row,col] >= 0),
+			(presetvals[row,col] = -2) -> (res[row,col] = -2),
 
 $ operation constraints
 	(op[0] = 1) -> (res[0,0] + res[0,1] = res[0,2]),
@@ -72,12 +72,15 @@ $ operation constraints
 	(op[16] = 1) -> (res[5,6] + res[6,6] = res[7,6]*10 + res[8,6]),
 	(op[16] = 2) -> (res[5,6] - res[6,6] = res[7,6]*10 + res[8,6]),
 	(op[16] = 3) -> (res[5,6] * res[6,6] = res[7,6]*10 + res[8,6]),
-	(op[17] = 1) -> (res[8,0] + res[8,1] = res[8,2]),
-	(op[17] = 2) -> (res[8,0] - res[8,1] = res[8,2]),
-	(op[17] = 3) -> (res[8,0] * res[8,1] = res[8,2]),
-	(op[18] = 1) -> (res[8,4] + res[8,5] = res[8,6]),
-	(op[18] = 2) -> (res[8,4] - res[8,5] = res[8,6]),
-	(op[18] = 3) -> (res[8,4] * res[8,5] = res[8,6]),
+	(op[17] = 1) -> (res[6,2] + res[6,3] = res[6,4]),
+	(op[17] = 2) -> (res[6,2] - res[6,3] = res[6,4]),
+	(op[17] = 3) -> (res[6,2] * res[6,3] = res[6,4]),
+	(op[18] = 1) -> (res[8,0] + res[8,1] = res[8,2]),
+	(op[18] = 2) -> (res[8,0] - res[8,1] = res[8,2]),
+	(op[18] = 3) -> (res[8,0] * res[8,1] = res[8,2]),
+	(op[19] = 1) -> (res[8,4] + res[8,5] = res[8,6]),
+	(op[19] = 2) -> (res[8,4] - res[8,5] = res[8,6]),
+	(op[19] = 3) -> (res[8,4] * res[8,5] = res[8,6]),
 
 $ the following HAVE TO be > 0
 	res[2,0] > 0,
