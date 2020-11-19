@@ -14,8 +14,12 @@ such that
 $ set initial values
     forAll row : NROWS .
 		forAll col : NCOLS . 
-			(values[row,col] >= -1) ->
+			(values[row,col] >= -2) ->
 	    		(res[row,col] = values[row,col]),
+	forAll row : NROWS .
+		forAll col : NCOLS .
+			(values[row,col] > -2) -> (res[row,col] >= 0)
+			
 $ operation constraints
 	(op[0] = 1) -> (res[0,0] + res[0,1] = res[0,2]),
 	(op[0] = 2) -> (res[0,0] - res[0,1] = res[0,2]),
@@ -84,25 +88,3 @@ $ the following HAVE TO be > 0
 	res[7,2] > 0,
 	res[7,4] > 0,
 	res[7,6] > 0,
-	
-
-$ only the following cells can be < 0
-	res[0,3] < 0,
-	res[1,1] < 0,
-	res[1,5] < 0,
-	res[2,1] < 0,
-	res[2,3] < 0,
-	res[2,5] < 0,
-	res[3,3] < 0,
-	res[4,0] < 0,
-	res[4,2] < 0,
-	res[4,3] < 0,
-	res[4,4] < 0,
-	res[4,6] < 0,
-	res[5,3] < 0,
-	res[6,1] < 0,
-	res[6,5] < 0,
-	res[7,1] < 0,
-	res[7,3] < 0,
-	res[7,5] < 0,
-	res[8,3] < 0
