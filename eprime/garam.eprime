@@ -8,10 +8,11 @@ letting VALUES be domain int(-2..9)
 letting NROWS be domain int(0..8)
 letting NCOLS be domain int(0..6)
 
+$#VAR res
 find res : matrix indexed by [NROWS,NCOLS] of VALUES
 
 $ Here comes the MUS/SAT reasoning mess
-$#CON ops_bool "equation {a[0]} does not hold"
+$#CON ops_bool "equation {a[0]} holds"
 find ops_bool : matrix indexed by [int(0..19)] of bool
 $#CON two_digit "this number {a[0]} cannot be 0 since it is the beginning of a 2 digit number"
 find two_digit : matrix indexed by [int(0..7)] of bool
@@ -118,6 +119,6 @@ $ the following HAVE TO be > 0
 	two_digit[6] -> (res[7,4] > 0),
 	two_digit[7] -> (res[7,6] > 0),
 $ check if problem is SAT
-	and([and(ops_bool), and(two_digit)]),
+$	and([and(ops_bool), and(two_digit)]),
 	
 	true
