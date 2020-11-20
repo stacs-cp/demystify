@@ -20,7 +20,7 @@ $#CON alldiff_box "box {a[0]} must have all different elements"
 find alldiff_box : matrix indexed by [int(1..9)] of bool 
 $#CON alldiff_hint "hint {a[0]} must have all different elements"
 find alldiff_hint: matrix indexed by [int(1..n_hints)] of bool 
-$#CON sum_hint "hint {a[0]} must sum to {???} <- can we refer to hints matrix here?"
+$#CON sum_hint "hint {a[0]} must sum to {params['hints'][a[0]-1]}"
 find sum_hint    : matrix indexed by [int(1..n_hints)] of bool 
 
 such that 
@@ -46,6 +46,6 @@ forAll i: int(1..n_hints) .
     alldiff_hint[i] -> allDiff([ x[r,c] | r: int(1..9), c: int(1..9), grid[r,c] = i]),
 
 $ get a solution please :)
-and([and(alldiff_row),and(alldiff_col),and(alldiff_box),and(sum_hint),and(alldiff_hint)]),
+$and([and(alldiff_row),and(alldiff_col),and(alldiff_box),and(sum_hint),and(alldiff_hint)]),
 
 true
