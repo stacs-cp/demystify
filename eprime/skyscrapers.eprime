@@ -49,6 +49,7 @@ $#CON col_alldiff "all elements in column {a[0]} must be different"
 
 find col_alldiff : matrix indexed by [RANGE] of bool
 
+$#CON clues_left_on "the count for {['left','top','right','bottom'][a[0]-1]} {a[1]} is {params['CLUES'][a[0]-1][a[1]-1]}"
 find clues_left_on : matrix indexed by [int(1..4),RANGE] of bool
 
 find max_left : matrix indexed by [int(1..4),RANGE, VALUES] of VALUES
@@ -61,7 +62,7 @@ $ index 2 is transpose so left corresponds to top hand in original
 $ index 3 is reversed original so left corresponds to right hand in original
 $ index 4 is transpose reversed so left corresponds to bottom in original
 
-find field3d : matrix indexed by [int(1..4),RANGE,RANGE] of RANGE 
+find variant_fields : matrix indexed by [int(1..4),RANGE,RANGE] of RANGE 
 
 such that
 
@@ -74,16 +75,16 @@ $ all columns have to be different
 	col_alldiff[col] -> allDiff(field[..,col]),	 
 
 forAll row, col: RANGE . 
-    field3d[1,row,col] = field[row,col] /\    
-    field3d[2,row,col] = field[col,row] /\
-    field3d[3,row,col] = field[row,SIZE+1-col] /\
-    field3d[4,row,col] = field[SIZE+1-col,row],
+    variant_fields[1,row,col] = field[row,col] /\    
+    variant_fields[2,row,col] = field[col,row] /\
+    variant_fields[3,row,col] = field[row,SIZE+1-col] /\
+    variant_fields[4,row,col] = field[SIZE+1-col,row],
 
 forAll i : int(1..4) . 
     forAll row : RANGE . 
         max_left[i,row,0] = 0 /\
         forall col : RANGE . 
-             max_left[i,row,col] = max(max_left[i,row,col-1],field3d[i,row,col]) ,
+             max_left[i,row,col] = max(max_left[i,row,col-1],variant_fields[i,row,col]) ,
 
 forAll i : int(1..4) . 
     forAll row : RANGE . 
@@ -91,10 +92,10 @@ forAll i : int(1..4) .
 
 forAll i : int(1..4) . 
     forAll row : RANGE . 
-        clues_left_on[i,row] -> (CLUES[i,row] > 0 -> sky_left[i,row]=CLUES[i,row]) , 
+        clues_left_on[i,row] -> (CLUES[i,row] > 0 -> (sky_left[i,row]=CLUES[i,row] )) , 
 
 $ insist that probelm problem is sat
 
-and([and(row_alldiff), and(col_alldiff), and(flatten(clues_left_on)) ]),
+$and([and(row_alldiff), and(col_alldiff), and(flatten(clues_left_on)) ]),
 
 true
