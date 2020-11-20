@@ -1,0 +1,51 @@
+language ESSENCE' 1.0
+
+
+$ Model for the Killer Sudoku. Adapted for the demistify tool.
+$ a "hint" is a box
+given hints : matrix indexed by [int(1..n_hints)] of int(1..45) 
+given grid : matrix indexed by [int(1..9),int(1..9)] of int(0..n_hints) 
+
+$#VAR x
+find x : matrix indexed by [int(1..9),int(1..9)] of int(1..9) 
+
+$ all the reasoning
+$ -----------------
+
+$#CON alldiff_row "row {a[0]} must have all different elements"
+find alldiff_row : matrix indexed by [int(1..9)] of bool 
+$#CON alldiff_col "column {a[0]} must have all different elements"
+find alldiff_col : matrix indexed by [int(1..9)] of bool 
+$#CON alldiff_box "box {a[0]} must have all different elements"
+find alldiff_box : matrix indexed by [int(1..9)] of bool 
+$#CON alldiff_hint "hint {a[0]} must have all different elements"
+find alldiff_hint: matrix indexed by [int(1..n_hints)] of bool 
+$#CON sum_hint "hint {a[0]} must sum to {???} <- can we refer to hints matrix here?"
+find sum_hint    : matrix indexed by [int(1..n_hints)] of bool 
+
+such that 
+
+$ rows
+forAll i: int(1..9)  .
+    alldiff_row[i] -> allDiff(x[..,i]),
+
+$ columns
+forAll i: int(1..9)  .
+    alldiff_col[i] -> allDiff(x[i,..]),
+
+$ 3x3 boxes
+forAll i,j: int(0..2) .
+    alldiff_box[(i*3)+j+1] -> allDiff([x[r,c] | r: int(i*3+1..i*3+3), c: int(j*3+1..j*3+3)] ),
+
+$ hints must sum up to what its required
+forAll i: int(1..n_hints) .
+    sum_hint[i] -> sum([ x[r,c] | r: int(1..9), c: int(1..9), grid[r,c] = i]) = hints[i],
+
+$ elements in a hint must be different
+forAll i: int(1..n_hints) .
+    alldiff_hint[i] -> allDiff([ x[r,c] | r: int(1..9), c: int(1..9), grid[r,c] = i]),
+
+$ get a solution please :)
+and([and(alldiff_row),and(alldiff_col),and(alldiff_box),and(sum_hint),and(alldiff_hint)]),
+
+true
