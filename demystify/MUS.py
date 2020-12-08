@@ -64,7 +64,7 @@ def tinyMUS(solver, assume, distance):
 
 count = 0
 
-def MUS(r, solver, assume, minsize, *, config, initial_cons=None):
+def MUS(r, solver, assume, minsize, *, config, initial_cons=None, just_check=False):
     smtassume = [solver._varlit2smtmap[a] for a in assume]
 
     if config["dumpSAT"]:
@@ -91,9 +91,13 @@ def MUS(r, solver, assume, minsize, *, config, initial_cons=None):
     # cons = r.sample(initial_conlits, len(initial_conlits))
     core = cons
 
-    # We used to start with one 'core' calculation, stop that because
-    # it might send us down a bad track
-    # core = solver.basicCore(smtassume + cons)
+    if just_check:
+        return solver.basicCore(smtassume + cons) is not None
+
+    # Check if the initial input was not even a MUS
+    if initial_cons is not None and solver.basicCore(smtassume + cons) is None:
+        return None
+
 
     lens = [len(core)]
 
@@ -340,9 +344,35 @@ def checkMUS(solver, puzlits, oldmus, musdict):
             )
             for (p, newmus) in res:
                 # print("!!! {} :: {}".format(oldmus[p], newmus))
-                assert newmus is not None
-                update_musdict(musdict, p, newmus)
+                if newmus is not None:
+                    update_musdict(musdict, p, newmus)
 
+def _parfunc_dochecklitsmus(args):
+    (p, oldmus) = args
+    return (
+        p,
+        MUS(
+            randomFromSeed("X"),
+            getChildSolver(),
+            [p.neg()],
+            math.inf,
+            initial_cons=oldmus,
+            just_check=True,
+            config=CONFIG
+        ),
+    )
+
+# Check which literals are filtered by a particular MUS
+def checkWhichLitsAMUSProves(solver, puzlits, mus):
+    setChildSolver(solver)
+    if len(puzlits) > 0:
+        with getPool(CONFIG["cores"]) as pool:
+            res = pool.map(
+                _parfunc_dochecklitsmus, [(p, mus) for p in puzlits]
+            )
+            return list(p for (p,musvalid) in res if musvalid)
+    else:
+        return []
 
 def _findSmallestMUS_func(tup):
     (p, randstr, minsize, config) = tup

@@ -82,6 +82,7 @@ class DummyClause:
     def __repr__(self):
         return self._name + "!"
 
+
 class Clause:
     def __init__(self, name: str, clause: Sequence[str], clausenames=None):
         self._name = name
