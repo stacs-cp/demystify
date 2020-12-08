@@ -1,0 +1,16 @@
+language ESSENCE' 1.0
+
+given dims : int
+given row_sums : matrix indexed by [int(1..dims)] of int(1..sum( [i | i : int(1..dims)] ))
+given col_sums : matrix indexed by [int(1..dims)] of int(1..sum( [i | i : int(1..dims)] ))
+
+find res : matrix indexed by [int(1..dims), int(1..dims)] of int(0,1)
+
+such that
+    forAll r : int(1..dims) .
+        sum( [i | i : int(1..dims), res[r,i] = 1] ) = row_sums[r],
+
+    forAll c : int(1..dims) .
+        sum( [i | i : int(1..dims),  res[i,c] = 1] ) = col_sums[c],
+
+true
