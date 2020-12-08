@@ -8,9 +8,9 @@ find res : matrix indexed by [int(1..dims), int(1..dims)] of int(0,1)
 
 such that
     forAll r : int(1..dims) .
-        sum( [i | i : int(1..dims), res[r,i] = 1] ) = row_sums[r],
+        sum( [ res[r,i]*i | i : int(1..dims)]) = row_sums[r],
 
     forAll c : int(1..dims) .
-        sum( [i | i : int(1..dims),  res[i,c] = 1] ) = col_sums[c],
+        sum( [ res[c,i]*i | i : int(1..dims)]) = row_sums[c],
 
 true
