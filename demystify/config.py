@@ -48,7 +48,7 @@ CONFIG = {
     "checkCloseFirst": False,
 
     # Smallest size of MUS to look for
-    "baseSizeMUS": 3,
+    "baseSizeMUS": 2,
     # Make use of unsat cores when shrinking MUSes
     "useUnsatCores": True,
     # Reset solver for each size of MUS
@@ -70,7 +70,7 @@ CONFIG = {
     # Start Gallops with big steps
     "highGallop": False,
 
-    "tryManyChopMUS": False,
+    "tryManyChopMUS": True,
 
     "minPrecheckMUS": False,
 

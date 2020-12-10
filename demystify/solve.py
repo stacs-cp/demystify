@@ -7,11 +7,10 @@ import uuid
 
 from .prettyprint import print_explanation
 
-from .MUS import musdict_minimum
+from .MUS import musdict_minimum, checkWhichLitsAMUSProves
 
 # Make a unique id
 id_counter = 0
-
 
 def get_id():
     global id_counter
@@ -30,9 +29,9 @@ def hidden(name, content):
     return s
 
 
-def explain(solver, lit, reason, classid):
+def explain(solver, lits, reason, classid):
     exp = ""
-    exp += "<p>Setting " + str(lit) + " because:</p>\n"
+    exp += "<p>Setting " + ", ".join(str(l) for l in lits) + " because:</p>\n"
     if len(reason) == 0:
         exp += "<p>The basic design of the problem</p>"
     else:
@@ -50,24 +49,24 @@ def list_counter(l):
         d[i] = d.get(i, 0) + 1
     return d
 
-def html_step(outstream, solver, p, choices):
+def html_step(outstream, solver, p, choices, bestchoice):
     classid = uuid.uuid4().hex[:8]
-    print_explanation(outstream, solver, choices[0], [p], classid)
-    print("Smallest mus size:", len(choices[0]),  file=outstream)
-    print(explain(solver, p, choices[0], classid), file=outstream)
+    print_explanation(outstream, solver, bestchoice, p, classid)
+    print("Smallest mus size:", len(bestchoice),  file=outstream)
+    print(explain(solver, p, bestchoice, classid), file=outstream)
 
     if len(choices) > 1:
             others = io.StringIO()
             classid = uuid.uuid4().hex[:8]
-            for c in choices[1:]:
-                print_explanation(others, solver, c, [p], classid)
+            for c in (c for c in choices if c != bestchoice):
+                print_explanation(others, solver, c, p, classid)
                 print("Smallest mus size:", len(c),  file=others)
                 print(explain(solver, p, c, classid), file=others)
             print(hidden("{} methods of deducing the same value were found:".format(len(choices)),
                     others.getvalue()
                     ), file=others)
 
-def html_solve(outstream, solver, puzlits, MUS, steps=math.inf, *, gofast = False, fulltrace=False, forcechoices = None, skip=-1):
+def html_solve(outstream, solver, puzlits, MUSFind, steps=math.inf, *, gofast = False, fulltrace=False, forcechoices = None, skip=-1):
     trace = []
     ftrace = []
     total_calls = 0
@@ -136,7 +135,7 @@ hide = function(id) {
         logging.info("Current state %s", solver.getCurrentDomain())
 
         begin_stats = solver.get_stats()
-        musdict = MUS.smallestMUS(puzlits)
+        musdict = MUSFind.smallestMUS(puzlits)
         end_stats = solver.get_stats()
 
         stats_diff = {"solveCount": end_stats["solveCount"] - begin_stats["solveCount"],
@@ -163,7 +162,7 @@ hide = function(id) {
 
             print("Doing", len(lits), " simple deductions ", file=outstream)
 
-            exps = "\n".join([explain(solver, p, musdict[p][0], classid) for p in sorted(lits)])
+            exps = "\n".join([explain(solver, [p], musdict[p][0], classid) for p in sorted(lits)])
             print(hidden("Show why", exps), file=outstream)
 
             for p in lits:
@@ -176,27 +175,45 @@ hide = function(id) {
             if fulltrace:
                 ftrace.append(fullinfo)
 
-            if gofast:
-                mins = basemins
-            else:
-                mins = [basemins[0]]
+            bestlit = None
+            bestmus = None
+            bestdeletedlits = None
+            bestmusstat = (math.inf, math.inf, math.inf)
+            deleteddict = {}
+            for b in basemins:
+                deleteddict[b] = {}
+                for mus in musdict[b]:
+                    muslits = set.union(*(set(m.lits()) for m in mus))
+                    puzlitsinmus = set(p for p in puzlits if p in muslits or p.neg() in muslits)
+                    deletedlits = checkWhichLitsAMUSProves(solver, puzlitsinmus, mus)
+                    deleteddict[b][mus] = deletedlits
+                    musval = (len(mus), -len(deletedlits), len(puzlitsinmus))
+                    if musval < bestmusstat:
+                        bestmusstat = musval
+                        bestlit = b
+                        bestmus = mus
+                        bestdeletedlits = deletedlits
 
-            for p in mins:
-                choices = tuple(sorted(set(musdict[p])))
-                html_step(outstream, solver, p, choices)
+            assert not gofast
 
-                trace.append((smallest, mins))
-                if forcechoices is None:
-                    logging.info("Choosing {}".format(p))
-                    solver.addLit(p)
-                    puzlits.remove(p)
+
+            choices = tuple(sorted(set(musdict[bestlit])))
+            #passkeys = checkWhichLitsAMUSProves(solver, puzlits, choices[0])
+            html_step(outstream, solver, bestdeletedlits, choices, bestmus)
+
+            trace.append((smallest, bestlit, bestmus, bestmusstat))
+            if forcechoices is None:
+                logging.info("Choosing {}".format(bestdeletedlits))
+                for k in bestdeletedlits:
+                    solver.addLit(k)
+                    puzlits.remove(k)
 
             if not gofast:
                 if len(basemins) > 1:
                     others = io.StringIO()
-                    for p in basemins[1:]:
+                    for p in (p for p in basemins if p != bestlit):
                         choices = tuple(sorted(set(musdict[p])))
-                        html_step(others, solver, p, choices)
+                        html_step(others, solver, deleteddict[p][choices[0]], choices, choices[0])
                         print("<br>\n", file=others)
                     
 

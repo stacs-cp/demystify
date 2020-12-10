@@ -249,7 +249,7 @@ else:
     solver = demystify.internal.Solver(puz, cnf=formula, litmap=litmap, conmap=constraintmap)
 
     logging.debug(solver.solve(getsol=True))
-    print(solver.solve(getsol=True))
+    #print(solver.solve(getsol=True))
     fullsolution = solver.solveSingle([])
     logging.debug(fullsolution)
     puzlits = fullsolution

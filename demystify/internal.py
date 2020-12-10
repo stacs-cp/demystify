@@ -232,8 +232,9 @@ class Solver:
         return core
 
     def addLit(self, lit):
-        self._solver.addLit(self._varlit2smtmap[lit])
-        self._knownlits.append(lit)
+        if lit not in self._knownlits:
+            self._solver.addLit(self._varlit2smtmap[lit])
+            self._knownlits.append(lit)
 
     def getKnownLits(self):
         return self._knownlits

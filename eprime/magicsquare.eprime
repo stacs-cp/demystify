@@ -1,0 +1,40 @@
+language ESSENCE' 1.0
+
+given dims : int
+
+$ when we have a template use this
+$ given grid : matrix indexed by[int(1..dims), int(1..dims)] of int(0..dims*dims)
+
+find res : matrix indexed by[int(1..dims), int(1..dims)] of int(1..dims*dims)
+find ultimate_sum : int(1..sum( [i | i : int(1..dims*dims)] ))
+
+such that 
+    $ copy from template
+    $ forAll row : dims .
+	$ 	forAll col : dims . 
+	$ 		((grid[row,col] > 0) -> (res[row,col] = grid[row,col])),
+        
+    $ every number 1..n^2 has to be represented
+    allDiff( [res[i,j] | i,j : int(1..dims)] ),
+
+    $ each column has to sum to the same
+    forAll i : int(1..dims) .
+        sum(res[i,..]) = ultimate_sum,
+    
+    $ each row has to sum to the same
+    forAll i : int(1..dims) .
+        sum(res[..,i]) = ultimate_sum,
+
+    $ diagonal has to sum to the same
+    sum( [res[d,d] | d : int(1..dims)] ) = ultimate_sum,
+
+    $ anti-diagonal has to sum to the same
+    sum( [res[d,dims-d+1] | d : int(1..dims)] ) = ultimate_sum,
+
+    $ $ Symmetry-breaking which is just here to make sure the model is correct!
+    $ res[1,1] < res[1,dims], 
+    $ res[1,1] < res[dims,1], 
+    $ res[1,1] < res[dims,dims], 
+    $ res[1,2] < res[2,1],
+
+true
