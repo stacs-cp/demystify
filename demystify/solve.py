@@ -201,7 +201,7 @@ hide = function(id) {
             #passkeys = checkWhichLitsAMUSProves(solver, puzlits, choices[0])
             html_step(outstream, solver, bestdeletedlits, choices, bestmus)
 
-            trace.append((smallest, bestlit, bestmus, bestmusstat))
+            trace.append((smallest, bestmus))
             if forcechoices is None:
                 logging.info("Choosing {}".format(bestdeletedlits))
                 for k in bestdeletedlits:
@@ -240,7 +240,7 @@ hide = function(id) {
     logging.info("Total Solver Calls %d", total_calls)
     logging.info("Trace: %s", trace)
     logging.info("Trace Quality: %s", [(i, len(j)) for (i, j) in trace])
-    logging.info("Trace Sorted: %s", sorted([(i, len(j)) for (i, j) in trace]))
+    logging.info("Trace Sorted: %s", sorted([(i,len(j)) for (i, j) in trace]))
 
     if fulltrace:
         return (trace, ftrace)
