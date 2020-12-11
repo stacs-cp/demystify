@@ -37,7 +37,11 @@ parser.add_argument("--repeats", type=int, default=5, help="Number of times to t
 
 parser.add_argument("--cores", type=int, default=4, help="Number of CPU cores to use")
 
-parser.add_argument("--skip", type=int, default=-1,help="Skip displaying MUSes of <= this size")
+parser.add_argument("--skip", type=int, default=0,help="Skip displaying MUSes of <= this size")
+
+parser.add_argument("--merge", type=int, default=1,help="Merge MUSes of <= this size")
+
+parser.add_argument("--incomplete", action="store_true", help="allow problems with multiple solutions")
 
 args = parser.parse_args()
 
@@ -250,7 +254,10 @@ else:
 
     logging.debug(solver.solve(getsol=True))
     #print(solver.solve(getsol=True))
-    fullsolution = solver.solveSingle([])
+    if args.incomplete:
+        fullsolution = solver.solveAll([])
+    else:
+        fullsolution = solver.solveSingle([])
     logging.debug(fullsolution)
     puzlits = fullsolution
 
@@ -259,7 +266,7 @@ if fullsolution is None:
     print("Your problem has no solution!")
     sys.exit(1)
 
-if fullsolution == "Multiple":
+if fullsolution == "Multiple" and not args.incomplete:
     print("Your problem has multiple solutions!")
     sys.exit(1)
 
@@ -267,9 +274,9 @@ if fullsolution == "Multiple":
 
 MUS = demystify.MUS.CascadeMUSFinder(solver)
 
-trace = demystify.solve.html_solve(sys.stdout, solver, puzlits, MUS, skip=args.skip)
+trace = demystify.solve.html_solve(sys.stdout, solver, puzlits, MUS, skip=args.skip, merge=args.merge)
 
-print("Minitrace: ", [(s, mins[0], len(mins)) for (s, mins) in trace])
+print("Minitrace: ", [s for (s, _) in trace])
 
 
 logging.info("Finished")

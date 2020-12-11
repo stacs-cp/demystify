@@ -178,6 +178,11 @@ class Solver:
         return self._solver.solveSingle(
             self._varsmt, chainlist(self._conlits, smtassume)
         )
+    
+    def _solveAll(self, smtassume=tuple()):
+        return self._solver.solveAll(
+            self._varsmt, chainlist(self._conlits, smtassume)
+        )
 
     def reboot(self, seed):
         self._solver.reboot(seed)
@@ -187,10 +192,11 @@ class Solver:
     def var_smt2lits(self, model):
         ret = []
         for l in self._varsmt:
-            if model[l]:
-                ret.extend(self._varsmt2litmap[l])
-            else:
-                ret.extend(self._varsmt2neglitmap[l])
+            if l in model:
+                if model[l]:
+                    ret.extend(self._varsmt2litmap[l])
+                else:
+                    ret.extend(self._varsmt2neglitmap[l])
         return ret
 
     def solve(self, assume=tuple(), *, getsol):
@@ -216,6 +222,13 @@ class Solver:
             return self.Multiple
         else:
             return self.var_smt2lits(sol)
+
+    # This is the same as 'solve', but checks if there are many solutions,
+    # returning Solver.Multiple if there is more than one solution
+    def solveAll(self, assume=tuple()):
+        smtassume = [self._varlit2smtmap[l] for l in assume]
+        sol = self._solveAll(smtassume)
+        return self.var_smt2lits(sol)
 
     # Return a subset of 'lits' which forms a core, or
     # None if no core exists (or can be proved in the time limit)

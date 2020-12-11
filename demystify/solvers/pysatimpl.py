@@ -156,6 +156,21 @@ class SATSolver:
                 return "Multiple"
         return sol
 
+    def solveAll(self, puzlits, lits):
+        # if multiprocessing.current_process().name == "MainProcess":
+        #    print("!! solveSingle in the main thread")
+        # We just brute force check all assignments to other variables
+        sol = {}
+        for p in puzlits:
+            pos = self.solve(chainlist(lits, [p]), getsol=False)
+            neg = self.solve(chainlist(lits, [-p]), getsol=False)
+            if not (pos and neg):
+                if pos:
+                    sol[p] = True
+                else:
+                    sol[p] = False
+        return sol
+
     # Returns unsat_core from last solve
     def unsat_core(self):
         core = [x for x in self._solver.get_core() if x not in self._knownlits]

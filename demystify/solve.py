@@ -66,7 +66,7 @@ def html_step(outstream, solver, p, choices, bestchoice):
                     others.getvalue()
                     ), file=others)
 
-def html_solve(outstream, solver, puzlits, MUSFind, steps=math.inf, *, gofast = False, fulltrace=False, forcechoices = None, skip=-1):
+def html_solve(outstream, solver, puzlits, MUSFind, steps=math.inf, *, gofast = False, fulltrace=False, forcechoices = None, skip=-1, merge=1):
     trace = []
     ftrace = []
     total_calls = 0
@@ -154,7 +154,7 @@ hide = function(id) {
                 solver.addLit(p)
                 puzlits.remove(p)
 
-        elif smallest <= 1:
+        elif smallest <= merge:
             classid = uuid.uuid4().hex[:8]
 
             lits = [k for k in sorted(musdict.keys()) if len(musdict[k][0]) <= 1]
@@ -201,7 +201,7 @@ hide = function(id) {
             #passkeys = checkWhichLitsAMUSProves(solver, puzlits, choices[0])
             html_step(outstream, solver, bestdeletedlits, choices, bestmus)
 
-            trace.append((smallest, bestmus))
+            trace.append((bestmusstat, bestmus))
             if forcechoices is None:
                 logging.info("Choosing {}".format(bestdeletedlits))
                 for k in bestdeletedlits:
