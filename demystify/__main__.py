@@ -125,7 +125,7 @@ if args.puzzle is not None:
         puzlits = [p for p in fullsolution if p not in model]
 
 else:
-    paramjson = subprocess.run(["conjure", "pretty", "--output-format", "json", args.eprimeparam], capture_output=True)
+    paramjson = subprocess.run(["conjure", "pretty", "--output-format", "json", args.eprimeparam], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if paramjson.returncode != 0:
         print("Conjure pretty-printing of params failed")
         print(paramjson.stdout)
