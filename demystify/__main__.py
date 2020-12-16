@@ -170,6 +170,7 @@ else:
 
     with open(args.eprimeparam+".dimacs") as sat_data:
         varmap = dict()
+        ordervarmap = dict()
         for line in sat_data:
             if line.startswith("c Var"):
                 dmatch = dvarmatch.match(line)
@@ -177,14 +178,21 @@ else:
                 assert dmatch is not None or omatch is not None
                 # At the moment, only care about direct match
                 if dmatch is not None:
-                    if not dmatch[1].startswith("aux"):
-                        var = demystify.utils.parseSavileRowName(identifiers, dmatch[1])
-                        if var is not None:
-                            if var[0] not in varmap:
-                                varmap[var[0]] = dict()
-                            if var[1] not in varmap[var[0]]:
-                                varmap[var[0]][var[1]] = dict()
-                            varmap[var[0]][var[1]][int(dmatch[2])] = int(dmatch[3])
+                    fillmap = varmap
+                    match = dmatch
+                else:
+                    fillmap = ordervarmap
+                    match = omatch
+
+                if not match[1].startswith("aux"):
+                    var = demystify.utils.parseSavileRowName(identifiers, match[1])
+                    if var is not None:
+                        if var[0] not in fillmap:
+                            fillmap[var[0]] = dict()
+                        if var[1] not in fillmap[var[0]]:
+                            fillmap[var[0]][var[1]] = dict()
+                        fillmap[var[0]][var[1]][int(match[2])] = int(match[3])
+                    
         logging.debug(varmap)
 
     printvarmap = dict()
@@ -199,18 +207,34 @@ else:
 
     varlits = set()
 
+    # For each variable / literal, establish maps between the demysify literal and SAT literal
     for v in set(varmap.keys()).intersection(vars):
             printvarmap[v] = dict()
+
+            
             for loc in varmap[v]:
+                litsforvar = []
                 var = demystify.base.Var(f'{v}[{",".join(str(l) for l in loc)}]', tuple(varmap[v][loc].keys()), loc)
                 printvarmap[v][loc] = var
                 varlist.append(var)
                 for (dom, sat) in varmap[v][loc].items():
                     litmap[demystify.base.EqVal(var, dom)] = sat
-                    invlitmap[sat] = demystify.base.EqVal(var,dom)
+                    invlitmap[sat] = [demystify.base.EqVal(var,dom)]
                     if -sat not in invlitmap:
-                        invlitmap[-sat] = demystify.base.NeqVal(var, dom)
+                        invlitmap[-sat] = [demystify.base.NeqVal(var, dom)]
                     varlits.add(sat)
+                    litsforvar.append(demystify.base.EqVal(var,dom))
+                    litsforvar.append(demystify.base.NeqVal(var,dom))
+    
+                # For 'order' variables, just map them to the whole CP variable
+                if loc in ordervarmap[v]:
+                    for (dom, sat) in ordervarmap[v][loc].items():
+                        invlitmap[sat] = set(litsforvar)
+                        if -sat not in invlitmap:
+                            pass
+                            invlitmap[-sat] = set(litsforvar)
+                        varlits.add(sat)
+
 
 
     for v in set(varmap.keys()).intersection(set(cons.keys())):
@@ -227,7 +251,7 @@ else:
             a = tuple(k)
             constraintname = eval('f"' + cons[v] + '"', locals())
             logging.debug(constraintname)
-            connected = [invlitmap[s] for s in demystify.utils.getConnectedVars(formula.clauses, varmap[v][k][1], varlits)]
+            connected = set(lit for s in demystify.utils.getConnectedVars(formula.clauses, varmap[v][k][1], varlits) for lit in invlitmap[s])
             constraintmap[demystify.base.DummyClause(constraintname, connected)] = varmap[v][k][1]
 
     printvarlist = []
