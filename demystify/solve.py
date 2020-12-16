@@ -160,7 +160,7 @@ hide = function(id) {
         elif smallest <= merge:
             classid = uuid.uuid4().hex[:8]
 
-            lits = [k for k in sorted(musdict.keys()) if len(musdict[k][0]) <= 1]
+            lits = [k for k in sorted(musdict.keys()) if len(musdict[k][0]) <= merge]
             print_explanation(outstream, solver, [musdict[l][0] for l in lits], lits, classid)
 
             print("Doing", len(lits), " simple deductions ", file=outstream)
