@@ -186,9 +186,10 @@ hide = function(id) {
             for b in basemins:
                 deleteddict[b] = {}
                 for mus in musdict[b]:
-                    muslits = set.union(*(set(m.lits()) for m in mus))
+                    muslits = set.union(set(),*(set(m.lits()) for m in mus))
                     puzlitsinmus = set(p for p in puzlits if p in muslits or p.neg() in muslits)
-                    deletedlits = checkWhichLitsAMUSProves(solver, puzlitsinmus, mus)
+                    # Explictly add 'b', for the case where the MUS is size 0 in particular
+                    deletedlits = set(checkWhichLitsAMUSProves(solver, puzlitsinmus, mus)).union(set([b]))
                     deleteddict[b][mus] = deletedlits
                     musval = (len(mus), -len(deletedlits), len(puzlitsinmus))
                     if musval < bestmusstat:
