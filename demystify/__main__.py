@@ -251,6 +251,8 @@ else:
             constraintname = eval('f"' + cons[v] + '"', locals())
             logging.debug(constraintname)
             connected = set(lit for s in demystify.utils.getConnectedVars(formula.clauses, varmap[v][k][1], varlits) for lit in invlitmap[s])
+            # Savilerow is too clever, so just put both negative + positive version of all literals in
+            connected = connected.union(set(lit.neg() for lit in connected))
             constraintmap[demystify.base.DummyClause(constraintname, connected)] = varmap[v][k][1]
 
     printvarlist = []
