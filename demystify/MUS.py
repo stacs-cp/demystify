@@ -32,13 +32,11 @@ def safepow(x,y):
 
 def tinyMUS(solver, assume, distance):
     smtassume = [solver._varlit2smtmap[l] for l in assume]
-
     if distance == 1:
         cons = flatten([solver._varlit2con[l] for l in assume])
     elif distance == 2:
         cons = flatten([solver._varlit2con2[l] for l in assume])
     else:
-        print("!! Invalid distance")
         sys.exit(1)
 
     core = solver.basicCore(smtassume + cons)
@@ -65,6 +63,7 @@ def tinyMUS(solver, assume, distance):
 count = 0
 
 def MUS(r, solver, assume, minsize, *, config, initial_cons=None, just_check=False):
+    #print("!!",assume)
     smtassume = [solver._varlit2smtmap[a] for a in assume]
 
     if config["dumpSAT"]:
@@ -493,9 +492,7 @@ class CascadeMUSFinder:
                 distance=2,
             )
 
-        if (not CONFIG["checkSmall2"]) or (
-           musdict_minimum(musdict) > 3
-        ):
+        if (not CONFIG["checkSmall2"]):
             cascadeMUS(self._solver, puzlits, CONFIG["repeats"], musdict, CONFIG)
         else:
             logging.info("Early exit: skipping cascade")
