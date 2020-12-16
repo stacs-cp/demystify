@@ -1,0 +1,53 @@
+language ESSENCE' 1.0
+
+given x_max,y_max : int
+letting X be int(0..x_max-1)
+letting Y be int(0..y_max-1)
+
+given blanks : matrix indexed by [X,Y] of int(0..1)
+given vertsums: matrix indexed by [X,Y] of int
+given horzsums: matrix indexed by [X,Y] of int
+
+where forAll x: X. forAll y : Y. vertsums[x,y] != 0 -> blanks[x+1,y] = 1
+where forAll x: X. forAll y : Y. horzsums[x,y] != 0 -> blanks[x,y+1] = 1
+
+$#VAR grid
+find grid : matrix indexed by [X,Y] of int(0..9)
+
+$#CON vertalldiff "The vertical block starting at {(a[0]+1,a[1]+1)} is all different"
+find vertalldiff: matrix indexed by [X,Y] of bool
+
+$#CON vertsum "The vertical block starting at {(a[0]+1,a[1]+1)} sums to {params['vertsums'][a[0]][a[1]]}"
+find vertsum: matrix indexed by [X,Y] of bool
+
+$#CON horzalldiff "The horizontal block starting at {(a[0]+1,a[1]+1)} is all different"
+find horzalldiff: matrix indexed by [X,Y] of bool
+
+$#CON horzsum "The horizontal block starting at {(a[0]+1,a[1]+1)} sums to {params['horzsums'][a[0]][a[1]]}"
+find horzsum: matrix indexed by [X,Y] of bool
+
+
+such that
+forAll x : X. forAll y : Y. blanks[x,y] = 0 <-> grid[x,y] = 0,
+
+forAll x: X. forAll y : Y.
+vertalldiff[x,y] ->
+(vertsums[x,y] != 0 ->
+( allDiff([ grid[i,y] | i : int(x+1..x_max-1), forAll q:int(x+1..i). blanks[q,y]=1]) )),
+
+forAll x: X. forAll y : Y.
+vertsum[x,y] -> (
+vertsums[x,y] != 0 ->
+( vertsums[x,y] = sum([ grid[i,y] | i : int(x+1..x_max-1), forAll q:int(x+1..i). blanks[q,y]=1]) )),
+
+
+forAll x: X. forAll y : Y.
+horzalldiff[x,y] -> 
+(horzsums[x,y] != 0 ->
+( allDiff([ grid[x,j] | j : int(y+1..y_max-1), forAll q:int(y+1..j). blanks[x,q]=1]) )),
+
+
+forAll x: X. forAll y : Y.
+horzsum[x,y] -> (
+horzsums[x,y] != 0 ->
+( horzsums[x,y] = sum([ grid[x,j] | j : int(y+1..y_max-1), forAll q:int(y+1..j). blanks[x,q]=1]) ))
