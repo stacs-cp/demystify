@@ -227,11 +227,10 @@ else:
                     litsforvar.append(demystify.base.NeqVal(var,dom))
     
                 # For 'order' variables, just map them to the whole CP variable
-                if loc in ordervarmap[v]:
+                if v in ordervarmap and loc in ordervarmap[v]:
                     for (dom, sat) in ordervarmap[v][loc].items():
                         invlitmap[sat] = set(litsforvar)
                         if -sat not in invlitmap:
-                            pass
                             invlitmap[-sat] = set(litsforvar)
                         varlits.add(sat)
 
