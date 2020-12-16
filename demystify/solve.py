@@ -148,8 +148,11 @@ hide = function(id) {
 
         if smallest <= skip:
             # Skip over some cases
-            lits = [k for k in sorted(musdict.keys()) if len(musdict[k][0]) <= smallest]
-            print("Skipping tiny MUSes..")
+            lits = [k for k in sorted(musdict.keys()) if len(musdict[k][0]) <= skip]
+            print("Skip displaying tiny MUSes..")
+
+            exps = "\n".join([explain(solver, [p], musdict[p][0], uuid.uuid4().hex[:8]) for p in sorted(lits)])
+            print(hidden("Show hidden", exps), file=outstream)
             for p in lits:
                 solver.addLit(p)
                 puzlits.remove(p)
