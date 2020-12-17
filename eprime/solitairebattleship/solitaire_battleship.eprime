@@ -76,27 +76,31 @@ find r_column_tallies : matrix indexed by [COL_RANGE] of bool
 $#CON r_row_tallies "Row {(a[0])} must have {params['row_tallies'][a[0]]} occupied squares"
 find r_row_tallies : matrix indexed by [ROW_RANGE] of bool
 
+$$ following maybe not the most obvious, could make clearer.  
+$$ Because type 0 is water and type i is ship of size i
+
+$#CON r_num_occupied_by_types: "There must be {params['num_occupied_by_types'][a[0]]} squares containing type {(a[0])}"
+find r_num_occupied_by_types : matrix indexed by [int(0..LARGEST)] of bool
+
 such that
 
 $$ if we want to just insist on a solution, include the following 
 
     forAll i : COL_RANGE . r_column_tallies[i] = true,
     forAll i : ROW_RANGE . r_row_tallies[i] = true,
+    forAll i : int(0..LARGEST) . r_num_occupied_by_types[i] = true,
 
     $ simple calculation of cells occupied by types
 
-
+    $$ ipg - is this a kind of implied constraint?
 
      forAll i : int(1..LARGEST) . 
         (num_occupied_by_types[i] = i*num_types[i]),
 
-
-
-        (num_occupied_by_types[0] = 
+     (num_occupied_by_types[0] = 
 		height*width - (sum i : int(1..LARGEST) . num_occupied_by_types[i])),
 
     gcc(flatten(agrid),zero_to_n,num_occupied_by_types),
-
 
     $ amount of occupied sqares in each row
     forAll row : ROW_RANGE .
