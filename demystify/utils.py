@@ -59,10 +59,11 @@ def randomFromSeed(seed):
     return numpy.random.RandomState(seed)
     # return random.Random(seed)
 
-def parseSavileRowName(vars, n):
+def parseSavileRowName(vars, auxvars, n):
     varmatch = [v for v in vars if n.startswith(v)]
     if len(varmatch) == 0:
-        print("Cannot find {} in the VAR list {}".format(n, vars))
+        if not any(v for v in auxvars if n.startswith(v)):
+            print("Cannot find {} in the VAR list {} -- should it be AUX?".format(n, vars))
         return None
     if len(varmatch) > 1:
         print("Variables cannot have a common prefix: Can't tell if {} is {}".format(n, varmatch))

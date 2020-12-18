@@ -145,6 +145,7 @@ else:
 
     with open(args.eprime) as eprime_data:
         vars = set()
+        auxvars = set()
         cons = dict()
         conmatch = re.compile('\$\#CON (.*) "(.*)"')
         for line in eprime_data:
@@ -152,7 +153,7 @@ else:
                 if line.startswith("$#VAR"):
                     v = line.strip().split(" ")[1]
                     print("Found VAR: '{}'".format(v))
-                    if v in vars:
+                    if v in vars or v in auxvars:
                         #print(f"{v} defined twice")
                         sys.exit(1)
                     vars.add(v)
@@ -165,6 +166,12 @@ else:
                         #print(f"{match[1]} defined twice")
                         sys.exit(1)
                     cons[match[1]] = match[2]
+                elif line.startswith("$#AUX"):
+                    v = line.strip().split(" ")[1]
+                    print("Found Aux VAR: '{}'".format(v))
+                    if v in vars or v in auxvars:
+                        sys.exit(1)
+                    auxvars.add(v)
 
     identifiers = set.union(vars, cons.keys())
 
@@ -185,7 +192,7 @@ else:
                     match = omatch
 
                 if not match[1].startswith("aux"):
-                    var = demystify.utils.parseSavileRowName(identifiers, match[1])
+                    var = demystify.utils.parseSavileRowName(identifiers, auxvars, match[1])
                     if var is not None:
                         if var[0] not in fillmap:
                             fillmap[var[0]] = dict()
