@@ -191,7 +191,7 @@ hide = function(id) {
                     # Explictly add 'b', for the case where the MUS is size 0 in particular
                     deletedlits = set(checkWhichLitsAMUSProves(solver, puzlitsinmus, mus)).union(set([b]))
                     deleteddict[b][mus] = deletedlits
-                    musval = (len(mus), -len(deletedlits), len(puzlitsinmus))
+                    musval = (len(mus), len(puzlitsinmus), -len(deletedlits))
                     if musval < bestmusstat:
                         bestmusstat = musval
                         bestlit = b
@@ -206,11 +206,6 @@ hide = function(id) {
             html_step(outstream, solver, bestdeletedlits, choices, bestmus)
 
             trace.append((bestmusstat, bestmus))
-            if forcechoices is None:
-                logging.info("Choosing {}".format(bestdeletedlits))
-                for k in bestdeletedlits:
-                    solver.addLit(k)
-                    puzlits.remove(k)
 
             if not gofast:
                 if len(basemins) > 1:
@@ -231,6 +226,12 @@ hide = function(id) {
                     print("<p>Only 1 candidate with MUS size {} found</p>".format(smallest), file=outstream)
                 logging.info("Minimal choices : {} {}".format(len(basemins), basemins))
             
+            if forcechoices is None:
+                logging.info("Choosing {}".format(bestdeletedlits))
+                for k in bestdeletedlits:
+                    solver.addLit(k)
+                    puzlits.remove(k)
+
             if forcechoices is not None:
                 print("<h3>FORCING CHOICE TO {}</h3>".format(forcechoices[forcestep]), file=outstream)
                 solver.addLit(forcechoices[forcestep])
