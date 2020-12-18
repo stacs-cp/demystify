@@ -191,7 +191,7 @@ hide = function(id) {
                     # Explictly add 'b', for the case where the MUS is size 0 in particular
                     deletedlits = set(checkWhichLitsAMUSProves(solver, puzlitsinmus, mus)).union(set([b]))
                     deleteddict[b][mus] = deletedlits
-                    musval = (len(mus), -len(deletedlits), len(puzlitsinmus))
+                    musval = (len(mus), len(puzlitsinmus), -len(deletedlits))
                     if musval < bestmusstat:
                         bestmusstat = musval
                         bestlit = b
