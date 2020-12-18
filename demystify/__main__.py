@@ -255,7 +255,11 @@ else:
 
             # Note that 'a' can be accessed in the f string
             a = tuple(k)
-            constraintname = eval('f"' + cons[v] + '"', locals())
+            try:
+                constraintname = eval('f"' + cons[v] + '"', locals())
+            except:
+                print("Could not evaluate "+cons[v])
+                constraintname = cons[v]
             logging.debug(constraintname)
             connected = set(lit for s in demystify.utils.getConnectedVars(formula.clauses, varmap[v][k][1], varlits) for lit in invlitmap[s])
             # Savilerow is too clever, so just put both negative + positive version of all literals in
