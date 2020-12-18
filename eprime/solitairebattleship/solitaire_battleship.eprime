@@ -60,7 +60,10 @@ $$ core variables from Smith model, agrid being "t" in her description
 $$   agrid : size of ship occupying cell or 0 if empty
 $$   sij : boolean whether cell is occupied or not
 
+$#VAR agrid
 find    agrid  :         matrix indexed by [ROW_RANGE, COL_RANGE] of SQUARE_STATUS
+
+$#AUX sij
 find    sij  :         matrix indexed by [ROW_RANGE_PLUS, COL_RANGE_PLUS] of bool
 
 $$ four sets of "ladder" variables indicating length of run of occupied cells
@@ -70,30 +73,32 @@ $ lijk = 1 if there is a continuous line of cells from (i,j) LEFT to (i,j-k)
 $ dijk = 1 if there is a continuous line of cells from (i,j) DOWN to (i+k,j)
 $ uijk = 1 if there is a continuous line of cells from (i,j) UP to (i-k,j)
 
+$#AUX rijk
 find    rijk : matrix indexed by [ROW_RANGE, COL_RANGE, int(1..LARGEST-1)] of bool 
+$#AUX dijk
 find    dijk : matrix indexed by [ROW_RANGE, COL_RANGE, int(1..LARGEST-1)] of bool 
+$#AUX lijk
 find    lijk : matrix indexed by [ROW_RANGE, COL_RANGE, int(1..LARGEST-1)] of bool 
+$#AUX uijk
 find    uijk : matrix indexed by [ROW_RANGE, COL_RANGE, int(1..LARGEST-1)] of bool 
 
 $$  auxiliary variables to count number of each type of square in the grid
 
+$#AUX num_occupied_by_types 
 find   num_occupied_by_types: matrix indexed by [int(0..LARGEST)] of int(0..height*width)
 
 $$ demystify reified constraint variables
 
-$$CON r_column_tallies "Column {(a[0])} must have {params['column_tallies'][a[0]]} occupied squares"
-$#CON r_column_tallies "Column {(a[0])} must have SOME occupied squares"
+$#CON r_column_tallies "Column {(a[0])} must have {params['column_tallies'][a[0]-1]} occupied squares"
 find r_column_tallies : matrix indexed by [COL_RANGE] of bool
 
-$$CON r_row_tallies "Row {(a[0])} must have {params['row_tallies'][a[0]]} occupied squares"
-$#CON r_row_tallies "Row {(a[0])} must have SOME occupied squares"
+$#CON r_row_tallies "Row {(a[0])} must have {params['row_tallies'][a[0]-1]} occupied squares"
 find r_row_tallies : matrix indexed by [ROW_RANGE] of bool
 
 $$ following maybe not the most obvious, could make clearer.  
 $$ Because type 0 is water and type i is ship of size i
 
-$$CON r_num_occupied_by_types "There must be {params['num_occupied_by_types'][a[0]]} squares containing type {(a[0])}"
-$#CON r_num_occupied_by_types "There must be SOME squares containing type {(a[0])}"
+$#CON r_num_occupied_by_types "There must be {params['num_occupied_by_types'][a[0]]} squares containing type {(a[0])}"
 find r_num_occupied_by_types : matrix indexed by [int(0..LARGEST)] of bool
 
 $#CON r_sij_diagonals "If the square {(a[0],a[1])} is occupied then no square diagonally next to it can be"
