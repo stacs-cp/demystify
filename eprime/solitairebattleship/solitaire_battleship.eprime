@@ -46,14 +46,15 @@ $                4:bottom, 5:right,  6:left, 7:no hint
 $ num types gives number of each type of ship
 $ e.g. [4,3,2,1] = 4 submarine, 3 destroyers, 2 cruisers, 1 battleship
 
-
+given num_types: matrix indexed by [int(1..LARGEST)] of int(0..height*width)
 
 $ the amount of occupied squares for each column/row
 
-given num_types: matrix indexed by [int(1..LARGEST)] of int(0..height*width)
-
 given   column_tallies: matrix indexed by [COL_RANGE] of int(0..height)
 given   row_tallies:    matrix indexed by [ROW_RANGE] of int(0..width)
+
+$ hints: 0:water,  1:circle, 2:middle, 3:top, 4:bottom, 5:right,  6:left, 7:no hint
+
 given   hint :         matrix indexed by [ROW_RANGE, COL_RANGE] of HINT_STATUS
 
 $$ core variables from Smith model, agrid being "t" in her description
@@ -98,8 +99,11 @@ find r_row_tallies : matrix indexed by [ROW_RANGE] of bool
 $$ following maybe not the most obvious, could make clearer.  
 $$ Because type 0 is water and type i is ship of size i
 
-$#CON r_num_occupied_by_types "There must be {params['num_occupied_by_types'][a[0]]} squares containing type {(a[0])}"
-find r_num_occupied_by_types : matrix indexed by [int(0..LARGEST)] of bool
+$#CON r_num_occupied_by_types "There must be {params['num_types'][a[0]]} ships of size {(a[0])}"
+find r_num_occupied_by_types : matrix indexed by [int(1..LARGEST)] of bool
+
+$#CON r_num_occupied_by_water "There must be the right number of cells occupied by water"
+find r_num_occupied_by_water : matrix indexed by [int(0..0)] of bool
 
 $#CON r_sij_diagonals "If the square {(a[0],a[1])} is occupied then no square diagonally next to it can be"
 find r_sij_diagonals : matrix indexed by [ROW_RANGE, COL_RANGE] of bool
@@ -110,25 +114,30 @@ find r_hints : matrix indexed by [ROW_RANGE, COL_RANGE] of bool
 $#CON r_ship_sizes "The ship at {(a[0],a[1])} has to be of type equal to its size"
 find r_ship_sizes : matrix indexed by [ROW_RANGE, COL_RANGE] of bool
 
+$$ set r_force_solution to true for regular use, false for demystify use
+$letting r_force_solution be true
+letting r_force_solution be false
+
 such that
 
-$$ if we want to just insist on a solution, include the following 
 
-    $$ forAll i : COL_RANGE . r_column_tallies[i] = true,
-    $$ forAll i : ROW_RANGE . r_row_tallies[i] = true,
-    $$ forAll i : int(0..LARGEST) . r_num_occupied_by_types[i] = true,
-    $$ forAll i : ROW_RANGE . forAll j : COL_RANGE . 
-          $$ r_sij_diagonals[i,j] = true /\
-          $$ r_hints[i,j] = true /\
-          $$ r_ship_sizes[i,j] = true,
+    r_force_solution -> forAll i : COL_RANGE . r_column_tallies[i] = true,
+    r_force_solution -> forAll i : ROW_RANGE . r_row_tallies[i] = true,
+    r_force_solution -> r_num_occupied_by_water[0] = true,
+    r_force_solution -> forAll i : int(1..LARGEST) . r_num_occupied_by_types[i] = true,
+    r_force_solution -> forAll i : ROW_RANGE . forAll j : COL_RANGE . 
+          r_sij_diagonals[i,j] = true /\
+          r_hints[i,j] = true /\
+          r_ship_sizes[i,j] = true,
 
     $ simple calculation of cells occupied by types
 
-     forAll i : int(1..LARGEST) . 
-        (num_occupied_by_types[i] = i*num_types[i]),
-
+     r_num_occupied_by_water[0] -> 
      (num_occupied_by_types[0] = 
 		height*width - (sum i : int(1..LARGEST) . num_occupied_by_types[i])),
+    
+     forAll i : int(1..LARGEST) . 
+        r_num_occupied_by_types[i] -> (num_occupied_by_types[i] = i*num_types[i]),
 
     gcc(flatten(agrid),[i|i:int(0..LARGEST)],num_occupied_by_types),
 
