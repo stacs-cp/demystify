@@ -1,0 +1,366 @@
+$ Solitaire Battleship 
+$ 
+$ Popular 2-players game reduced to 1 player:
+$ Find the battleship, the 2 cruisers, 3 destroyers
+$ and 4 submarines on an 10x10 grid, given some hints
+$ for their locations.
+$ 
+$ Based on model by Barbara Smith, 2006
+$       "Constraint Programming Models for Solitaire Battleships", 
+$ Generalise to nxm grid, but and size of largest ship, and numbers of each type
+$
+$ From Savile Row distribution adapted for demystify by Ian Gent
+$ Dec 2020
+
+language ESSENCE' 1.0
+
+given width : int
+given height : int
+
+letting   ROW_RANGE     be domain int(1..height)
+letting   COL_RANGE     be domain int(1..width)
+
+letting ROW_RANGE_PLUS be domain int(0..height+1)
+letting COL_RANGE_PLUS be domain int(0..width+1)
+
+$ LARGEST is max size of ship (e.g. battleship = 4) for now hardwired, not given
+
+
+given LARGEST : int
+letting   SQUARE_STATUS be domain int (0..LARGEST)
+
+$ 0 = unoccupied
+$ i = length of ship 
+$     1 = submarine
+$     2 = destroyer
+$     3 = cruiser
+$     4 = battleship
+
+
+letting   HINT_STATUS  be domain int(0..7)
+
+$ hint status: 0:water,  1:circle, 2:middle, 3:top,
+$                4:bottom, 5:right,  6:left, 7:no hint
+         
+
+$ num types gives number of each type of ship
+$ e.g. [4,3,2,1] = 4 submarine, 3 destroyers, 2 cruisers, 1 battleship
+
+given num_types: matrix indexed by [int(1..LARGEST)] of int(0..height*width)
+
+$ the amount of occupied squares for each column/row
+
+given   column_tallies: matrix indexed by [COL_RANGE] of int(0..height)
+given   row_tallies:    matrix indexed by [ROW_RANGE] of int(0..width)
+
+$ hints: 0:water,  1:circle, 2:middle, 3:top, 4:bottom, 5:right,  6:left, 7:no hint
+
+given   hint :         matrix indexed by [ROW_RANGE, COL_RANGE] of HINT_STATUS
+
+$$ core variables from Smith model, agrid being "t" in her description
+$$   agrid : size of ship occupying cell or 0 if empty
+$$   sij : boolean whether cell is occupied or not
+
+$#VAR agrid
+find    agrid  :         matrix indexed by [ROW_RANGE, COL_RANGE] of SQUARE_STATUS
+
+$#AUX sij
+find    sij  :         matrix indexed by [ROW_RANGE_PLUS, COL_RANGE_PLUS] of bool
+
+$$ four sets of "ladder" variables indicating length of run of occupied cells
+
+$ rijk = 1 if there is a continuous line of cells from (i,j) RIGHT to (i,j+k)
+$ lijk = 1 if there is a continuous line of cells from (i,j) LEFT to (i,j-k)
+$ dijk = 1 if there is a continuous line of cells from (i,j) DOWN to (i+k,j)
+$ uijk = 1 if there is a continuous line of cells from (i,j) UP to (i-k,j)
+
+$#AUX rijk
+find    rijk : matrix indexed by [ROW_RANGE, COL_RANGE, int(1..LARGEST-1)] of bool 
+$#AUX dijk
+find    dijk : matrix indexed by [ROW_RANGE, COL_RANGE, int(1..LARGEST-1)] of bool 
+$#AUX lijk
+find    lijk : matrix indexed by [ROW_RANGE, COL_RANGE, int(1..LARGEST-1)] of bool 
+$#AUX uijk
+find    uijk : matrix indexed by [ROW_RANGE, COL_RANGE, int(1..LARGEST-1)] of bool 
+
+$$  auxiliary variables to count number of each type of square in the grid
+
+$#AUX num_occupied_by_types 
+find   num_occupied_by_types: matrix indexed by [int(0..LARGEST)] of int(0..height*width)
+
+$$ demystify reified constraint variables
+
+$#CON r_column_tallies "Column {(a[0])} must have {params['column_tallies'][a[0]-1]} occupied squares"
+find r_column_tallies : matrix indexed by [COL_RANGE] of bool
+
+$#CON r_row_tallies "Row {(a[0])} must have {params['row_tallies'][a[0]-1]} occupied squares"
+find r_row_tallies : matrix indexed by [ROW_RANGE] of bool
+
+$$ following maybe not the most obvious, could make clearer.  
+$$ Because type 0 is water and type i is ship of size i
+
+$#CON r_num_occupied_by_types "There must be {params['num_types'][a[0]-1]} ships of size {(a[0])}"
+find r_num_occupied_by_types : matrix indexed by [int(1..LARGEST)] of bool
+
+$#CON r_num_occupied_by_water "There must be the right number of cells occupied by water"
+find r_num_occupied_by_water : matrix indexed by [int(0..0)] of bool
+
+$#CON r_sij_diagonals "If the square {(a[0],a[1])} is occupied then no square diagonally next to it can be"
+find r_sij_diagonals : matrix indexed by [ROW_RANGE, COL_RANGE] of bool
+
+$#CON r_hints "There was a hint about square {(a[0],a[1])}"
+find r_hints : matrix indexed by [ROW_RANGE, COL_RANGE] of bool
+
+$#CON r_ship_sizes "The ship at {(a[0],a[1])} has to be of type equal to its size"
+find r_ship_sizes : matrix indexed by [ROW_RANGE, COL_RANGE] of bool
+
+$$ set r_force_solution to true for regular use, false for demystify use
+$letting r_force_solution be true
+letting r_force_solution be false
+
+such that
+
+
+    r_force_solution -> forAll i : COL_RANGE . r_column_tallies[i] = true,
+    r_force_solution -> forAll i : ROW_RANGE . r_row_tallies[i] = true,
+    r_force_solution -> r_num_occupied_by_water[0] = true,
+    r_force_solution -> forAll i : int(1..LARGEST) . r_num_occupied_by_types[i] = true,
+    r_force_solution -> forAll i : ROW_RANGE . forAll j : COL_RANGE . 
+          r_sij_diagonals[i,j] = true /\
+          r_hints[i,j] = true /\
+          r_ship_sizes[i,j] = true,
+
+    $ simple calculation of cells occupied by types
+
+     r_num_occupied_by_water[0] -> 
+     (num_occupied_by_types[0] = 
+		height*width - (sum i : int(1..LARGEST) . num_occupied_by_types[i])),
+    
+     forAll i : int(1..LARGEST) . 
+        r_num_occupied_by_types[i] -> (num_occupied_by_types[i] = i*num_types[i]),
+
+    gcc(flatten(agrid),[i|i:int(0..LARGEST)],num_occupied_by_types),
+
+    $ amount of occupied sqares in each row
+    forAll row : ROW_RANGE .
+        r_row_tallies[row]-> 
+        (sum  col: COL_RANGE .
+            sij[row,col]) = row_tallies[row], 
+
+    $ amount of occupied sqares in each column
+    forAll col : COL_RANGE .
+       r_column_tallies[col] -> 
+       (sum row : ROW_RANGE .  sij[row,col]) = column_tallies[col],
+
+    $ definition of sij and linkage to agrid 
+
+    forAll row: ROW_RANGE_PLUS .  
+        (sij[row,0] = 0) /\ (sij[row,width+1] = 0), 
+
+    forAll col: COL_RANGE_PLUS .  
+        (sij[0,col] = 0) /\ (sij[height+1,col] = 0),
+ 
+    forAll col : COL_RANGE .
+	forAll row : ROW_RANGE . 
+	   (sij[row,col] = (agrid[row,col] != 0)),
+
+
+    $ all squares diagonally adjacent to any occupied square are empty
+
+    forAll col : COL_RANGE .
+	forAll row : ROW_RANGE . 
+       r_sij_diagonals[row,col] -> 
+       (
+	      (sij[row,col] = 1) ->
+               ((sij[row-1,col-1] = 0) /\ 
+                (sij[row-1,col+1] = 0) /\ 
+                (sij[row+1,col-1] = 0) /\ 
+                (sij[row+1,col+1] = 0) )
+                ),
+
+
+
+    $ linkage of rijk to sij
+    forAll col : COL_RANGE .
+	forAll row : ROW_RANGE .  
+           ((rijk[row,col,1] = 1) <-> (sij[row,col] = 1 /\ sij[row,col+1]=1 )), 
+    
+    forAll col : COL_RANGE .
+	forAll row : ROW_RANGE . 
+	    forAll k : int(2..LARGEST-1) .
+                 (((col+k) <= width) -> 
+		   	((rijk[row,col,k] = 1) <-> ((rijk[row,col,k-1] =1) /\ sij[row,col+k]=1 ))),
+		   	
+    forAll col : COL_RANGE .
+	forAll row : ROW_RANGE . 
+	    forAll k : int(2..LARGEST-1) . 
+                 ((col + k > width) -> (rijk[row,col,k] = 0)),
+
+
+    $ linkage of lijk to sij
+    forAll col : COL_RANGE .
+	forAll row : ROW_RANGE .  (
+            ((lijk[row,col,1] = 1) <-> (sij[row,col] = 1 /\ sij[row,col-1]=1 ))),
+    
+    
+    forAll col : COL_RANGE .
+	forAll row : ROW_RANGE . 
+        forAll k : int(2..LARGEST-1) .
+         (((col-k) > 0) -> 
+		   	((lijk[row,col,k] = 1) <-> ((lijk[row,col,k-1] =1) /\ sij[row,col-k]=1 ))),
+    
+    forAll col : COL_RANGE .
+	forAll row : ROW_RANGE . 
+        forAll k : int(2..LARGEST-1) .
+                 ((col-k <= 0) -> (lijk[row,col,k] = 0)),
+
+    $ linkage of dijk to sij
+    forAll col : COL_RANGE .
+	forAll row : ROW_RANGE .  (
+            ((dijk[row,col,1] = 1) <-> (sij[row,col] = 1 /\ sij[row+1,col]=1))),
+    
+    forAll col : COL_RANGE .
+	forAll row : ROW_RANGE .  
+         forAll k : int(2..LARGEST-1) .  
+		(((row+k) <= height) -> 
+		   	((dijk[row,col,k] = 1) <-> ((dijk[row,col,k-1] =1) /\ sij[row+k,col]=1))),
+
+    forAll col : COL_RANGE .
+	forAll row : ROW_RANGE .  (
+         (forAll k : int(2..LARGEST-1) .  (
+                 ((row+k > height) -> (dijk[row,col,k] = 0)) ))),
+                 
+    $ linkage of uijk to sij
+    
+    forAll col : COL_RANGE .
+	forAll row : ROW_RANGE .  
+            ((uijk[row,col,1] = 1) <-> (sij[row,col] = 1 /\ sij[row-1,col]=1 )),
+            
+    forAll col : COL_RANGE .
+	forAll row : ROW_RANGE .  
+	     forAll k : int(2..LARGEST-1) .
+		(((row-k) > 0 ) -> 
+		   	((uijk[row,col,k] = 1) <-> ((uijk[row,col,k-1] =1) /\ sij[row-k,col]=1))),
+
+    forAll col : COL_RANGE .
+	forAll row : ROW_RANGE .  (
+	     (forAll k : int(2..LARGEST-1) .  (
+                 ((row - k <= 0) -> (uijk[row,col,k] = 0)) ))),
+
+
+ 
+$$ adding implied constraint  agrid[row,col]=agrid[row,col+1] etc
+
+    $ linkage of rijk to sij
+    forAll col : COL_RANGE .
+	forAll row : ROW_RANGE .  
+           ((rijk[row,col,1] = 1) -> agrid[row,col]=agrid[row,col+1]), 
+    
+    forAll col : COL_RANGE .
+	forAll row : ROW_RANGE . 
+	    forAll k : int(2..LARGEST-1) .
+                 (((col+k) <= width) -> 
+		   	((rijk[row,col,k] = 1) -> (agrid[row,col]=agrid[row,col+k]))),
+		   	
+    $ linkage of lijk to sij
+    forAll col : COL_RANGE .
+	forAll row : ROW_RANGE .  (
+            ((lijk[row,col,1] = 1) -> (agrid[row,col]=agrid[row,col-1]))),
+    
+    
+    forAll col : COL_RANGE .
+	forAll row : ROW_RANGE . 
+        forAll k : int(2..LARGEST-1) .
+         (((col-k) > 0) -> 
+		   	((lijk[row,col,k] = 1) -> ( agrid[row,col]=agrid[row,col-k]))),
+    
+    $ linkage of dijk to sij
+    forAll col : COL_RANGE .
+	forAll row : ROW_RANGE .  (
+            ((dijk[row,col,1] = 1) -> (agrid[row,col]=agrid[row+1,col]))),
+    
+    forAll col : COL_RANGE .
+	forAll row : ROW_RANGE .  
+         forAll k : int(2..LARGEST-1) .  
+		(((row+k) <= height) -> 
+		   	((dijk[row,col,k] = 1) -> (agrid[row,col]=agrid[row+k,col]))),
+
+    $ linkage of uijk to sij
+    
+    forAll col : COL_RANGE .
+	forAll row : ROW_RANGE .  
+            ((uijk[row,col,1] = 1) -> (agrid[row,col]=agrid[row-1,col])),
+            
+    forAll col : COL_RANGE .
+	forAll row : ROW_RANGE .  
+	     forAll k : int(2..LARGEST-1) .
+		(((row-k) > 0 ) -> 
+		   	((uijk[row,col,k] = 1) -> (agrid[row,col]=agrid[row-k,col]))),
+
+    $ linkage of u/d/r/l to agrid
+
+    forAll col : COL_RANGE . 
+	forAll row : ROW_RANGE .  
+        r_ship_sizes[row,col] -> 
+        ( 
+	      (sij[row,col] = 1) ->
+		  (agrid[row,col] = 1 +  (sum i : int(1..LARGEST-1) . rijk[row,col,i] ) + 
+					(sum j : int(1..LARGEST-1) . lijk[row,col,j] ) + 
+					(sum k : int(1..LARGEST-1) . uijk[row,col,k] ) + 
+					(sum l : int(1..LARGEST-1) . dijk[row,col,l])) 
+                    ),
+
+       
+$ reminder: 
+$ hint status: 0:water,  1:circle, 2:middle, 3:top,
+$                4:bottom, 5:right,  6:left, 7:no hint
+
+     forAll row : ROW_RANGE .
+       forAll col : COL_RANGE .
+         (r_hints[row,col] /\ hint[row,col] = 0) ->          $hint 0:water
+ 	    agrid[row,col] = 0,
+
+    forAll row : ROW_RANGE .
+      forAll col: COL_RANGE .
+         (r_hints[row,col] /\ hint[row,col] = 1) ->          $hint 1:circle
+	    agrid[row,col] = 1,
+
+     forAll row : ROW_RANGE .
+       forAll col: COL_RANGE .
+         (r_hints[row,col] /\ hint[row,col] = 2) ->          $hint 2:middle
+	    (agrid[row,col] >= 3 /\
+               ( (sij[row-1,col]=0 /\ sij[row+1,col]=0 /\ sij[row,col-1]=1 /\ sij[row,col+1]=1 ) 
+                 \/
+                 (sij[row-1,col]=1 /\ sij[row+1,col]=1 /\ sij[row,col-1]=0 /\ sij[row,col+1]=0 ) )),
+
+     forAll row : ROW_RANGE .
+       forAll col: COL_RANGE .
+         (r_hints[row,col] /\ hint[row,col] = 3) ->          $hint 3:top
+	    (agrid[row,col] >= 2 
+ /\
+		 sij[row,col+1] = 0 /\ sij[row,col-1]=0 /\ 
+		 sij[row+1,col]=1 /\ sij[row-1,col]=0
+),
+
+     forAll row : ROW_RANGE .
+       forAll col: COL_RANGE .
+         (r_hints[row,col] /\ hint[row,col] = 4) ->          $hint 4:bottom
+	    (agrid[row,col] >= 2 /\
+		 sij[row-1,col] = 1 /\ sij[row+1,col]=0 /\ sij[row,col+1]=0 /\ sij[row,col-1]=0),
+        
+
+     forAll row : ROW_RANGE .
+       forAll col: COL_RANGE .
+         (r_hints[row,col] /\ hint[row,col] = 5) ->          $hint 5:right
+	    (agrid[row,col] >= 2 /\
+		 sij[row,col-1] = 1 /\ sij[row,col+1]=0 /\ sij[row-1,col]=0 /\ sij[row+1,col]=0),
+
+     forAll row : ROW_RANGE .
+       forAll col: COL_RANGE .
+         (r_hints[row,col] /\ hint[row,col] = 6) ->          $hint 6:left
+	    (agrid[row,col] >= 2 /\
+		 sij[row,col+1] = 1 /\ sij[row,col-1]=0 /\ sij[row-1,col]=0 /\ sij[row+1,col]=0),
+
+
+
+true
