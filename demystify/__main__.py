@@ -43,6 +43,8 @@ parser.add_argument("--merge", type=int, default=1,help="Merge MUSes of <= this 
 
 parser.add_argument("--incomplete", action="store_true", help="allow problems with multiple solutions")
 
+parser.add_argument("--steps", type=int, default=float('inf'), help="How many steps to perform" )
+
 args = parser.parse_args()
 
 if args.puzzle is None and args.eprime is None:
@@ -310,7 +312,7 @@ if fullsolution == "Multiple" and not args.incomplete:
 
 MUS = demystify.MUS.CascadeMUSFinder(solver)
 
-trace = demystify.solve.html_solve(sys.stdout, solver, puzlits, MUS, skip=args.skip, merge=args.merge)
+trace = demystify.solve.html_solve(sys.stdout, solver, puzlits, MUS, skip=args.skip, merge=args.merge, steps=args.steps)
 
 print("Minitrace: ", [s for (s, _) in trace])
 

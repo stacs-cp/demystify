@@ -144,7 +144,7 @@ hide = function(id) {
         print("<h3>Step {} </h3>".format(step), file=outstream)
         print("Solver Calls: {} <br>".format(stats_diff["solveCount"]), file=outstream)
         total_calls += stats_diff["solveCount"]
-        step += 1
+
 
         if smallest <= skip:
             # Skip over some cases
@@ -158,6 +158,8 @@ hide = function(id) {
                 puzlits.remove(p)
 
         elif smallest <= merge:
+            step += 1
+
             classid = uuid.uuid4().hex[:8]
 
             lits = [k for k in sorted(musdict.keys()) if len(musdict[k][0]) <= merge]
@@ -172,6 +174,8 @@ hide = function(id) {
                 solver.addLit(p)
                 puzlits.remove(p)
         else:
+            step += 1
+
             # Find first thing with smallest value
             basemins = [k for k in sorted(musdict.keys()) if len(musdict[k][0]) == smallest]
             fullinfo = {lit: list_counter(musdict[lit]) for lit in basemins}
