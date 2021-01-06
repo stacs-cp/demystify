@@ -2,7 +2,10 @@
 
 shopt -s globstar
 
-$* binairo.eprime binairo/**/*.param
+# This is 150 problems, we skip these for now
+# $* binairo.eprime binairo/instances/**/*.param
+
+$* binairo.eprime binairo/solving_techniques/**/*.param
 
 $* nfutoshiki.eprime futoshiki/**/*.param
 
