@@ -1,0 +1,677 @@
+Created output file for domain filtering killersudoku/solving_techniques/2-3-innies-and-outies.param.minion
+Found VAR: 'x'
+Found CON: 'alldiff_row' 'row {a[0]} must have all different elements'
+Found CON: 'alldiff_col' 'column {a[0]} must have all different elements'
+Found CON: 'alldiff_box' 'box {a[0]} must have all different elements'
+Found CON: 'alldiff_hint' 'hint {a[0]} must have all different elements'
+Found CON: 'sum_hint' 'hint {a[0]} must sum to {params['hints'][a[0]-1]}'
+NODOMAINS 729
+!! 81
+
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+.nit {background-color: red}
+.pit {background-color: green}
+.nik {color:white}
+.pii {background-color:lightblue}
+.nii {background-color: orange}
+.pik {font-weight: bolder}
+td {border-width: 3; border-style: solid; border-color:transparent}
+
+</style>
+<!-- from https://stackoverflow.com/questions/12786810/hover-on-element-and-highlight-all-elements-with-the-same-class -->
+<script>
+function hoverByClass(classname,colorover,colorout="transparent"){
+	var elms=document.getElementsByClassName(classname);
+	for(var i=0;i<elms.length;i++){
+		elms[i].onmouseover = function(){
+			for(var k=0;k<elms.length;k++){
+				elms[k].style.borderColor=colorover;
+                elms[k].style.borderWidth=3
+                elms[k].style.borderStyle="solid"
+			}
+		};
+		elms[i].onmouseout = function(){
+			for(var k=0;k<elms.length;k++){
+				elms[k].style.borderColor=colorout;
+			}
+		};
+	}
+}
+</script>
+       
+<script>
+toggle = function(id) {
+    div = document.getElementById(id)
+    if( div.style.display == "none" ) {
+        div.style.display = "block";
+    } else {
+        div.style.display = "none";
+    }
+};
+
+hide = function(id) {
+    div = document.getElementById(id)
+    div.style.display = "none";
+};
+</script>
+</head>
+<body>
+    
+<h3>Step 1 </h3>
+Solver Calls: 77736 <br>
+<table style="border-collapse: collapse; border: solid 2px">
+<colgroup style="border:solid 3px"><col><col><col>
+<colgroup style="border:solid 3px"><col><col><col>
+<colgroup style="border:solid 3px"><col><col><col>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii c85e48581 c85e48582 c85e48583">1</td><td class="pii c85e48581 c85e48582 c85e48583">2</td><td class="pii c85e48581 c85e48582 c85e48583">3</td></tr>
+<tr><td class="pii c85e48581 c85e48582 c85e48583">4</td><td class="pii c85e48581 c85e48582 c85e48583">5</td><td class="pit c85e48581 c85e48582 c85e48583">6</td></tr>
+<tr><td class="pii c85e48581 c85e48582 c85e48583">7</td><td class="pii c85e48581 c85e48582 c85e48583">8</td><td class="pii c85e48581 c85e48582 c85e48583">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii c85e48581 c85e48582">1</td><td class="pii c85e48581 c85e48582">2</td><td class="pii c85e48581 c85e48582">3</td></tr>
+<tr><td class="pii c85e48581 c85e48582">4</td><td class="pii c85e48581 c85e48582">5</td><td class="pii c85e48581 c85e48582">6</td></tr>
+<tr><td class="pii c85e48581 c85e48582">7</td><td class="pii c85e48581 c85e48582">8</td><td class="pii c85e48581 c85e48582">9</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii c85e48583">1</td><td class="pii c85e48583">2</td><td class="pii c85e48583">3</td></tr>
+<tr><td class="pii c85e48583">4</td><td class="pii c85e48583">5</td><td class="pii c85e48583">6</td></tr>
+<tr><td class="pii c85e48583">7</td><td class="pii c85e48583">8</td><td class="pii c85e48583">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii c85e48581 c85e48582">1</td><td class="pii c85e48581 c85e48582">2</td><td class="pii c85e48581 c85e48582">3</td></tr>
+<tr><td class="pii c85e48581 c85e48582">4</td><td class="pii c85e48581 c85e48582">5</td><td class="pii c85e48581 c85e48582">6</td></tr>
+<tr><td class="pii c85e48581 c85e48582">7</td><td class="pii c85e48581 c85e48582">8</td><td class="pii c85e48581 c85e48582">9</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii c85e48583">1</td><td class="pii c85e48583">2</td><td class="pii c85e48583">3</td></tr>
+<tr><td class="pii c85e48583">4</td><td class="pii c85e48583">5</td><td class="pii c85e48583">6</td></tr>
+<tr><td class="pii c85e48583">7</td><td class="pii c85e48583">8</td><td class="pii c85e48583">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+</tr>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii c85e48580 c85e48583">1</td><td class="pii c85e48580 c85e48583">2</td><td class="pii c85e48580 c85e48583">3</td></tr>
+<tr><td class="pii c85e48580 c85e48583">4</td><td class="pii c85e48580 c85e48583">5</td><td class="pii c85e48580 c85e48583">6</td></tr>
+<tr><td class="pii c85e48580 c85e48583">7</td><td class="pii c85e48580 c85e48583">8</td><td class="pii c85e48580 c85e48583">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii c85e48580 c85e48583">1</td><td class="pii c85e48580 c85e48583">2</td><td class="pii c85e48580 c85e48583">3</td></tr>
+<tr><td class="pii c85e48580 c85e48583">4</td><td class="pii c85e48580 c85e48583">5</td><td class="pii c85e48580 c85e48583">6</td></tr>
+<tr><td class="pii c85e48580 c85e48583">7</td><td class="pii c85e48580 c85e48583">8</td><td class="pii c85e48580 c85e48583">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii c85e48583">1</td><td class="pii c85e48583">2</td><td class="pii c85e48583">3</td></tr>
+<tr><td class="pii c85e48583">4</td><td class="pii c85e48583">5</td><td class="pii c85e48583">6</td></tr>
+<tr><td class="pii c85e48583">7</td><td class="pii c85e48583">8</td><td class="pii c85e48583">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+</tr>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii c85e48583">1</td><td class="pii c85e48583">2</td><td class="pii c85e48583">3</td></tr>
+<tr><td class="pii c85e48583">4</td><td class="pii c85e48583">5</td><td class="pii c85e48583">6</td></tr>
+<tr><td class="pii c85e48583">7</td><td class="pii c85e48583">8</td><td class="pii c85e48583">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii c85e48583">1</td><td class="pii c85e48583">2</td><td class="pii c85e48583">3</td></tr>
+<tr><td class="pii c85e48583">4</td><td class="pii c85e48583">5</td><td class="pii c85e48583">6</td></tr>
+<tr><td class="pii c85e48583">7</td><td class="pii c85e48583">8</td><td class="pii c85e48583">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii c85e48583">1</td><td class="pii c85e48583">2</td><td class="pii c85e48583">3</td></tr>
+<tr><td class="pii c85e48583">4</td><td class="pii c85e48583">5</td><td class="pii c85e48583">6</td></tr>
+<tr><td class="pii c85e48583">7</td><td class="pii c85e48583">8</td><td class="pii c85e48583">9</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td><td class="">3</td></tr>
+<tr><td class="">4</td><td class="">5</td><td class="">6</td></tr>
+<tr><td class="">7</td><td class="">8</td><td class="">9</td></tr>
+</table>
+</td>
+</tr>
+</table>
+Smallest mus size: 4
+<p>Setting x[1,8] is 6 because:</p>
+<ul>
+<li class='c85e48580'>hint 16 must sum to 17</li>
+<script>hoverByClass("c85e48580","black")</script>
+<li class='c85e48581'>hint 5 must have all different elements</li>
+<script>hoverByClass("c85e48581","black")</script>
+<li class='c85e48582'>hint 5 must sum to 23</li>
+<script>hoverByClass("c85e48582","black")</script>
+<li class='c85e48583'>row 8 must have all different elements</li>
+<script>hoverByClass("c85e48583","black")</script>
+</ul>
+
+<p>Only 1 candidate with MUS size 4 found</p>
+<input type='submit' value='verbose choices info' onclick="toggle('id2');"><div id=id2 style='display:none;'>
+<pre>{x[1,8] is 6: {(box 3 must have all different elements!, hint 16 must sum to 17!, hint 5 must sum to 23!, row 8 must have all different elements!): 4,
+               (hint 16 must sum to 17!, hint 5 must have all different elements!, hint 5 must sum to 23!, row 8 must have all different elements!): 5}}</pre>
+</div>
+
+<hr>

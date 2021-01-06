@@ -1,0 +1,1570 @@
+WARNING: Index domains do not match for the matrix lt
+WARNING: This could be a mismatch between the matrix given in the parameter file
+WARNING: and its matrix domain in the given statement in the model file.
+Created output file for domain filtering futoshiki/solving_techniques/futoshikiorg/2-chain-of-inequalities.param.minion
+Found VAR: 'field'
+Found CON: 'row_alldiff' 'all elements in row {a[0]} must be different'
+Found CON: 'col_alldiff' 'all elements in column {a[0]} must be different'
+Found CON: 'less_than' 'cell ({params['lt'][a[0]][0]},{params['lt'][a[0]][1]}), must be less than cell ({params['lt'][a[0]][2]},{params['lt'][a[0]][3]})'
+NODOMAINS 64
+!! 16
+
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+.nit {background-color: red}
+.pit {background-color: green}
+.nik {color:white}
+.pii {background-color:lightblue}
+.nii {background-color: orange}
+.pik {font-weight: bolder}
+td {border-width: 3; border-style: solid; border-color:transparent}
+
+</style>
+<!-- from https://stackoverflow.com/questions/12786810/hover-on-element-and-highlight-all-elements-with-the-same-class -->
+<script>
+function hoverByClass(classname,colorover,colorout="transparent"){
+	var elms=document.getElementsByClassName(classname);
+	for(var i=0;i<elms.length;i++){
+		elms[i].onmouseover = function(){
+			for(var k=0;k<elms.length;k++){
+				elms[k].style.borderColor=colorover;
+                elms[k].style.borderWidth=3
+                elms[k].style.borderStyle="solid"
+			}
+		};
+		elms[i].onmouseout = function(){
+			for(var k=0;k<elms.length;k++){
+				elms[k].style.borderColor=colorout;
+			}
+		};
+	}
+}
+</script>
+       
+<script>
+toggle = function(id) {
+    div = document.getElementById(id)
+    if( div.style.display == "none" ) {
+        div.style.display = "block";
+    } else {
+        div.style.display = "none";
+    }
+};
+
+hide = function(id) {
+    div = document.getElementById(id)
+    div.style.display = "none";
+};
+</script>
+</head>
+<body>
+    
+<h3>Step 1 </h3>
+Solver Calls: 9057 <br>
+<table style="border-collapse: collapse; border: solid 2px">
+<colgroup style="border:solid 3px"><col><col><col>
+<colgroup style="border:solid 3px"><col><col><col>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii fef14d9a0 fef14d9a1">1</td><td class="pii fef14d9a0 fef14d9a1">2</td></tr>
+<tr><td class="pit fef14d9a0 fef14d9a1">3</td><td class="pii fef14d9a0 fef14d9a1">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii fef14d9a0">1</td><td class="pii fef14d9a0">2</td></tr>
+<tr><td class="pii fef14d9a0">3</td><td class="pit fef14d9a0">4</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii fef14d9a1 fef14d9a2">1</td><td class="pit fef14d9a1 fef14d9a2">2</td></tr>
+<tr><td class="pii fef14d9a1 fef14d9a2">3</td><td class="pii fef14d9a1 fef14d9a2">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+</tr>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pit fef14d9a2">1</td><td class="pii fef14d9a2">2</td></tr>
+<tr><td class="pii fef14d9a2">3</td><td class="pii fef14d9a2">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+</tr>
+</table>
+Smallest mus size: 3
+<p>Setting field[2,3] is 3, field[3,3] is 2, field[2,4] is 4, field[4,3] is 1 because:</p>
+<ul>
+<li class='fef14d9a0'>cell (2,3), must be less than cell (2,4)</li>
+<script>hoverByClass("fef14d9a0","black")</script>
+<li class='fef14d9a1'>cell (3,3), must be less than cell (2,3)</li>
+<script>hoverByClass("fef14d9a1","black")</script>
+<li class='fef14d9a2'>cell (4,3), must be less than cell (3,3)</li>
+<script>hoverByClass("fef14d9a2","black")</script>
+</ul>
+
+<input type='submit' value='Found 4 candidates with MUS size 3 (see other choices)' onclick="toggle('id1');"><div id=id1 style='display:none;'>
+<table style="border-collapse: collapse; border: solid 2px">
+<colgroup style="border:solid 3px"><col><col><col>
+<colgroup style="border:solid 3px"><col><col><col>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 2dbfd5460 2dbfd5461">1</td><td class="pii 2dbfd5460 2dbfd5461">2</td></tr>
+<tr><td class="pit 2dbfd5460 2dbfd5461">3</td><td class="pii 2dbfd5460 2dbfd5461">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 2dbfd5460">1</td><td class="pii 2dbfd5460">2</td></tr>
+<tr><td class="pii 2dbfd5460">3</td><td class="pit 2dbfd5460">4</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 2dbfd5461 2dbfd5462">1</td><td class="pit 2dbfd5461 2dbfd5462">2</td></tr>
+<tr><td class="pii 2dbfd5461 2dbfd5462">3</td><td class="pii 2dbfd5461 2dbfd5462">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+</tr>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pit 2dbfd5462">1</td><td class="pii 2dbfd5462">2</td></tr>
+<tr><td class="pii 2dbfd5462">3</td><td class="pii 2dbfd5462">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+</tr>
+</table>
+Smallest mus size: 3
+<p>Setting field[2,3] is 3, field[3,3] is 2, field[2,4] is 4, field[4,3] is 1 because:</p>
+<ul>
+<li class='2dbfd5460'>cell (2,3), must be less than cell (2,4)</li>
+<script>hoverByClass("2dbfd5460","black")</script>
+<li class='2dbfd5461'>cell (3,3), must be less than cell (2,3)</li>
+<script>hoverByClass("2dbfd5461","black")</script>
+<li class='2dbfd5462'>cell (4,3), must be less than cell (3,3)</li>
+<script>hoverByClass("2dbfd5462","black")</script>
+</ul>
+
+<br>
+
+<table style="border-collapse: collapse; border: solid 2px">
+<colgroup style="border:solid 3px"><col><col><col>
+<colgroup style="border:solid 3px"><col><col><col>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 5ff0a6730 5ff0a6731">1</td><td class="pii 5ff0a6730 5ff0a6731">2</td></tr>
+<tr><td class="pit 5ff0a6730 5ff0a6731">3</td><td class="pii 5ff0a6730 5ff0a6731">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 5ff0a6730">1</td><td class="pii 5ff0a6730">2</td></tr>
+<tr><td class="pii 5ff0a6730">3</td><td class="pit 5ff0a6730">4</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 5ff0a6731 5ff0a6732">1</td><td class="pit 5ff0a6731 5ff0a6732">2</td></tr>
+<tr><td class="pii 5ff0a6731 5ff0a6732">3</td><td class="pii 5ff0a6731 5ff0a6732">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+</tr>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pit 5ff0a6732">1</td><td class="pii 5ff0a6732">2</td></tr>
+<tr><td class="pii 5ff0a6732">3</td><td class="pii 5ff0a6732">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+</tr>
+</table>
+Smallest mus size: 3
+<p>Setting field[2,3] is 3, field[3,3] is 2, field[2,4] is 4, field[4,3] is 1 because:</p>
+<ul>
+<li class='5ff0a6730'>cell (2,3), must be less than cell (2,4)</li>
+<script>hoverByClass("5ff0a6730","black")</script>
+<li class='5ff0a6731'>cell (3,3), must be less than cell (2,3)</li>
+<script>hoverByClass("5ff0a6731","black")</script>
+<li class='5ff0a6732'>cell (4,3), must be less than cell (3,3)</li>
+<script>hoverByClass("5ff0a6732","black")</script>
+</ul>
+
+<br>
+
+<table style="border-collapse: collapse; border: solid 2px">
+<colgroup style="border:solid 3px"><col><col><col>
+<colgroup style="border:solid 3px"><col><col><col>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii e0e2fe730 e0e2fe731">1</td><td class="pii e0e2fe730 e0e2fe731">2</td></tr>
+<tr><td class="pit e0e2fe730 e0e2fe731">3</td><td class="pii e0e2fe730 e0e2fe731">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii e0e2fe730">1</td><td class="pii e0e2fe730">2</td></tr>
+<tr><td class="pii e0e2fe730">3</td><td class="pit e0e2fe730">4</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii e0e2fe731 e0e2fe732">1</td><td class="pit e0e2fe731 e0e2fe732">2</td></tr>
+<tr><td class="pii e0e2fe731 e0e2fe732">3</td><td class="pii e0e2fe731 e0e2fe732">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+</tr>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pit e0e2fe732">1</td><td class="pii e0e2fe732">2</td></tr>
+<tr><td class="pii e0e2fe732">3</td><td class="pii e0e2fe732">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+</tr>
+</table>
+Smallest mus size: 3
+<p>Setting field[2,3] is 3, field[3,3] is 2, field[2,4] is 4, field[4,3] is 1 because:</p>
+<ul>
+<li class='e0e2fe730'>cell (2,3), must be less than cell (2,4)</li>
+<script>hoverByClass("e0e2fe730","black")</script>
+<li class='e0e2fe731'>cell (3,3), must be less than cell (2,3)</li>
+<script>hoverByClass("e0e2fe731","black")</script>
+<li class='e0e2fe732'>cell (4,3), must be less than cell (3,3)</li>
+<script>hoverByClass("e0e2fe732","black")</script>
+</ul>
+
+<br>
+
+
+</div>
+
+<input type='submit' value='verbose choices info' onclick="toggle('id2');"><div id=id2 style='display:none;'>
+<pre>{field[2,3] is 3: {(cell (2,3), must be less than cell (2,4)!, cell (3,3), must be less than cell (2,3)!, cell (4,3), must be less than cell (3,3)!): 20},
+ field[2,4] is 4: {(cell (2,3), must be less than cell (2,4)!, cell (3,3), must be less than cell (2,3)!, cell (4,3), must be less than cell (3,3)!): 20},
+ field[3,3] is 2: {(cell (2,3), must be less than cell (2,4)!, cell (3,3), must be less than cell (2,3)!, cell (4,3), must be less than cell (3,3)!): 19},
+ field[4,3] is 1: {(cell (2,3), must be less than cell (2,4)!, cell (3,3), must be less than cell (2,3)!, cell (4,3), must be less than cell (3,3)!): 19}}</pre>
+</div>
+
+<hr>
+<h3>Step 2 </h3>
+Solver Calls: 24 <br>
+<table style="border-collapse: collapse; border: solid 2px">
+<colgroup style="border:solid 3px"><col><col><col>
+<colgroup style="border:solid 3px"><col><col><col>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 18cfffcc0">1</td><td class="pii 18cfffcc0">2</td></tr>
+<tr><td class="pii 18cfffcc0">3</td><td class="pit 18cfffcc0">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 18cfffcc0">1</td><td class="pii 18cfffcc0">2</td></tr>
+<tr><td class="pii pik 18cfffcc0">3</td><td class="pii 18cfffcc0">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="pik">4</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 18cfffcc0">1</td><td class="pii pik 18cfffcc0">2</td></tr>
+<tr><td class="pii 18cfffcc0">3</td><td class="pii 18cfffcc0">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+</tr>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii pik 18cfffcc0">1</td><td class="pii 18cfffcc0">2</td></tr>
+<tr><td class="pii 18cfffcc0">3</td><td class="pii 18cfffcc0">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+</tr>
+</table>
+Doing 1  simple deductions 
+<input type='submit' value='Show why' onclick="toggle('id3');"><div id=id3 style='display:none;'>
+<p>Setting field[1,3] is 4 because:</p>
+<ul>
+<li class='18cfffcc0'>all elements in column 3 must be different</li>
+<script>hoverByClass("18cfffcc0","black")</script>
+</ul>
+
+</div>
+
+<hr>
+<h3>Step 3 </h3>
+Solver Calls: 4448 <br>
+<table style="border-collapse: collapse; border: solid 2px">
+<colgroup style="border:solid 3px"><col><col><col>
+<colgroup style="border:solid 3px"><col><col><col>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 71e7d6b80 71e7d6b81">1</td><td class="pii 71e7d6b80 71e7d6b81">2</td></tr>
+<tr><td class="pit 71e7d6b80 71e7d6b81">3</td><td class="pii 71e7d6b80 71e7d6b81">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 71e7d6b80 71e7d6b81 71e7d6b82">1</td><td class="pit 71e7d6b80 71e7d6b81 71e7d6b82">2</td></tr>
+<tr><td class="pii 71e7d6b80 71e7d6b81 71e7d6b82">3</td><td class="pii 71e7d6b80 71e7d6b81 71e7d6b82">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 71e7d6b80">1</td><td class="pii 71e7d6b80">2</td></tr>
+<tr><td class="pii 71e7d6b80">3</td><td class="pii pik 71e7d6b80">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pit 71e7d6b80">1</td><td class="pii 71e7d6b80">2</td></tr>
+<tr><td class="pii 71e7d6b80">3</td><td class="pii 71e7d6b80">4</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pit 71e7d6b82">1</td><td class="pii 71e7d6b82">2</td></tr>
+<tr><td class="pii 71e7d6b82">3</td><td class="pii 71e7d6b82">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="pik">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="pik">4</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="pik">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+</tr>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+</tr>
+</table>
+Smallest mus size: 3
+<p>Setting field[1,1] is 3, field[2,2] is 1, field[1,2] is 2, field[1,4] is 1 because:</p>
+<ul>
+<li class='71e7d6b80'>all elements in row 1 must be different</li>
+<script>hoverByClass("71e7d6b80","black")</script>
+<li class='71e7d6b81'>cell (1,2), must be less than cell (1,1)</li>
+<script>hoverByClass("71e7d6b81","black")</script>
+<li class='71e7d6b82'>cell (2,2), must be less than cell (1,2)</li>
+<script>hoverByClass("71e7d6b82","black")</script>
+</ul>
+
+<p>Only 1 candidate with MUS size 3 found</p>
+<input type='submit' value='verbose choices info' onclick="toggle('id4');"><div id=id4 style='display:none;'>
+<pre>{field[1,2] is 2: {(all elements in row 1 must be different!, cell (1,2), must be less than cell (1,1)!, cell (2,2), must be less than cell (1,2)!): 2}}</pre>
+</div>
+
+<hr>
+<h3>Step 4 </h3>
+Solver Calls: 20 <br>
+<table style="border-collapse: collapse; border: solid 2px">
+<colgroup style="border:solid 3px"><col><col><col>
+<colgroup style="border:solid 3px"><col><col><col>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="pik">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="pik">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="pik">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 6570e9a90">1</td><td class="pit 6570e9a90">2</td></tr>
+<tr><td class="pii 6570e9a90">3</td><td class="pii 6570e9a90">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii pik 6570e9a90">1</td><td class="pii 6570e9a90">2</td></tr>
+<tr><td class="pii 6570e9a90">3</td><td class="pii 6570e9a90">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 6570e9a90">1</td><td class="pii 6570e9a90">2</td></tr>
+<tr><td class="pii pik 6570e9a90">3</td><td class="pii 6570e9a90">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 6570e9a90">1</td><td class="pii 6570e9a90">2</td></tr>
+<tr><td class="pii 6570e9a90">3</td><td class="pii pik 6570e9a90">4</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="pik">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+</tr>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+</tr>
+</table>
+Doing 1  simple deductions 
+<input type='submit' value='Show why' onclick="toggle('id5');"><div id=id5 style='display:none;'>
+<p>Setting field[2,1] is 2 because:</p>
+<ul>
+<li class='6570e9a90'>all elements in row 2 must be different</li>
+<script>hoverByClass("6570e9a90","black")</script>
+</ul>
+
+</div>
+
+<hr>
+<h3>Step 5 </h3>
+Solver Calls: 915 <br>
+<table style="border-collapse: collapse; border: solid 2px">
+<colgroup style="border:solid 3px"><col><col><col>
+<colgroup style="border:solid 3px"><col><col><col>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="pik">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="pik">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="pik">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii pik afbe860a0">1</td><td class="pii afbe860a0">2</td></tr>
+<tr><td class="pii afbe860a0">3</td><td class="pii afbe860a0">4</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="pik">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="pik">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii afbe860a0">1</td><td class="pii afbe860a0">2</td></tr>
+<tr><td class="pii afbe860a0">3</td><td class="pii pik afbe860a0">4</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii afbe860a1">1</td><td class="pii afbe860a1">2</td></tr>
+<tr><td class="pii afbe860a1">3</td><td class="pii afbe860a1">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii afbe860a1">1</td><td class="pii afbe860a1">2</td></tr>
+<tr><td class="pii afbe860a1">3</td><td class="pii afbe860a1">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii afbe860a1">1</td><td class="pii pik afbe860a1">2</td></tr>
+<tr><td class="pii afbe860a1">3</td><td class="pii afbe860a1">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii afbe860a0 afbe860a1">1</td><td class="pii afbe860a0 afbe860a1">2</td></tr>
+<tr><td class="pit afbe860a0 afbe860a1">3</td><td class="pii afbe860a0 afbe860a1">4</td></tr>
+</table>
+</td>
+</tr>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii afbe860a0">1</td><td class="pit afbe860a0">2</td></tr>
+<tr><td class="pii afbe860a0">3</td><td class="pii afbe860a0">4</td></tr>
+</table>
+</td>
+</tr>
+</table>
+Smallest mus size: 2
+<p>Setting field[4,4] is 2, field[3,4] is 3 because:</p>
+<ul>
+<li class='afbe860a0'>all elements in column 4 must be different</li>
+<script>hoverByClass("afbe860a0","black")</script>
+<li class='afbe860a1'>all elements in row 3 must be different</li>
+<script>hoverByClass("afbe860a1","black")</script>
+</ul>
+
+<input type='submit' value='Found 2 candidates with MUS size 2 (see other choices)' onclick="toggle('id6');"><div id=id6 style='display:none;'>
+<table style="border-collapse: collapse; border: solid 2px">
+<colgroup style="border:solid 3px"><col><col><col>
+<colgroup style="border:solid 3px"><col><col><col>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 723e433b0">1</td><td class="pii 723e433b0">2</td></tr>
+<tr><td class="pii pik 723e433b0">3</td><td class="pii 723e433b0">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="pik">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="pik">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 723e433b0">1</td><td class="pii pik 723e433b0">2</td></tr>
+<tr><td class="pii 723e433b0">3</td><td class="pii 723e433b0">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="pik">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="pik">4</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pit 723e433b0">1</td><td class="pii 723e433b0">2</td></tr>
+<tr><td class="pii 723e433b0">3</td><td class="pii 723e433b0">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="pik">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+</tr>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 723e433b0 723e433b1">1</td><td class="pii 723e433b0 723e433b1">2</td></tr>
+<tr><td class="pii 723e433b0 723e433b1">3</td><td class="pit 723e433b0 723e433b1">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 723e433b1">1</td><td class="pii 723e433b1">2</td></tr>
+<tr><td class="pii 723e433b1">3</td><td class="pii 723e433b1">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii pik 723e433b1">1</td><td class="pii 723e433b1">2</td></tr>
+<tr><td class="pii 723e433b1">3</td><td class="pii 723e433b1">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 723e433b1">1</td><td class="pii 723e433b1">2</td></tr>
+<tr><td class="pii 723e433b1">3</td><td class="pii 723e433b1">4</td></tr>
+</table>
+</td>
+</tr>
+</table>
+Smallest mus size: 2
+<p>Setting field[3,1] is 1, field[4,1] is 4 because:</p>
+<ul>
+<li class='723e433b0'>all elements in column 1 must be different</li>
+<script>hoverByClass("723e433b0","black")</script>
+<li class='723e433b1'>all elements in row 4 must be different</li>
+<script>hoverByClass("723e433b1","black")</script>
+</ul>
+
+<br>
+
+
+</div>
+
+<input type='submit' value='verbose choices info' onclick="toggle('id7');"><div id=id7 style='display:none;'>
+<pre>{field[3,4] is 3: {(all elements in column 4 must be different!, all elements in row 3 must be different!): 2},
+ field[4,1] is 4: {(all elements in column 1 must be different!, all elements in row 4 must be different!): 2}}</pre>
+</div>
+
+<hr>
+<h3>Step 6 </h3>
+Solver Calls: 530 <br>
+<table style="border-collapse: collapse; border: solid 2px">
+<colgroup style="border:solid 3px"><col><col><col>
+<colgroup style="border:solid 3px"><col><col><col>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="pik">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 3b3623200">1</td><td class="pii pik 3b3623200">2</td></tr>
+<tr><td class="pii 3b3623200">3</td><td class="pii 3b3623200">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="pik">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="pik">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii pik 3b3623200">1</td><td class="pii 3b3623200">2</td></tr>
+<tr><td class="pii 3b3623200">3</td><td class="pii 3b3623200">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="pik">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="pik">4</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pit 3b3623201">1</td><td class="pii 3b3623201">2</td></tr>
+<tr><td class="pii 3b3623201">3</td><td class="pii 3b3623201">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 3b3623200 3b3623201">1</td><td class="pii 3b3623200 3b3623201">2</td></tr>
+<tr><td class="pii 3b3623200 3b3623201">3</td><td class="pit 3b3623200 3b3623201">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 3b3623201">1</td><td class="pii pik 3b3623201">2</td></tr>
+<tr><td class="pii 3b3623201">3</td><td class="pii 3b3623201">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 3b3623201">1</td><td class="pii 3b3623201">2</td></tr>
+<tr><td class="pii pik 3b3623201">3</td><td class="pii 3b3623201">4</td></tr>
+</table>
+</td>
+</tr>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 3b3623200">1</td><td class="pii 3b3623200">2</td></tr>
+<tr><td class="pit 3b3623200">3</td><td class="pii 3b3623200">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="pik">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+</tr>
+</table>
+Smallest mus size: 2
+<p>Setting field[3,1] is 1, field[3,2] is 4, field[4,2] is 3 because:</p>
+<ul>
+<li class='3b3623200'>all elements in column 2 must be different</li>
+<script>hoverByClass("3b3623200","black")</script>
+<li class='3b3623201'>all elements in row 3 must be different</li>
+<script>hoverByClass("3b3623201","black")</script>
+</ul>
+
+<input type='submit' value='Found 2 candidates with MUS size 2 (see other choices)' onclick="toggle('id8');"><div id=id8 style='display:none;'>
+<table style="border-collapse: collapse; border: solid 2px">
+<colgroup style="border:solid 3px"><col><col><col>
+<colgroup style="border:solid 3px"><col><col><col>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii b52715000">1</td><td class="pii b52715000">2</td></tr>
+<tr><td class="pii pik b52715000">3</td><td class="pii b52715000">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="pik">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="pik">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii b52715000">1</td><td class="pii pik b52715000">2</td></tr>
+<tr><td class="pii b52715000">3</td><td class="pii b52715000">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="pik">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="pik">4</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pit b52715000">1</td><td class="pii b52715000">2</td></tr>
+<tr><td class="pii b52715000">3</td><td class="pii b52715000">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="pik">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="pik">3</td><td class="">4</td></tr>
+</table>
+</td>
+</tr>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii b52715000 b52715001">1</td><td class="pii b52715000 b52715001">2</td></tr>
+<tr><td class="pii b52715000 b52715001">3</td><td class="pit b52715000 b52715001">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii b52715001">1</td><td class="pii b52715001">2</td></tr>
+<tr><td class="pit b52715001">3</td><td class="pii b52715001">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii pik b52715001">1</td><td class="pii b52715001">2</td></tr>
+<tr><td class="pii b52715001">3</td><td class="pii b52715001">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii b52715001">1</td><td class="pii pik b52715001">2</td></tr>
+<tr><td class="pii b52715001">3</td><td class="pii b52715001">4</td></tr>
+</table>
+</td>
+</tr>
+</table>
+Smallest mus size: 2
+<p>Setting field[3,1] is 1, field[4,1] is 4, field[4,2] is 3 because:</p>
+<ul>
+<li class='b52715000'>all elements in column 1 must be different</li>
+<script>hoverByClass("b52715000","black")</script>
+<li class='b52715001'>all elements in row 4 must be different</li>
+<script>hoverByClass("b52715001","black")</script>
+</ul>
+
+<br>
+
+
+</div>
+
+<input type='submit' value='verbose choices info' onclick="toggle('id9');"><div id=id9 style='display:none;'>
+<pre>{field[3,2] is 4: {(all elements in column 2 must be different!, all elements in row 3 must be different!): 2},
+ field[4,1] is 4: {(all elements in column 1 must be different!, all elements in row 4 must be different!): 4}}</pre>
+</div>
+
+<hr>
+<h3>Step 7 </h3>
+Solver Calls: 4 <br>
+<table style="border-collapse: collapse; border: solid 2px">
+<colgroup style="border:solid 3px"><col><col><col>
+<colgroup style="border:solid 3px"><col><col><col>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="pik">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="pik">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="pik">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="pik">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="pik">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="pik">4</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="pik">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="pik">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="pik">3</td><td class="">4</td></tr>
+</table>
+</td>
+</tr>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii b1e4c4400">1</td><td class="pii b1e4c4400">2</td></tr>
+<tr><td class="pii b1e4c4400">3</td><td class="pit b1e4c4400">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii b1e4c4400">1</td><td class="pii b1e4c4400">2</td></tr>
+<tr><td class="pii pik b1e4c4400">3</td><td class="pii b1e4c4400">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii pik b1e4c4400">1</td><td class="pii b1e4c4400">2</td></tr>
+<tr><td class="pii b1e4c4400">3</td><td class="pii b1e4c4400">4</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii b1e4c4400">1</td><td class="pii pik b1e4c4400">2</td></tr>
+<tr><td class="pii b1e4c4400">3</td><td class="pii b1e4c4400">4</td></tr>
+</table>
+</td>
+</tr>
+</table>
+Doing 1  simple deductions 
+<input type='submit' value='Show why' onclick="toggle('id10');"><div id=id10 style='display:none;'>
+<p>Setting field[4,1] is 4 because:</p>
+<ul>
+<li class='b1e4c4400'>all elements in row 4 must be different</li>
+<script>hoverByClass("b1e4c4400","black")</script>
+</ul>
+
+</div>
+
+<hr>
+Minitrace:  [(3, 4, -4), (3, 4, -4), (2, 4, -2), (2, 3, -3)]

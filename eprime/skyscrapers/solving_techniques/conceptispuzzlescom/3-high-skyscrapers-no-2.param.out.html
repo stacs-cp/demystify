@@ -1,0 +1,2762 @@
+Created output file for domain filtering skyscrapers/solving_techniques/conceptispuzzlescom/3-high-skyscrapers-no-2.param.minion
+Found VAR: 'field'
+Found CON: 'row_alldiff' 'all elements in row {a[0]} must be different'
+Found CON: 'col_alldiff' 'all elements in column {a[0]} must be different'
+Found CON: 'clues_left_on' 'the count for {['left','top','right','bottom'][a[0]-1]} {a[1]} is {params['CLUES'][a[0]-1][a[1]-1]}'
+Found Aux VAR: 'max_left'
+Found Aux VAR: 'sky_left'
+Found Aux VAR: 'variant_fields'
+
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+.nit {background-color: red}
+.pit {background-color: green}
+.nik {color:white}
+.pii {background-color:lightblue}
+.nii {background-color: orange}
+.pik {font-weight: bolder}
+td {border-width: 3; border-style: solid; border-color:transparent}
+
+</style>
+<!-- from https://stackoverflow.com/questions/12786810/hover-on-element-and-highlight-all-elements-with-the-same-class -->
+<script>
+function hoverByClass(classname,colorover,colorout="transparent"){
+	var elms=document.getElementsByClassName(classname);
+	for(var i=0;i<elms.length;i++){
+		elms[i].onmouseover = function(){
+			for(var k=0;k<elms.length;k++){
+				elms[k].style.borderColor=colorover;
+                elms[k].style.borderWidth=3
+                elms[k].style.borderStyle="solid"
+			}
+		};
+		elms[i].onmouseout = function(){
+			for(var k=0;k<elms.length;k++){
+				elms[k].style.borderColor=colorout;
+			}
+		};
+	}
+}
+</script>
+       
+<script>
+toggle = function(id) {
+    div = document.getElementById(id)
+    if( div.style.display == "none" ) {
+        div.style.display = "block";
+    } else {
+        div.style.display = "none";
+    }
+};
+
+hide = function(id) {
+    div = document.getElementById(id)
+    div.style.display = "none";
+};
+</script>
+</head>
+<body>
+    
+<h3>Step 1 </h3>
+Solver Calls: 372 <br>
+<table style="border-collapse: collapse; border: solid 2px">
+<colgroup style="border:solid 3px"><col><col><col>
+<colgroup style="border:solid 3px"><col><col><col>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii de4beea30 de4beea31">1</td><td class="pii de4beea30 de4beea31">2</td></tr>
+<tr><td class="pii de4beea30 de4beea31">3</td><td class="nit de4beea30 de4beea31">4</td></tr>
+<tr><td class="nit de4beea30 de4beea31">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii de4beea30 de4beea31 de4beea32 de4beea33">1</td><td class="pii de4beea30 de4beea31 de4beea32 de4beea33">2</td></tr>
+<tr><td class="pii de4beea30 de4beea31 de4beea32 de4beea33">3</td><td class="nit de4beea30 de4beea31 de4beea32 de4beea33">4</td></tr>
+<tr><td class="nit de4beea30 de4beea31 de4beea32 de4beea33">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii de4beea30 de4beea31">1</td><td class="pii de4beea30 de4beea31">2</td></tr>
+<tr><td class="pii de4beea30 de4beea31">3</td><td class="pii de4beea30 de4beea31">4</td></tr>
+<tr><td class="pii de4beea30 de4beea31">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii de4beea30 de4beea31">1</td><td class="pii de4beea30 de4beea31">2</td></tr>
+<tr><td class="pii de4beea30 de4beea31">3</td><td class="pii de4beea30 de4beea31">4</td></tr>
+<tr><td class="pii de4beea30 de4beea31">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii de4beea30 de4beea31 de4beea34 de4beea35 de4beea36 de4beea331 de4beea332">1</td><td class="pii de4beea30 de4beea31 de4beea34 de4beea35 de4beea36 de4beea331 de4beea332">2</td></tr>
+<tr><td class="nit de4beea30 de4beea31 de4beea34 de4beea35 de4beea36 de4beea331 de4beea332">3</td><td class="nit de4beea30 de4beea31 de4beea34 de4beea35 de4beea36 de4beea331 de4beea332">4</td></tr>
+<tr><td class="nit de4beea30 de4beea31 de4beea34 de4beea35 de4beea36 de4beea331 de4beea332">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nit de4beea37 de4beea38 de4beea39 de4beea310 de4beea311 de4beea312 de4beea313 de4beea314 de4beea315 de4beea316 de4beea317 de4beea318 de4beea319 de4beea320 de4beea321 de4beea322 de4beea323 de4beea324 de4beea325 de4beea326 de4beea327 de4beea328 de4beea329 de4beea330">1</td><td class="nit de4beea37 de4beea38 de4beea39 de4beea310 de4beea311 de4beea312 de4beea313 de4beea314 de4beea315 de4beea316 de4beea317 de4beea318 de4beea319 de4beea320 de4beea321 de4beea322 de4beea323 de4beea324 de4beea325 de4beea326 de4beea327 de4beea328 de4beea329 de4beea330">2</td></tr>
+<tr><td class="nit de4beea37 de4beea38 de4beea39 de4beea310 de4beea311 de4beea312 de4beea313 de4beea314 de4beea315 de4beea316 de4beea317 de4beea318 de4beea319 de4beea320 de4beea321 de4beea322 de4beea323 de4beea324 de4beea325 de4beea326 de4beea327 de4beea328 de4beea329 de4beea330">3</td><td class="nit de4beea37 de4beea38 de4beea39 de4beea310 de4beea311 de4beea312 de4beea313 de4beea314 de4beea315 de4beea316 de4beea317 de4beea318 de4beea319 de4beea320 de4beea321 de4beea322 de4beea323 de4beea324 de4beea325 de4beea326 de4beea327 de4beea328 de4beea329 de4beea330">4</td></tr>
+<tr><td class="pit de4beea37 de4beea38 de4beea39 de4beea310 de4beea311 de4beea312 de4beea313 de4beea314 de4beea315 de4beea316 de4beea317 de4beea318 de4beea319 de4beea320 de4beea321 de4beea322 de4beea323 de4beea324 de4beea325 de4beea326 de4beea327 de4beea328 de4beea329 de4beea330">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nit de4beea32 de4beea33 de4beea37 de4beea38 de4beea39 de4beea310 de4beea311 de4beea312 de4beea313 de4beea314 de4beea315 de4beea316 de4beea317 de4beea318 de4beea319 de4beea320 de4beea321 de4beea322 de4beea323 de4beea324 de4beea325 de4beea326 de4beea327 de4beea328 de4beea329 de4beea330">1</td><td class="nit de4beea32 de4beea33 de4beea37 de4beea38 de4beea39 de4beea310 de4beea311 de4beea312 de4beea313 de4beea314 de4beea315 de4beea316 de4beea317 de4beea318 de4beea319 de4beea320 de4beea321 de4beea322 de4beea323 de4beea324 de4beea325 de4beea326 de4beea327 de4beea328 de4beea329 de4beea330">2</td></tr>
+<tr><td class="nit de4beea32 de4beea33 de4beea37 de4beea38 de4beea39 de4beea310 de4beea311 de4beea312 de4beea313 de4beea314 de4beea315 de4beea316 de4beea317 de4beea318 de4beea319 de4beea320 de4beea321 de4beea322 de4beea323 de4beea324 de4beea325 de4beea326 de4beea327 de4beea328 de4beea329 de4beea330">3</td><td class="pit de4beea32 de4beea33 de4beea37 de4beea38 de4beea39 de4beea310 de4beea311 de4beea312 de4beea313 de4beea314 de4beea315 de4beea316 de4beea317 de4beea318 de4beea319 de4beea320 de4beea321 de4beea322 de4beea323 de4beea324 de4beea325 de4beea326 de4beea327 de4beea328 de4beea329 de4beea330">4</td></tr>
+<tr><td class="nit de4beea32 de4beea33 de4beea37 de4beea38 de4beea39 de4beea310 de4beea311 de4beea312 de4beea313 de4beea314 de4beea315 de4beea316 de4beea317 de4beea318 de4beea319 de4beea320 de4beea321 de4beea322 de4beea323 de4beea324 de4beea325 de4beea326 de4beea327 de4beea328 de4beea329 de4beea330">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nit de4beea37 de4beea38 de4beea39 de4beea310 de4beea311 de4beea312 de4beea313 de4beea314 de4beea315 de4beea316 de4beea317 de4beea318 de4beea319 de4beea320 de4beea321 de4beea322 de4beea323 de4beea324 de4beea325 de4beea326 de4beea327 de4beea328 de4beea329 de4beea330">1</td><td class="nit de4beea37 de4beea38 de4beea39 de4beea310 de4beea311 de4beea312 de4beea313 de4beea314 de4beea315 de4beea316 de4beea317 de4beea318 de4beea319 de4beea320 de4beea321 de4beea322 de4beea323 de4beea324 de4beea325 de4beea326 de4beea327 de4beea328 de4beea329 de4beea330">2</td></tr>
+<tr><td class="pit de4beea37 de4beea38 de4beea39 de4beea310 de4beea311 de4beea312 de4beea313 de4beea314 de4beea315 de4beea316 de4beea317 de4beea318 de4beea319 de4beea320 de4beea321 de4beea322 de4beea323 de4beea324 de4beea325 de4beea326 de4beea327 de4beea328 de4beea329 de4beea330">3</td><td class="nit de4beea37 de4beea38 de4beea39 de4beea310 de4beea311 de4beea312 de4beea313 de4beea314 de4beea315 de4beea316 de4beea317 de4beea318 de4beea319 de4beea320 de4beea321 de4beea322 de4beea323 de4beea324 de4beea325 de4beea326 de4beea327 de4beea328 de4beea329 de4beea330">4</td></tr>
+<tr><td class="nit de4beea37 de4beea38 de4beea39 de4beea310 de4beea311 de4beea312 de4beea313 de4beea314 de4beea315 de4beea316 de4beea317 de4beea318 de4beea319 de4beea320 de4beea321 de4beea322 de4beea323 de4beea324 de4beea325 de4beea326 de4beea327 de4beea328 de4beea329 de4beea330">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nit de4beea37 de4beea38 de4beea39 de4beea310 de4beea311 de4beea312 de4beea313 de4beea314 de4beea315 de4beea316 de4beea317 de4beea318 de4beea319 de4beea320 de4beea321 de4beea322 de4beea323 de4beea324 de4beea325 de4beea326 de4beea327 de4beea328 de4beea329 de4beea330">1</td><td class="pit de4beea37 de4beea38 de4beea39 de4beea310 de4beea311 de4beea312 de4beea313 de4beea314 de4beea315 de4beea316 de4beea317 de4beea318 de4beea319 de4beea320 de4beea321 de4beea322 de4beea323 de4beea324 de4beea325 de4beea326 de4beea327 de4beea328 de4beea329 de4beea330">2</td></tr>
+<tr><td class="nit de4beea37 de4beea38 de4beea39 de4beea310 de4beea311 de4beea312 de4beea313 de4beea314 de4beea315 de4beea316 de4beea317 de4beea318 de4beea319 de4beea320 de4beea321 de4beea322 de4beea323 de4beea324 de4beea325 de4beea326 de4beea327 de4beea328 de4beea329 de4beea330">3</td><td class="nit de4beea37 de4beea38 de4beea39 de4beea310 de4beea311 de4beea312 de4beea313 de4beea314 de4beea315 de4beea316 de4beea317 de4beea318 de4beea319 de4beea320 de4beea321 de4beea322 de4beea323 de4beea324 de4beea325 de4beea326 de4beea327 de4beea328 de4beea329 de4beea330">4</td></tr>
+<tr><td class="nit de4beea37 de4beea38 de4beea39 de4beea310 de4beea311 de4beea312 de4beea313 de4beea314 de4beea315 de4beea316 de4beea317 de4beea318 de4beea319 de4beea320 de4beea321 de4beea322 de4beea323 de4beea324 de4beea325 de4beea326 de4beea327 de4beea328 de4beea329 de4beea330">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pit de4beea34 de4beea35 de4beea36 de4beea37 de4beea38 de4beea39 de4beea310 de4beea311 de4beea312 de4beea313 de4beea314 de4beea315 de4beea316 de4beea317 de4beea318 de4beea319 de4beea320 de4beea321 de4beea322 de4beea323 de4beea324 de4beea325 de4beea326 de4beea327 de4beea328 de4beea329 de4beea330 de4beea331 de4beea332">1</td><td class="nit de4beea34 de4beea35 de4beea36 de4beea37 de4beea38 de4beea39 de4beea310 de4beea311 de4beea312 de4beea313 de4beea314 de4beea315 de4beea316 de4beea317 de4beea318 de4beea319 de4beea320 de4beea321 de4beea322 de4beea323 de4beea324 de4beea325 de4beea326 de4beea327 de4beea328 de4beea329 de4beea330 de4beea331 de4beea332">2</td></tr>
+<tr><td class="nit de4beea34 de4beea35 de4beea36 de4beea37 de4beea38 de4beea39 de4beea310 de4beea311 de4beea312 de4beea313 de4beea314 de4beea315 de4beea316 de4beea317 de4beea318 de4beea319 de4beea320 de4beea321 de4beea322 de4beea323 de4beea324 de4beea325 de4beea326 de4beea327 de4beea328 de4beea329 de4beea330 de4beea331 de4beea332">3</td><td class="nit de4beea34 de4beea35 de4beea36 de4beea37 de4beea38 de4beea39 de4beea310 de4beea311 de4beea312 de4beea313 de4beea314 de4beea315 de4beea316 de4beea317 de4beea318 de4beea319 de4beea320 de4beea321 de4beea322 de4beea323 de4beea324 de4beea325 de4beea326 de4beea327 de4beea328 de4beea329 de4beea330 de4beea331 de4beea332">4</td></tr>
+<tr><td class="nit de4beea34 de4beea35 de4beea36 de4beea37 de4beea38 de4beea39 de4beea310 de4beea311 de4beea312 de4beea313 de4beea314 de4beea315 de4beea316 de4beea317 de4beea318 de4beea319 de4beea320 de4beea321 de4beea322 de4beea323 de4beea324 de4beea325 de4beea326 de4beea327 de4beea328 de4beea329 de4beea330 de4beea331 de4beea332">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+<tr><td class="">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii de4beea32 de4beea33">1</td><td class="pii de4beea32 de4beea33">2</td></tr>
+<tr><td class="pii de4beea32 de4beea33">3</td><td class="pii de4beea32 de4beea33">4</td></tr>
+<tr><td class="pii de4beea32 de4beea33">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+<tr><td class="">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+<tr><td class="">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii de4beea34 de4beea35 de4beea36 de4beea331 de4beea332">1</td><td class="pii de4beea34 de4beea35 de4beea36 de4beea331 de4beea332">2</td></tr>
+<tr><td class="pii de4beea34 de4beea35 de4beea36 de4beea331 de4beea332">3</td><td class="pii de4beea34 de4beea35 de4beea36 de4beea331 de4beea332">4</td></tr>
+<tr><td class="nit de4beea34 de4beea35 de4beea36 de4beea331 de4beea332">5</td></tr>
+</table>
+</td>
+</tr>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii de4beea333 de4beea334 de4beea335">1</td><td class="pii de4beea333 de4beea334 de4beea335">2</td></tr>
+<tr><td class="pii de4beea333 de4beea334 de4beea335">3</td><td class="nit de4beea333 de4beea334 de4beea335">4</td></tr>
+<tr><td class="nit de4beea333 de4beea334 de4beea335">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii de4beea32 de4beea33 de4beea333 de4beea334 de4beea335">1</td><td class="pii de4beea32 de4beea33 de4beea333 de4beea334 de4beea335">2</td></tr>
+<tr><td class="pii de4beea32 de4beea33 de4beea333 de4beea334 de4beea335">3</td><td class="pii de4beea32 de4beea33 de4beea333 de4beea334 de4beea335">4</td></tr>
+<tr><td class="nit de4beea32 de4beea33 de4beea333 de4beea334 de4beea335">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii de4beea333 de4beea334 de4beea335">1</td><td class="pii de4beea333 de4beea334 de4beea335">2</td></tr>
+<tr><td class="pii de4beea333 de4beea334 de4beea335">3</td><td class="pii de4beea333 de4beea334 de4beea335">4</td></tr>
+<tr><td class="pii de4beea333 de4beea334 de4beea335">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii de4beea333 de4beea334 de4beea335">1</td><td class="pii de4beea333 de4beea334 de4beea335">2</td></tr>
+<tr><td class="pii de4beea333 de4beea334 de4beea335">3</td><td class="pii de4beea333 de4beea334 de4beea335">4</td></tr>
+<tr><td class="pii de4beea333 de4beea334 de4beea335">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii de4beea34 de4beea35 de4beea36 de4beea331 de4beea332 de4beea333 de4beea334 de4beea335">1</td><td class="pii de4beea34 de4beea35 de4beea36 de4beea331 de4beea332 de4beea333 de4beea334 de4beea335">2</td></tr>
+<tr><td class="pii de4beea34 de4beea35 de4beea36 de4beea331 de4beea332 de4beea333 de4beea334 de4beea335">3</td><td class="pii de4beea34 de4beea35 de4beea36 de4beea331 de4beea332 de4beea333 de4beea334 de4beea335">4</td></tr>
+<tr><td class="pii de4beea34 de4beea35 de4beea36 de4beea331 de4beea332 de4beea333 de4beea334 de4beea335">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii de4beea336 de4beea337 de4beea338 de4beea339 de4beea340 de4beea341">1</td><td class="pii de4beea336 de4beea337 de4beea338 de4beea339 de4beea340 de4beea341">2</td></tr>
+<tr><td class="nit de4beea336 de4beea337 de4beea338 de4beea339 de4beea340 de4beea341">3</td><td class="nit de4beea336 de4beea337 de4beea338 de4beea339 de4beea340 de4beea341">4</td></tr>
+<tr><td class="nit de4beea336 de4beea337 de4beea338 de4beea339 de4beea340 de4beea341">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii de4beea32 de4beea33 de4beea336 de4beea337 de4beea338 de4beea339 de4beea340 de4beea341">1</td><td class="pii de4beea32 de4beea33 de4beea336 de4beea337 de4beea338 de4beea339 de4beea340 de4beea341">2</td></tr>
+<tr><td class="pii de4beea32 de4beea33 de4beea336 de4beea337 de4beea338 de4beea339 de4beea340 de4beea341">3</td><td class="nit de4beea32 de4beea33 de4beea336 de4beea337 de4beea338 de4beea339 de4beea340 de4beea341">4</td></tr>
+<tr><td class="nit de4beea32 de4beea33 de4beea336 de4beea337 de4beea338 de4beea339 de4beea340 de4beea341">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii de4beea336 de4beea337 de4beea338 de4beea339 de4beea340 de4beea341">1</td><td class="pii de4beea336 de4beea337 de4beea338 de4beea339 de4beea340 de4beea341">2</td></tr>
+<tr><td class="pii de4beea336 de4beea337 de4beea338 de4beea339 de4beea340 de4beea341">3</td><td class="pii de4beea336 de4beea337 de4beea338 de4beea339 de4beea340 de4beea341">4</td></tr>
+<tr><td class="nit de4beea336 de4beea337 de4beea338 de4beea339 de4beea340 de4beea341">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii de4beea336 de4beea337 de4beea338 de4beea339 de4beea340 de4beea341">1</td><td class="pii de4beea336 de4beea337 de4beea338 de4beea339 de4beea340 de4beea341">2</td></tr>
+<tr><td class="pii de4beea336 de4beea337 de4beea338 de4beea339 de4beea340 de4beea341">3</td><td class="pii de4beea336 de4beea337 de4beea338 de4beea339 de4beea340 de4beea341">4</td></tr>
+<tr><td class="pii de4beea336 de4beea337 de4beea338 de4beea339 de4beea340 de4beea341">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii de4beea34 de4beea35 de4beea36 de4beea331 de4beea332 de4beea336 de4beea337 de4beea338 de4beea339 de4beea340 de4beea341">1</td><td class="pii de4beea34 de4beea35 de4beea36 de4beea331 de4beea332 de4beea336 de4beea337 de4beea338 de4beea339 de4beea340 de4beea341">2</td></tr>
+<tr><td class="pii de4beea34 de4beea35 de4beea36 de4beea331 de4beea332 de4beea336 de4beea337 de4beea338 de4beea339 de4beea340 de4beea341">3</td><td class="pii de4beea34 de4beea35 de4beea36 de4beea331 de4beea332 de4beea336 de4beea337 de4beea338 de4beea339 de4beea340 de4beea341">4</td></tr>
+<tr><td class="pii de4beea34 de4beea35 de4beea36 de4beea331 de4beea332 de4beea336 de4beea337 de4beea338 de4beea339 de4beea340 de4beea341">5</td></tr>
+</table>
+</td>
+</tr>
+</table>
+Doing 42  simple deductions 
+<input type='submit' value='Show why' onclick="toggle('id1');"><div id=id1 style='display:none;'>
+<p>Setting field[1,1] is not 4 because:</p>
+<ul>
+<li class='de4beea30'>the count for left 1 is 3</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[1,1] is not 5 because:</p>
+<ul>
+<li class='de4beea30'>the count for left 1 is 3</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[1,2] is not 4 because:</p>
+<ul>
+<li class='de4beea30'>the count for top 2 is 3</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[1,2] is not 5 because:</p>
+<ul>
+<li class='de4beea30'>the count for top 2 is 3</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[1,5] is not 3 because:</p>
+<ul>
+<li class='de4beea30'>the count for top 5 is 4</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[1,5] is not 4 because:</p>
+<ul>
+<li class='de4beea30'>the count for top 5 is 4</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[1,5] is not 5 because:</p>
+<ul>
+<li class='de4beea30'>the count for top 5 is 4</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[2,1] is not 1 because:</p>
+<ul>
+<li class='de4beea30'>the count for right 2 is 5</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[2,1] is not 2 because:</p>
+<ul>
+<li class='de4beea30'>the count for right 2 is 5</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[2,1] is not 3 because:</p>
+<ul>
+<li class='de4beea30'>the count for right 2 is 5</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[2,1] is not 4 because:</p>
+<ul>
+<li class='de4beea30'>the count for right 2 is 5</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[2,1] is 5 because:</p>
+<ul>
+<li class='de4beea30'>the count for right 2 is 5</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[2,2] is not 1 because:</p>
+<ul>
+<li class='de4beea30'>the count for right 2 is 5</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[2,2] is not 2 because:</p>
+<ul>
+<li class='de4beea30'>the count for right 2 is 5</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[2,2] is not 3 because:</p>
+<ul>
+<li class='de4beea30'>the count for right 2 is 5</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[2,2] is 4 because:</p>
+<ul>
+<li class='de4beea30'>the count for right 2 is 5</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[2,2] is not 5 because:</p>
+<ul>
+<li class='de4beea30'>the count for right 2 is 5</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[2,3] is not 1 because:</p>
+<ul>
+<li class='de4beea30'>the count for right 2 is 5</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[2,3] is not 2 because:</p>
+<ul>
+<li class='de4beea30'>the count for right 2 is 5</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[2,3] is 3 because:</p>
+<ul>
+<li class='de4beea30'>the count for right 2 is 5</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[2,3] is not 4 because:</p>
+<ul>
+<li class='de4beea30'>the count for right 2 is 5</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[2,3] is not 5 because:</p>
+<ul>
+<li class='de4beea30'>the count for right 2 is 5</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[2,4] is not 1 because:</p>
+<ul>
+<li class='de4beea30'>the count for right 2 is 5</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[2,4] is 2 because:</p>
+<ul>
+<li class='de4beea30'>the count for right 2 is 5</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[2,4] is not 3 because:</p>
+<ul>
+<li class='de4beea30'>the count for right 2 is 5</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[2,4] is not 4 because:</p>
+<ul>
+<li class='de4beea30'>the count for right 2 is 5</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[2,4] is not 5 because:</p>
+<ul>
+<li class='de4beea30'>the count for right 2 is 5</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[2,5] is 1 because:</p>
+<ul>
+<li class='de4beea30'>the count for right 2 is 5</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[2,5] is not 2 because:</p>
+<ul>
+<li class='de4beea30'>the count for right 2 is 5</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[2,5] is not 3 because:</p>
+<ul>
+<li class='de4beea30'>the count for right 2 is 5</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[2,5] is not 4 because:</p>
+<ul>
+<li class='de4beea30'>the count for right 2 is 5</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[2,5] is not 5 because:</p>
+<ul>
+<li class='de4beea30'>the count for top 5 is 4</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[3,5] is not 5 because:</p>
+<ul>
+<li class='de4beea30'>the count for top 5 is 4</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[4,1] is not 4 because:</p>
+<ul>
+<li class='de4beea30'>the count for left 4 is 3</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[4,1] is not 5 because:</p>
+<ul>
+<li class='de4beea30'>the count for left 4 is 3</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[4,2] is not 5 because:</p>
+<ul>
+<li class='de4beea30'>the count for left 4 is 3</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[5,1] is not 3 because:</p>
+<ul>
+<li class='de4beea30'>the count for left 5 is 4</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[5,1] is not 4 because:</p>
+<ul>
+<li class='de4beea30'>the count for left 5 is 4</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[5,1] is not 5 because:</p>
+<ul>
+<li class='de4beea30'>the count for left 5 is 4</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[5,2] is not 4 because:</p>
+<ul>
+<li class='de4beea30'>the count for left 5 is 4</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[5,2] is not 5 because:</p>
+<ul>
+<li class='de4beea30'>the count for left 5 is 4</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+<p>Setting field[5,3] is not 5 because:</p>
+<ul>
+<li class='de4beea30'>the count for left 5 is 4</li>
+<script>hoverByClass("de4beea30","black")</script>
+</ul>
+
+</div>
+
+<hr>
+<h3>Step 2 </h3>
+Solver Calls: 282 <br>
+<table style="border-collapse: collapse; border: solid 2px">
+<colgroup style="border:solid 3px"><col><col><col>
+<colgroup style="border:solid 3px"><col><col><col>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 5c62daa90 5c62daa91 5c62daa97 5c62daa98 5c62daa99 5c62daa910 5c62daa911">1</td><td class="pii 5c62daa90 5c62daa91 5c62daa97 5c62daa98 5c62daa99 5c62daa910 5c62daa911">2</td></tr>
+<tr><td class="pii 5c62daa90 5c62daa91 5c62daa97 5c62daa98 5c62daa99 5c62daa910 5c62daa911">3</td><td class="nik 5c62daa90 5c62daa91 5c62daa97 5c62daa98 5c62daa99 5c62daa910 5c62daa911">4</td></tr>
+<tr><td class="nik 5c62daa90 5c62daa91 5c62daa97 5c62daa98 5c62daa99 5c62daa910 5c62daa911">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 5c62daa90 5c62daa91 5c62daa912 5c62daa913 5c62daa914 5c62daa915 5c62daa916 5c62daa922">1</td><td class="pii 5c62daa90 5c62daa91 5c62daa912 5c62daa913 5c62daa914 5c62daa915 5c62daa916 5c62daa922">2</td></tr>
+<tr><td class="pii 5c62daa90 5c62daa91 5c62daa912 5c62daa913 5c62daa914 5c62daa915 5c62daa916 5c62daa922">3</td><td class="nik 5c62daa90 5c62daa91 5c62daa912 5c62daa913 5c62daa914 5c62daa915 5c62daa916 5c62daa922">4</td></tr>
+<tr><td class="nik 5c62daa90 5c62daa91 5c62daa912 5c62daa913 5c62daa914 5c62daa915 5c62daa916 5c62daa922">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nit 5c62daa90 5c62daa91 5c62daa92 5c62daa917 5c62daa923 5c62daa928">1</td><td class="nit 5c62daa90 5c62daa91 5c62daa92 5c62daa917 5c62daa923 5c62daa928">2</td></tr>
+<tr><td class="nit 5c62daa90 5c62daa91 5c62daa92 5c62daa917 5c62daa923 5c62daa928">3</td><td class="pii 5c62daa90 5c62daa91 5c62daa92 5c62daa917 5c62daa923 5c62daa928">4</td></tr>
+<tr><td class="pii 5c62daa90 5c62daa91 5c62daa92 5c62daa917 5c62daa923 5c62daa928">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nit 5c62daa90 5c62daa91 5c62daa93 5c62daa94 5c62daa918 5c62daa924 5c62daa929">1</td><td class="nit 5c62daa90 5c62daa91 5c62daa93 5c62daa94 5c62daa918 5c62daa924 5c62daa929">2</td></tr>
+<tr><td class="pii 5c62daa90 5c62daa91 5c62daa93 5c62daa94 5c62daa918 5c62daa924 5c62daa929">3</td><td class="pii 5c62daa90 5c62daa91 5c62daa93 5c62daa94 5c62daa918 5c62daa924 5c62daa929">4</td></tr>
+<tr><td class="pii 5c62daa90 5c62daa91 5c62daa93 5c62daa94 5c62daa918 5c62daa924 5c62daa929">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nit 5c62daa90 5c62daa91 5c62daa95 5c62daa96 5c62daa919 5c62daa920 5c62daa921 5c62daa925 5c62daa926 5c62daa927">1</td><td class="pit 5c62daa90 5c62daa91 5c62daa95 5c62daa96 5c62daa919 5c62daa920 5c62daa921 5c62daa925 5c62daa926 5c62daa927">2</td></tr>
+<tr><td class="nik 5c62daa90 5c62daa91 5c62daa95 5c62daa96 5c62daa919 5c62daa920 5c62daa921 5c62daa925 5c62daa926 5c62daa927">3</td><td class="nik 5c62daa90 5c62daa91 5c62daa95 5c62daa96 5c62daa919 5c62daa920 5c62daa921 5c62daa925 5c62daa926 5c62daa927">4</td></tr>
+<tr><td class="nik 5c62daa90 5c62daa91 5c62daa95 5c62daa96 5c62daa919 5c62daa920 5c62daa921 5c62daa925 5c62daa926 5c62daa927">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik 5c62daa97 5c62daa98 5c62daa99 5c62daa910 5c62daa911">1</td><td class="nik 5c62daa97 5c62daa98 5c62daa99 5c62daa910 5c62daa911">2</td></tr>
+<tr><td class="nik 5c62daa97 5c62daa98 5c62daa99 5c62daa910 5c62daa911">3</td><td class="nik 5c62daa97 5c62daa98 5c62daa99 5c62daa910 5c62daa911">4</td></tr>
+<tr><td class="pii pik 5c62daa97 5c62daa98 5c62daa99 5c62daa910 5c62daa911">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik 5c62daa912 5c62daa913 5c62daa914 5c62daa915 5c62daa916 5c62daa922">1</td><td class="nik 5c62daa912 5c62daa913 5c62daa914 5c62daa915 5c62daa916 5c62daa922">2</td></tr>
+<tr><td class="nik 5c62daa912 5c62daa913 5c62daa914 5c62daa915 5c62daa916 5c62daa922">3</td><td class="pii pik 5c62daa912 5c62daa913 5c62daa914 5c62daa915 5c62daa916 5c62daa922">4</td></tr>
+<tr><td class="nik 5c62daa912 5c62daa913 5c62daa914 5c62daa915 5c62daa916 5c62daa922">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik 5c62daa92 5c62daa917 5c62daa923 5c62daa928">1</td><td class="nik 5c62daa92 5c62daa917 5c62daa923 5c62daa928">2</td></tr>
+<tr><td class="pii pik 5c62daa92 5c62daa917 5c62daa923 5c62daa928">3</td><td class="nik 5c62daa92 5c62daa917 5c62daa923 5c62daa928">4</td></tr>
+<tr><td class="nik 5c62daa92 5c62daa917 5c62daa923 5c62daa928">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik 5c62daa93 5c62daa94 5c62daa918 5c62daa924 5c62daa929">1</td><td class="pii pik 5c62daa93 5c62daa94 5c62daa918 5c62daa924 5c62daa929">2</td></tr>
+<tr><td class="nik 5c62daa93 5c62daa94 5c62daa918 5c62daa924 5c62daa929">3</td><td class="nik 5c62daa93 5c62daa94 5c62daa918 5c62daa924 5c62daa929">4</td></tr>
+<tr><td class="nik 5c62daa93 5c62daa94 5c62daa918 5c62daa924 5c62daa929">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii pik 5c62daa95 5c62daa96 5c62daa919 5c62daa920 5c62daa921 5c62daa925 5c62daa926 5c62daa927">1</td><td class="nik 5c62daa95 5c62daa96 5c62daa919 5c62daa920 5c62daa921 5c62daa925 5c62daa926 5c62daa927">2</td></tr>
+<tr><td class="nik 5c62daa95 5c62daa96 5c62daa919 5c62daa920 5c62daa921 5c62daa925 5c62daa926 5c62daa927">3</td><td class="nik 5c62daa95 5c62daa96 5c62daa919 5c62daa920 5c62daa921 5c62daa925 5c62daa926 5c62daa927">4</td></tr>
+<tr><td class="nik 5c62daa95 5c62daa96 5c62daa919 5c62daa920 5c62daa921 5c62daa925 5c62daa926 5c62daa927">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nit 5c62daa97 5c62daa98 5c62daa99 5c62daa910 5c62daa911">1</td><td class="nit 5c62daa97 5c62daa98 5c62daa99 5c62daa910 5c62daa911">2</td></tr>
+<tr><td class="nit 5c62daa97 5c62daa98 5c62daa99 5c62daa910 5c62daa911">3</td><td class="pit 5c62daa97 5c62daa98 5c62daa99 5c62daa910 5c62daa911">4</td></tr>
+<tr><td class="nit 5c62daa97 5c62daa98 5c62daa99 5c62daa910 5c62daa911">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nit 5c62daa912 5c62daa913 5c62daa914 5c62daa915 5c62daa916 5c62daa922">1</td><td class="nit 5c62daa912 5c62daa913 5c62daa914 5c62daa915 5c62daa916 5c62daa922">2</td></tr>
+<tr><td class="nit 5c62daa912 5c62daa913 5c62daa914 5c62daa915 5c62daa916 5c62daa922">3</td><td class="nit 5c62daa912 5c62daa913 5c62daa914 5c62daa915 5c62daa916 5c62daa922">4</td></tr>
+<tr><td class="pit 5c62daa912 5c62daa913 5c62daa914 5c62daa915 5c62daa916 5c62daa922">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 5c62daa92 5c62daa917 5c62daa923 5c62daa928">1</td><td class="pii 5c62daa92 5c62daa917 5c62daa923 5c62daa928">2</td></tr>
+<tr><td class="nit 5c62daa92 5c62daa917 5c62daa923 5c62daa928">3</td><td class="pii 5c62daa92 5c62daa917 5c62daa923 5c62daa928">4</td></tr>
+<tr><td class="pii 5c62daa92 5c62daa917 5c62daa923 5c62daa928">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 5c62daa93 5c62daa94 5c62daa918 5c62daa924 5c62daa929">1</td><td class="nit 5c62daa93 5c62daa94 5c62daa918 5c62daa924 5c62daa929">2</td></tr>
+<tr><td class="pii 5c62daa93 5c62daa94 5c62daa918 5c62daa924 5c62daa929">3</td><td class="pii 5c62daa93 5c62daa94 5c62daa918 5c62daa924 5c62daa929">4</td></tr>
+<tr><td class="pii 5c62daa93 5c62daa94 5c62daa918 5c62daa924 5c62daa929">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nit 5c62daa95 5c62daa96 5c62daa919 5c62daa920 5c62daa921 5c62daa925 5c62daa926 5c62daa927">1</td><td class="nit 5c62daa95 5c62daa96 5c62daa919 5c62daa920 5c62daa921 5c62daa925 5c62daa926 5c62daa927">2</td></tr>
+<tr><td class="pii 5c62daa95 5c62daa96 5c62daa919 5c62daa920 5c62daa921 5c62daa925 5c62daa926 5c62daa927">3</td><td class="nit 5c62daa95 5c62daa96 5c62daa919 5c62daa920 5c62daa921 5c62daa925 5c62daa926 5c62daa927">4</td></tr>
+<tr><td class="nik 5c62daa95 5c62daa96 5c62daa919 5c62daa920 5c62daa921 5c62daa925 5c62daa926 5c62daa927">5</td></tr>
+</table>
+</td>
+</tr>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 5c62daa97 5c62daa98 5c62daa99 5c62daa910 5c62daa911">1</td><td class="pii 5c62daa97 5c62daa98 5c62daa99 5c62daa910 5c62daa911">2</td></tr>
+<tr><td class="pii 5c62daa97 5c62daa98 5c62daa99 5c62daa910 5c62daa911">3</td><td class="nik 5c62daa97 5c62daa98 5c62daa99 5c62daa910 5c62daa911">4</td></tr>
+<tr><td class="nik 5c62daa97 5c62daa98 5c62daa99 5c62daa910 5c62daa911">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 5c62daa912 5c62daa913 5c62daa914 5c62daa915 5c62daa916 5c62daa922">1</td><td class="pii 5c62daa912 5c62daa913 5c62daa914 5c62daa915 5c62daa916 5c62daa922">2</td></tr>
+<tr><td class="pii 5c62daa912 5c62daa913 5c62daa914 5c62daa915 5c62daa916 5c62daa922">3</td><td class="nit 5c62daa912 5c62daa913 5c62daa914 5c62daa915 5c62daa916 5c62daa922">4</td></tr>
+<tr><td class="nik 5c62daa912 5c62daa913 5c62daa914 5c62daa915 5c62daa916 5c62daa922">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 5c62daa92 5c62daa917 5c62daa923 5c62daa928">1</td><td class="pii 5c62daa92 5c62daa917 5c62daa923 5c62daa928">2</td></tr>
+<tr><td class="nit 5c62daa92 5c62daa917 5c62daa923 5c62daa928">3</td><td class="pii 5c62daa92 5c62daa917 5c62daa923 5c62daa928">4</td></tr>
+<tr><td class="pii 5c62daa92 5c62daa917 5c62daa923 5c62daa928">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 5c62daa93 5c62daa94 5c62daa918 5c62daa924 5c62daa929">1</td><td class="nit 5c62daa93 5c62daa94 5c62daa918 5c62daa924 5c62daa929">2</td></tr>
+<tr><td class="pii 5c62daa93 5c62daa94 5c62daa918 5c62daa924 5c62daa929">3</td><td class="pii 5c62daa93 5c62daa94 5c62daa918 5c62daa924 5c62daa929">4</td></tr>
+<tr><td class="pii 5c62daa93 5c62daa94 5c62daa918 5c62daa924 5c62daa929">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nit 5c62daa95 5c62daa96 5c62daa919 5c62daa920 5c62daa921 5c62daa925 5c62daa926 5c62daa927">1</td><td class="nit 5c62daa95 5c62daa96 5c62daa919 5c62daa920 5c62daa921 5c62daa925 5c62daa926 5c62daa927">2</td></tr>
+<tr><td class="pii 5c62daa95 5c62daa96 5c62daa919 5c62daa920 5c62daa921 5c62daa925 5c62daa926 5c62daa927">3</td><td class="pii 5c62daa95 5c62daa96 5c62daa919 5c62daa920 5c62daa921 5c62daa925 5c62daa926 5c62daa927">4</td></tr>
+<tr><td class="nit 5c62daa95 5c62daa96 5c62daa919 5c62daa920 5c62daa921 5c62daa925 5c62daa926 5c62daa927">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 5c62daa97 5c62daa98 5c62daa99 5c62daa910 5c62daa911">1</td><td class="pii 5c62daa97 5c62daa98 5c62daa99 5c62daa910 5c62daa911">2</td></tr>
+<tr><td class="nik 5c62daa97 5c62daa98 5c62daa99 5c62daa910 5c62daa911">3</td><td class="nik 5c62daa97 5c62daa98 5c62daa99 5c62daa910 5c62daa911">4</td></tr>
+<tr><td class="nik 5c62daa97 5c62daa98 5c62daa99 5c62daa910 5c62daa911">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 5c62daa912 5c62daa913 5c62daa914 5c62daa915 5c62daa916 5c62daa922">1</td><td class="pii 5c62daa912 5c62daa913 5c62daa914 5c62daa915 5c62daa916 5c62daa922">2</td></tr>
+<tr><td class="pii 5c62daa912 5c62daa913 5c62daa914 5c62daa915 5c62daa916 5c62daa922">3</td><td class="nik 5c62daa912 5c62daa913 5c62daa914 5c62daa915 5c62daa916 5c62daa922">4</td></tr>
+<tr><td class="nik 5c62daa912 5c62daa913 5c62daa914 5c62daa915 5c62daa916 5c62daa922">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 5c62daa92 5c62daa917 5c62daa923 5c62daa928">1</td><td class="pii 5c62daa92 5c62daa917 5c62daa923 5c62daa928">2</td></tr>
+<tr><td class="nit 5c62daa92 5c62daa917 5c62daa923 5c62daa928">3</td><td class="pii 5c62daa92 5c62daa917 5c62daa923 5c62daa928">4</td></tr>
+<tr><td class="nik 5c62daa92 5c62daa917 5c62daa923 5c62daa928">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 5c62daa93 5c62daa94 5c62daa918 5c62daa924 5c62daa929">1</td><td class="nit 5c62daa93 5c62daa94 5c62daa918 5c62daa924 5c62daa929">2</td></tr>
+<tr><td class="pii 5c62daa93 5c62daa94 5c62daa918 5c62daa924 5c62daa929">3</td><td class="pii 5c62daa93 5c62daa94 5c62daa918 5c62daa924 5c62daa929">4</td></tr>
+<tr><td class="pii 5c62daa93 5c62daa94 5c62daa918 5c62daa924 5c62daa929">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 5c62daa95 5c62daa96 5c62daa919 5c62daa920 5c62daa921 5c62daa925 5c62daa926 5c62daa927">1</td><td class="pii 5c62daa95 5c62daa96 5c62daa919 5c62daa920 5c62daa921 5c62daa925 5c62daa926 5c62daa927">2</td></tr>
+<tr><td class="pii 5c62daa95 5c62daa96 5c62daa919 5c62daa920 5c62daa921 5c62daa925 5c62daa926 5c62daa927">3</td><td class="pii 5c62daa95 5c62daa96 5c62daa919 5c62daa920 5c62daa921 5c62daa925 5c62daa926 5c62daa927">4</td></tr>
+<tr><td class="pii 5c62daa95 5c62daa96 5c62daa919 5c62daa920 5c62daa921 5c62daa925 5c62daa926 5c62daa927">5</td></tr>
+</table>
+</td>
+</tr>
+</table>
+Doing 30  simple deductions 
+<input type='submit' value='Show why' onclick="toggle('id2');"><div id=id2 style='display:none;'>
+<p>Setting field[1,3] is not 1 because:</p>
+<ul>
+<li class='5c62daa90'>all elements in row 1 must be different</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+<p>Setting field[1,3] is not 2 because:</p>
+<ul>
+<li class='5c62daa90'>all elements in row 1 must be different</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+<p>Setting field[1,3] is not 3 because:</p>
+<ul>
+<li class='5c62daa90'>all elements in column 3 must be different</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+<p>Setting field[1,4] is not 1 because:</p>
+<ul>
+<li class='5c62daa90'>the count for top 4 is 1</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+<p>Setting field[1,4] is not 2 because:</p>
+<ul>
+<li class='5c62daa90'>all elements in column 4 must be different</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+<p>Setting field[1,5] is not 1 because:</p>
+<ul>
+<li class='5c62daa90'>all elements in column 5 must be different</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+<p>Setting field[1,5] is 2 because:</p>
+<ul>
+<li class='5c62daa90'>all elements in column 5 must be different</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+<p>Setting field[3,1] is not 1 because:</p>
+<ul>
+<li class='5c62daa90'>all elements in column 1 must be different</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+<p>Setting field[3,1] is not 2 because:</p>
+<ul>
+<li class='5c62daa90'>all elements in column 1 must be different</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+<p>Setting field[3,1] is not 3 because:</p>
+<ul>
+<li class='5c62daa90'>all elements in column 1 must be different</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+<p>Setting field[3,1] is 4 because:</p>
+<ul>
+<li class='5c62daa90'>all elements in column 1 must be different</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+<p>Setting field[3,1] is not 5 because:</p>
+<ul>
+<li class='5c62daa90'>all elements in column 1 must be different</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+<p>Setting field[3,2] is not 1 because:</p>
+<ul>
+<li class='5c62daa90'>all elements in column 2 must be different</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+<p>Setting field[3,2] is not 2 because:</p>
+<ul>
+<li class='5c62daa90'>all elements in column 2 must be different</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+<p>Setting field[3,2] is not 3 because:</p>
+<ul>
+<li class='5c62daa90'>all elements in column 2 must be different</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+<p>Setting field[3,2] is not 4 because:</p>
+<ul>
+<li class='5c62daa90'>all elements in column 2 must be different</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+<p>Setting field[3,2] is 5 because:</p>
+<ul>
+<li class='5c62daa90'>all elements in column 2 must be different</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+<p>Setting field[3,3] is not 3 because:</p>
+<ul>
+<li class='5c62daa90'>all elements in column 3 must be different</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+<p>Setting field[3,4] is not 2 because:</p>
+<ul>
+<li class='5c62daa90'>all elements in column 4 must be different</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+<p>Setting field[3,5] is not 1 because:</p>
+<ul>
+<li class='5c62daa90'>all elements in column 5 must be different</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+<p>Setting field[3,5] is not 2 because:</p>
+<ul>
+<li class='5c62daa90'>all elements in column 5 must be different</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+<p>Setting field[3,5] is not 4 because:</p>
+<ul>
+<li class='5c62daa90'>the count for top 5 is 4</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+<p>Setting field[4,2] is not 4 because:</p>
+<ul>
+<li class='5c62daa90'>all elements in column 2 must be different</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+<p>Setting field[4,3] is not 3 because:</p>
+<ul>
+<li class='5c62daa90'>all elements in column 3 must be different</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+<p>Setting field[4,4] is not 2 because:</p>
+<ul>
+<li class='5c62daa90'>all elements in column 4 must be different</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+<p>Setting field[4,5] is not 1 because:</p>
+<ul>
+<li class='5c62daa90'>all elements in column 5 must be different</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+<p>Setting field[4,5] is not 2 because:</p>
+<ul>
+<li class='5c62daa90'>all elements in column 5 must be different</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+<p>Setting field[4,5] is not 5 because:</p>
+<ul>
+<li class='5c62daa90'>the count for top 5 is 4</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+<p>Setting field[5,3] is not 3 because:</p>
+<ul>
+<li class='5c62daa90'>all elements in column 3 must be different</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+<p>Setting field[5,4] is not 2 because:</p>
+<ul>
+<li class='5c62daa90'>all elements in column 4 must be different</li>
+<script>hoverByClass("5c62daa90","black")</script>
+</ul>
+
+</div>
+
+<hr>
+<h3>Step 3 </h3>
+Solver Calls: 198 <br>
+<table style="border-collapse: collapse; border: solid 2px">
+<colgroup style="border:solid 3px"><col><col><col>
+<colgroup style="border:solid 3px"><col><col><col>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii bda89ded0 bda89ded1">1</td><td class="nit bda89ded0 bda89ded1">2</td></tr>
+<tr><td class="pii bda89ded0 bda89ded1">3</td><td class="nik bda89ded0 bda89ded1">4</td></tr>
+<tr><td class="nik bda89ded0 bda89ded1">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii bda89ded0 bda89ded1">1</td><td class="nit bda89ded0 bda89ded1">2</td></tr>
+<tr><td class="pii bda89ded0 bda89ded1">3</td><td class="nik bda89ded0 bda89ded1">4</td></tr>
+<tr><td class="nik bda89ded0 bda89ded1">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik bda89ded0 bda89ded1">1</td><td class="nik bda89ded0 bda89ded1">2</td></tr>
+<tr><td class="nik bda89ded0 bda89ded1">3</td><td class="pii bda89ded0 bda89ded1">4</td></tr>
+<tr><td class="pii bda89ded0 bda89ded1">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik bda89ded0 bda89ded1">1</td><td class="nik bda89ded0 bda89ded1">2</td></tr>
+<tr><td class="pii bda89ded0 bda89ded1">3</td><td class="pii bda89ded0 bda89ded1">4</td></tr>
+<tr><td class="pii bda89ded0 bda89ded1">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik bda89ded0 bda89ded1 bda89ded9 bda89ded10 bda89ded11">1</td><td class="pii pik bda89ded0 bda89ded1 bda89ded9 bda89ded10 bda89ded11">2</td></tr>
+<tr><td class="nik bda89ded0 bda89ded1 bda89ded9 bda89ded10 bda89ded11">3</td><td class="nik bda89ded0 bda89ded1 bda89ded9 bda89ded10 bda89ded11">4</td></tr>
+<tr><td class="nik bda89ded0 bda89ded1 bda89ded9 bda89ded10 bda89ded11">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="pik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="pik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="pik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="pik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii pik bda89ded9 bda89ded10 bda89ded11">1</td><td class="nik bda89ded9 bda89ded10 bda89ded11">2</td></tr>
+<tr><td class="nik bda89ded9 bda89ded10 bda89ded11">3</td><td class="nik bda89ded9 bda89ded10 bda89ded11">4</td></tr>
+<tr><td class="nik bda89ded9 bda89ded10 bda89ded11">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik bda89ded2 bda89ded3 bda89ded4 bda89ded5 bda89ded6 bda89ded7 bda89ded8">1</td><td class="nik bda89ded2 bda89ded3 bda89ded4 bda89ded5 bda89ded6 bda89ded7 bda89ded8">2</td></tr>
+<tr><td class="nik bda89ded2 bda89ded3 bda89ded4 bda89ded5 bda89ded6 bda89ded7 bda89ded8">3</td><td class="pii pik bda89ded2 bda89ded3 bda89ded4 bda89ded5 bda89ded6 bda89ded7 bda89ded8">4</td></tr>
+<tr><td class="nik bda89ded2 bda89ded3 bda89ded4 bda89ded5 bda89ded6 bda89ded7 bda89ded8">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik bda89ded2 bda89ded3 bda89ded4 bda89ded5 bda89ded6 bda89ded7 bda89ded8">1</td><td class="nik bda89ded2 bda89ded3 bda89ded4 bda89ded5 bda89ded6 bda89ded7 bda89ded8">2</td></tr>
+<tr><td class="nik bda89ded2 bda89ded3 bda89ded4 bda89ded5 bda89ded6 bda89ded7 bda89ded8">3</td><td class="nik bda89ded2 bda89ded3 bda89ded4 bda89ded5 bda89ded6 bda89ded7 bda89ded8">4</td></tr>
+<tr><td class="pii pik bda89ded2 bda89ded3 bda89ded4 bda89ded5 bda89ded6 bda89ded7 bda89ded8">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nit bda89ded2 bda89ded3 bda89ded4 bda89ded5 bda89ded6 bda89ded7 bda89ded8">1</td><td class="pit bda89ded2 bda89ded3 bda89ded4 bda89ded5 bda89ded6 bda89ded7 bda89ded8">2</td></tr>
+<tr><td class="nik bda89ded2 bda89ded3 bda89ded4 bda89ded5 bda89ded6 bda89ded7 bda89ded8">3</td><td class="nit bda89ded2 bda89ded3 bda89ded4 bda89ded5 bda89ded6 bda89ded7 bda89ded8">4</td></tr>
+<tr><td class="nit bda89ded2 bda89ded3 bda89ded4 bda89ded5 bda89ded6 bda89ded7 bda89ded8">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pit bda89ded2 bda89ded3 bda89ded4 bda89ded5 bda89ded6 bda89ded7 bda89ded8">1</td><td class="nik bda89ded2 bda89ded3 bda89ded4 bda89ded5 bda89ded6 bda89ded7 bda89ded8">2</td></tr>
+<tr><td class="nit bda89ded2 bda89ded3 bda89ded4 bda89ded5 bda89ded6 bda89ded7 bda89ded8">3</td><td class="nit bda89ded2 bda89ded3 bda89ded4 bda89ded5 bda89ded6 bda89ded7 bda89ded8">4</td></tr>
+<tr><td class="pii bda89ded2 bda89ded3 bda89ded4 bda89ded5 bda89ded6 bda89ded7 bda89ded8">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik bda89ded2 bda89ded3 bda89ded4 bda89ded5 bda89ded6 bda89ded7 bda89ded8 bda89ded9 bda89ded10 bda89ded11">1</td><td class="nik bda89ded2 bda89ded3 bda89ded4 bda89ded5 bda89ded6 bda89ded7 bda89ded8 bda89ded9 bda89ded10 bda89ded11">2</td></tr>
+<tr><td class="pit bda89ded2 bda89ded3 bda89ded4 bda89ded5 bda89ded6 bda89ded7 bda89ded8 bda89ded9 bda89ded10 bda89ded11">3</td><td class="nik bda89ded2 bda89ded3 bda89ded4 bda89ded5 bda89ded6 bda89ded7 bda89ded8 bda89ded9 bda89ded10 bda89ded11">4</td></tr>
+<tr><td class="nik bda89ded2 bda89ded3 bda89ded4 bda89ded5 bda89ded6 bda89ded7 bda89ded8 bda89ded9 bda89ded10 bda89ded11">5</td></tr>
+</table>
+</td>
+</tr>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="nik">3</td><td class="">4</td></tr>
+<tr><td class="">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="nik">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+<tr><td class="">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik bda89ded9 bda89ded10 bda89ded11">1</td><td class="nik bda89ded9 bda89ded10 bda89ded11">2</td></tr>
+<tr><td class="nit bda89ded9 bda89ded10 bda89ded11">3</td><td class="pit bda89ded9 bda89ded10 bda89ded11">4</td></tr>
+<tr><td class="nik bda89ded9 bda89ded10 bda89ded11">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="nik">3</td><td class="">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="nik">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+<tr><td class="">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii bda89ded9 bda89ded10 bda89ded11">1</td><td class="pii bda89ded9 bda89ded10 bda89ded11">2</td></tr>
+<tr><td class="pii bda89ded9 bda89ded10 bda89ded11">3</td><td class="pii bda89ded9 bda89ded10 bda89ded11">4</td></tr>
+<tr><td class="pii bda89ded9 bda89ded10 bda89ded11">5</td></tr>
+</table>
+</td>
+</tr>
+</table>
+Doing 12  simple deductions 
+<input type='submit' value='Show why' onclick="toggle('id3');"><div id=id3 style='display:none;'>
+<p>Setting field[1,1] is not 2 because:</p>
+<ul>
+<li class='bda89ded0'>all elements in row 1 must be different</li>
+<script>hoverByClass("bda89ded0","black")</script>
+</ul>
+
+<p>Setting field[1,2] is not 2 because:</p>
+<ul>
+<li class='bda89ded0'>all elements in row 1 must be different</li>
+<script>hoverByClass("bda89ded0","black")</script>
+</ul>
+
+<p>Setting field[3,3] is not 1 because:</p>
+<ul>
+<li class='bda89ded0'>all elements in row 3 must be different</li>
+<script>hoverByClass("bda89ded0","black")</script>
+</ul>
+
+<p>Setting field[3,3] is 2 because:</p>
+<ul>
+<li class='bda89ded0'>all elements in row 3 must be different</li>
+<script>hoverByClass("bda89ded0","black")</script>
+</ul>
+
+<p>Setting field[3,3] is not 4 because:</p>
+<ul>
+<li class='bda89ded0'>all elements in row 3 must be different</li>
+<script>hoverByClass("bda89ded0","black")</script>
+</ul>
+
+<p>Setting field[3,3] is not 5 because:</p>
+<ul>
+<li class='bda89ded0'>all elements in row 3 must be different</li>
+<script>hoverByClass("bda89ded0","black")</script>
+</ul>
+
+<p>Setting field[3,4] is 1 because:</p>
+<ul>
+<li class='bda89ded0'>all elements in row 3 must be different</li>
+<script>hoverByClass("bda89ded0","black")</script>
+</ul>
+
+<p>Setting field[3,4] is not 3 because:</p>
+<ul>
+<li class='bda89ded0'>all elements in row 3 must be different</li>
+<script>hoverByClass("bda89ded0","black")</script>
+</ul>
+
+<p>Setting field[3,4] is not 4 because:</p>
+<ul>
+<li class='bda89ded0'>all elements in row 3 must be different</li>
+<script>hoverByClass("bda89ded0","black")</script>
+</ul>
+
+<p>Setting field[3,5] is 3 because:</p>
+<ul>
+<li class='bda89ded0'>all elements in column 5 must be different</li>
+<script>hoverByClass("bda89ded0","black")</script>
+</ul>
+
+<p>Setting field[4,5] is not 3 because:</p>
+<ul>
+<li class='bda89ded0'>all elements in column 5 must be different</li>
+<script>hoverByClass("bda89ded0","black")</script>
+</ul>
+
+<p>Setting field[4,5] is 4 because:</p>
+<ul>
+<li class='bda89ded0'>all elements in column 5 must be different</li>
+<script>hoverByClass("bda89ded0","black")</script>
+</ul>
+
+</div>
+
+<hr>
+<h3>Step 4 </h3>
+Solver Calls: 5841 <br>
+Skip displaying tiny MUSes..
+<input type='submit' value='Show hidden' onclick="toggle('id4');"><div id=id4 style='display:none;'>
+<p>Setting field[3,4] is not 5 because:</p>
+<p>The basic design of the problem</p>
+</div>
+
+<hr>
+<h3>Step 4 </h3>
+Solver Calls: 171 <br>
+<table style="border-collapse: collapse; border: solid 2px">
+<colgroup style="border:solid 3px"><col><col><col>
+<colgroup style="border:solid 3px"><col><col><col>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="nik">2</td></tr>
+<tr><td class="">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="nik">2</td></tr>
+<tr><td class="">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik 6dd7ed6f0 6dd7ed6f4">1</td><td class="nik 6dd7ed6f0 6dd7ed6f4">2</td></tr>
+<tr><td class="nik 6dd7ed6f0 6dd7ed6f4">3</td><td class="pii 6dd7ed6f0 6dd7ed6f4">4</td></tr>
+<tr><td class="pii 6dd7ed6f0 6dd7ed6f4">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik 6dd7ed6f2 6dd7ed6f5">1</td><td class="nik 6dd7ed6f2 6dd7ed6f5">2</td></tr>
+<tr><td class="pii 6dd7ed6f2 6dd7ed6f5">3</td><td class="pii 6dd7ed6f2 6dd7ed6f5">4</td></tr>
+<tr><td class="pii 6dd7ed6f2 6dd7ed6f5">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="pik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="pik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="pik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik 6dd7ed6f0 6dd7ed6f4">1</td><td class="nik 6dd7ed6f0 6dd7ed6f4">2</td></tr>
+<tr><td class="pii pik 6dd7ed6f0 6dd7ed6f4">3</td><td class="nik 6dd7ed6f0 6dd7ed6f4">4</td></tr>
+<tr><td class="nik 6dd7ed6f0 6dd7ed6f4">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik 6dd7ed6f2 6dd7ed6f5">1</td><td class="pii pik 6dd7ed6f2 6dd7ed6f5">2</td></tr>
+<tr><td class="nik 6dd7ed6f2 6dd7ed6f5">3</td><td class="nik 6dd7ed6f2 6dd7ed6f5">4</td></tr>
+<tr><td class="nik 6dd7ed6f2 6dd7ed6f5">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="pik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="pik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik 6dd7ed6f0 6dd7ed6f4">1</td><td class="pii pik 6dd7ed6f0 6dd7ed6f4">2</td></tr>
+<tr><td class="nik 6dd7ed6f0 6dd7ed6f4">3</td><td class="nik 6dd7ed6f0 6dd7ed6f4">4</td></tr>
+<tr><td class="nik 6dd7ed6f0 6dd7ed6f4">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii pik 6dd7ed6f2 6dd7ed6f5">1</td><td class="nik 6dd7ed6f2 6dd7ed6f5">2</td></tr>
+<tr><td class="nik 6dd7ed6f2 6dd7ed6f5">3</td><td class="nik 6dd7ed6f2 6dd7ed6f5">4</td></tr>
+<tr><td class="nik 6dd7ed6f2 6dd7ed6f5">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="pik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+</tr>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 6dd7ed6f1 6dd7ed6f3">1</td><td class="pii 6dd7ed6f1 6dd7ed6f3">2</td></tr>
+<tr><td class="pii 6dd7ed6f1 6dd7ed6f3">3</td><td class="nik 6dd7ed6f1 6dd7ed6f3">4</td></tr>
+<tr><td class="nik 6dd7ed6f1 6dd7ed6f3">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 6dd7ed6f1 6dd7ed6f3">1</td><td class="pii 6dd7ed6f1 6dd7ed6f3">2</td></tr>
+<tr><td class="pii 6dd7ed6f1 6dd7ed6f3">3</td><td class="nik 6dd7ed6f1 6dd7ed6f3">4</td></tr>
+<tr><td class="nik 6dd7ed6f1 6dd7ed6f3">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 6dd7ed6f0 6dd7ed6f1 6dd7ed6f3 6dd7ed6f4">1</td><td class="nit 6dd7ed6f0 6dd7ed6f1 6dd7ed6f3 6dd7ed6f4">2</td></tr>
+<tr><td class="nik 6dd7ed6f0 6dd7ed6f1 6dd7ed6f3 6dd7ed6f4">3</td><td class="nit 6dd7ed6f0 6dd7ed6f1 6dd7ed6f3 6dd7ed6f4">4</td></tr>
+<tr><td class="pii 6dd7ed6f0 6dd7ed6f1 6dd7ed6f3 6dd7ed6f4">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nit 6dd7ed6f1 6dd7ed6f2 6dd7ed6f3 6dd7ed6f5">1</td><td class="nik 6dd7ed6f1 6dd7ed6f2 6dd7ed6f3 6dd7ed6f5">2</td></tr>
+<tr><td class="pii 6dd7ed6f1 6dd7ed6f2 6dd7ed6f3 6dd7ed6f5">3</td><td class="nit 6dd7ed6f1 6dd7ed6f2 6dd7ed6f3 6dd7ed6f5">4</td></tr>
+<tr><td class="pii 6dd7ed6f1 6dd7ed6f2 6dd7ed6f3 6dd7ed6f5">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik 6dd7ed6f1 6dd7ed6f3">1</td><td class="nik 6dd7ed6f1 6dd7ed6f3">2</td></tr>
+<tr><td class="nik 6dd7ed6f1 6dd7ed6f3">3</td><td class="pii pik 6dd7ed6f1 6dd7ed6f3">4</td></tr>
+<tr><td class="nik 6dd7ed6f1 6dd7ed6f3">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii 6dd7ed6f0 6dd7ed6f4">1</td><td class="nit 6dd7ed6f0 6dd7ed6f4">2</td></tr>
+<tr><td class="nik 6dd7ed6f0 6dd7ed6f4">3</td><td class="pii 6dd7ed6f0 6dd7ed6f4">4</td></tr>
+<tr><td class="nik 6dd7ed6f0 6dd7ed6f4">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nit 6dd7ed6f2 6dd7ed6f5">1</td><td class="nik 6dd7ed6f2 6dd7ed6f5">2</td></tr>
+<tr><td class="pii 6dd7ed6f2 6dd7ed6f5">3</td><td class="pii 6dd7ed6f2 6dd7ed6f5">4</td></tr>
+<tr><td class="pii 6dd7ed6f2 6dd7ed6f5">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+<tr><td class="">5</td></tr>
+</table>
+</td>
+</tr>
+</table>
+Doing 6  simple deductions 
+<input type='submit' value='Show why' onclick="toggle('id5');"><div id=id5 style='display:none;'>
+<p>Setting field[4,3] is not 2 because:</p>
+<ul>
+<li class='6dd7ed6f0'>all elements in column 3 must be different</li>
+<script>hoverByClass("6dd7ed6f0","black")</script>
+</ul>
+
+<p>Setting field[4,3] is not 4 because:</p>
+<ul>
+<li class='6dd7ed6f0'>all elements in row 4 must be different</li>
+<script>hoverByClass("6dd7ed6f0","black")</script>
+</ul>
+
+<p>Setting field[4,4] is not 1 because:</p>
+<ul>
+<li class='6dd7ed6f0'>all elements in column 4 must be different</li>
+<script>hoverByClass("6dd7ed6f0","black")</script>
+</ul>
+
+<p>Setting field[4,4] is not 4 because:</p>
+<ul>
+<li class='6dd7ed6f0'>all elements in row 4 must be different</li>
+<script>hoverByClass("6dd7ed6f0","black")</script>
+</ul>
+
+<p>Setting field[5,3] is not 2 because:</p>
+<ul>
+<li class='6dd7ed6f0'>all elements in column 3 must be different</li>
+<script>hoverByClass("6dd7ed6f0","black")</script>
+</ul>
+
+<p>Setting field[5,4] is not 1 because:</p>
+<ul>
+<li class='6dd7ed6f0'>all elements in column 4 must be different</li>
+<script>hoverByClass("6dd7ed6f0","black")</script>
+</ul>
+
+</div>
+
+<hr>
+<h3>Step 5 </h3>
+Solver Calls: 158 <br>
+<table style="border-collapse: collapse; border: solid 2px">
+<colgroup style="border:solid 3px"><col><col><col>
+<colgroup style="border:solid 3px"><col><col><col>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="nik">2</td></tr>
+<tr><td class="">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="nik">2</td></tr>
+<tr><td class="">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="">4</td></tr>
+<tr><td class="">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+<tr><td class="">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="pik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="pik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="pik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="pik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="pik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="pik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="pik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="pik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="pik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+</tr>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii a5e5922a0">1</td><td class="pii a5e5922a0">2</td></tr>
+<tr><td class="nit a5e5922a0">3</td><td class="nik a5e5922a0">4</td></tr>
+<tr><td class="nik a5e5922a0">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii a5e5922a0">1</td><td class="pii a5e5922a0">2</td></tr>
+<tr><td class="pii a5e5922a0">3</td><td class="nik a5e5922a0">4</td></tr>
+<tr><td class="nik a5e5922a0">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii a5e5922a0">1</td><td class="nik a5e5922a0">2</td></tr>
+<tr><td class="nik a5e5922a0">3</td><td class="nik a5e5922a0">4</td></tr>
+<tr><td class="pii a5e5922a0">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik a5e5922a0">1</td><td class="nik a5e5922a0">2</td></tr>
+<tr><td class="pii a5e5922a0">3</td><td class="nik a5e5922a0">4</td></tr>
+<tr><td class="pii a5e5922a0">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik a5e5922a0">1</td><td class="nik a5e5922a0">2</td></tr>
+<tr><td class="nik a5e5922a0">3</td><td class="pii pik a5e5922a0">4</td></tr>
+<tr><td class="nik a5e5922a0">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii a5e5922a1 a5e5922a2 a5e5922a3">1</td><td class="pii a5e5922a1 a5e5922a2 a5e5922a3">2</td></tr>
+<tr><td class="nik a5e5922a1 a5e5922a2 a5e5922a3">3</td><td class="nik a5e5922a1 a5e5922a2 a5e5922a3">4</td></tr>
+<tr><td class="nik a5e5922a1 a5e5922a2 a5e5922a3">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nit a5e5922a1 a5e5922a2 a5e5922a3">1</td><td class="pii a5e5922a1 a5e5922a2 a5e5922a3">2</td></tr>
+<tr><td class="pii a5e5922a1 a5e5922a2 a5e5922a3">3</td><td class="nik a5e5922a1 a5e5922a2 a5e5922a3">4</td></tr>
+<tr><td class="nik a5e5922a1 a5e5922a2 a5e5922a3">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii a5e5922a1 a5e5922a2 a5e5922a3">1</td><td class="nik a5e5922a1 a5e5922a2 a5e5922a3">2</td></tr>
+<tr><td class="nik a5e5922a1 a5e5922a2 a5e5922a3">3</td><td class="pii a5e5922a1 a5e5922a2 a5e5922a3">4</td></tr>
+<tr><td class="nik a5e5922a1 a5e5922a2 a5e5922a3">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik a5e5922a1 a5e5922a2 a5e5922a3">1</td><td class="nik a5e5922a1 a5e5922a2 a5e5922a3">2</td></tr>
+<tr><td class="pii a5e5922a1 a5e5922a2 a5e5922a3">3</td><td class="pii a5e5922a1 a5e5922a2 a5e5922a3">4</td></tr>
+<tr><td class="pii a5e5922a1 a5e5922a2 a5e5922a3">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nit a5e5922a1 a5e5922a2 a5e5922a3">1</td><td class="nit a5e5922a1 a5e5922a2 a5e5922a3">2</td></tr>
+<tr><td class="pii a5e5922a1 a5e5922a2 a5e5922a3">3</td><td class="pii a5e5922a1 a5e5922a2 a5e5922a3">4</td></tr>
+<tr><td class="pii a5e5922a1 a5e5922a2 a5e5922a3">5</td></tr>
+</table>
+</td>
+</tr>
+</table>
+Doing 4  simple deductions 
+<input type='submit' value='Show why' onclick="toggle('id6');"><div id=id6 style='display:none;'>
+<p>Setting field[4,1] is not 3 because:</p>
+<ul>
+<li class='a5e5922a0'>the count for left 4 is 3</li>
+<script>hoverByClass("a5e5922a0","black")</script>
+</ul>
+
+<p>Setting field[5,2] is not 1 because:</p>
+<ul>
+<li class='a5e5922a0'>the count for left 5 is 4</li>
+<script>hoverByClass("a5e5922a0","black")</script>
+</ul>
+
+<p>Setting field[5,5] is not 1 because:</p>
+<ul>
+<li class='a5e5922a0'>the count for right 5 is 1</li>
+<script>hoverByClass("a5e5922a0","black")</script>
+</ul>
+
+<p>Setting field[5,5] is not 2 because:</p>
+<ul>
+<li class='a5e5922a0'>the count for right 5 is 1</li>
+<script>hoverByClass("a5e5922a0","black")</script>
+</ul>
+
+</div>
+
+<hr>
+<h3>Step 6 </h3>
+Solver Calls: 134 <br>
+<table style="border-collapse: collapse; border: solid 2px">
+<colgroup style="border:solid 3px"><col><col><col>
+<colgroup style="border:solid 3px"><col><col><col>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nit f1b85adc0 f1b85adc1">1</td><td class="nik f1b85adc0 f1b85adc1">2</td></tr>
+<tr><td class="pit f1b85adc0 f1b85adc1">3</td><td class="nik f1b85adc0 f1b85adc1">4</td></tr>
+<tr><td class="nik f1b85adc0 f1b85adc1">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="nik">2</td></tr>
+<tr><td class="">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="">4</td></tr>
+<tr><td class="">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+<tr><td class="">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="pik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik f1b85adc0 f1b85adc1">1</td><td class="nik f1b85adc0 f1b85adc1">2</td></tr>
+<tr><td class="nik f1b85adc0 f1b85adc1">3</td><td class="nik f1b85adc0 f1b85adc1">4</td></tr>
+<tr><td class="pii pik f1b85adc0 f1b85adc1">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="pik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="pik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="pik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik f1b85adc0 f1b85adc1">1</td><td class="nik f1b85adc0 f1b85adc1">2</td></tr>
+<tr><td class="nik f1b85adc0 f1b85adc1">3</td><td class="pii pik f1b85adc0 f1b85adc1">4</td></tr>
+<tr><td class="nik f1b85adc0 f1b85adc1">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="pik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="pik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="pik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+</tr>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii f1b85adc0 f1b85adc1">1</td><td class="pii f1b85adc0 f1b85adc1">2</td></tr>
+<tr><td class="nik f1b85adc0 f1b85adc1">3</td><td class="nik f1b85adc0 f1b85adc1">4</td></tr>
+<tr><td class="nik f1b85adc0 f1b85adc1">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="">3</td><td class="nik">4</td></tr>
+<tr><td class="">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="pik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii f1b85adc0 f1b85adc1">1</td><td class="pii f1b85adc0 f1b85adc1">2</td></tr>
+<tr><td class="nik f1b85adc0 f1b85adc1">3</td><td class="nik f1b85adc0 f1b85adc1">4</td></tr>
+<tr><td class="nik f1b85adc0 f1b85adc1">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+<tr><td class="">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+<tr><td class="">5</td></tr>
+</table>
+</td>
+</tr>
+</table>
+Doing 2  simple deductions 
+<input type='submit' value='Show why' onclick="toggle('id7');"><div id=id7 style='display:none;'>
+<p>Setting field[1,1] is not 1 because:</p>
+<ul>
+<li class='f1b85adc0'>all elements in column 1 must be different</li>
+<script>hoverByClass("f1b85adc0","black")</script>
+</ul>
+
+<p>Setting field[1,1] is 3 because:</p>
+<ul>
+<li class='f1b85adc0'>all elements in column 1 must be different</li>
+<script>hoverByClass("f1b85adc0","black")</script>
+</ul>
+
+</div>
+
+<hr>
+<h3>Step 7 </h3>
+Solver Calls: 139 <br>
+<table style="border-collapse: collapse; border: solid 2px">
+<colgroup style="border:solid 3px"><col><col><col>
+<colgroup style="border:solid 3px"><col><col><col>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik 88058f3d0 88058f3d1 88058f3d2 88058f3d3">1</td><td class="nik 88058f3d0 88058f3d1 88058f3d2 88058f3d3">2</td></tr>
+<tr><td class="pii pik 88058f3d0 88058f3d1 88058f3d2 88058f3d3">3</td><td class="nik 88058f3d0 88058f3d1 88058f3d2 88058f3d3">4</td></tr>
+<tr><td class="nik 88058f3d0 88058f3d1 88058f3d2 88058f3d3">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pit 88058f3d0 88058f3d1 88058f3d2 88058f3d3">1</td><td class="nik 88058f3d0 88058f3d1 88058f3d2 88058f3d3">2</td></tr>
+<tr><td class="nit 88058f3d0 88058f3d1 88058f3d2 88058f3d3">3</td><td class="nik 88058f3d0 88058f3d1 88058f3d2 88058f3d3">4</td></tr>
+<tr><td class="nik 88058f3d0 88058f3d1 88058f3d2 88058f3d3">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik 88058f3d0 88058f3d1 88058f3d2 88058f3d3">1</td><td class="nik 88058f3d0 88058f3d1 88058f3d2 88058f3d3">2</td></tr>
+<tr><td class="nik 88058f3d0 88058f3d1 88058f3d2 88058f3d3">3</td><td class="pit 88058f3d0 88058f3d1 88058f3d2 88058f3d3">4</td></tr>
+<tr><td class="nit 88058f3d0 88058f3d1 88058f3d2 88058f3d3">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik 88058f3d0 88058f3d1 88058f3d2 88058f3d3">1</td><td class="nik 88058f3d0 88058f3d1 88058f3d2 88058f3d3">2</td></tr>
+<tr><td class="pii 88058f3d0 88058f3d1 88058f3d2 88058f3d3">3</td><td class="pii 88058f3d0 88058f3d1 88058f3d2 88058f3d3">4</td></tr>
+<tr><td class="pii 88058f3d0 88058f3d1 88058f3d2 88058f3d3">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik 88058f3d0 88058f3d1 88058f3d2 88058f3d3">1</td><td class="pii pik 88058f3d0 88058f3d1 88058f3d2 88058f3d3">2</td></tr>
+<tr><td class="nik 88058f3d0 88058f3d1 88058f3d2 88058f3d3">3</td><td class="nik 88058f3d0 88058f3d1 88058f3d2 88058f3d3">4</td></tr>
+<tr><td class="nik 88058f3d0 88058f3d1 88058f3d2 88058f3d3">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="pik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="pik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="pik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="pik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="pik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="pik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="pik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="pik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+</tr>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="">3</td><td class="nik">4</td></tr>
+<tr><td class="">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="pik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="">2</td></tr>
+<tr><td class="">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+<tr><td class="">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+<tr><td class="">5</td></tr>
+</table>
+</td>
+</tr>
+</table>
+Doing 4  simple deductions 
+<input type='submit' value='Show why' onclick="toggle('id8');"><div id=id8 style='display:none;'>
+<p>Setting field[1,2] is 1 because:</p>
+<ul>
+<li class='88058f3d0'>all elements in row 1 must be different</li>
+<script>hoverByClass("88058f3d0","black")</script>
+</ul>
+
+<p>Setting field[1,2] is not 3 because:</p>
+<ul>
+<li class='88058f3d0'>all elements in row 1 must be different</li>
+<script>hoverByClass("88058f3d0","black")</script>
+</ul>
+
+<p>Setting field[1,3] is 4 because:</p>
+<ul>
+<li class='88058f3d0'>the count for left 1 is 3</li>
+<script>hoverByClass("88058f3d0","black")</script>
+</ul>
+
+<p>Setting field[1,3] is not 5 because:</p>
+<ul>
+<li class='88058f3d0'>the count for left 1 is 3</li>
+<script>hoverByClass("88058f3d0","black")</script>
+</ul>
+
+</div>
+
+<hr>
+<h3>Step 8 </h3>
+Solver Calls: 118 <br>
+<table style="border-collapse: collapse; border: solid 2px">
+<colgroup style="border:solid 3px"><col><col><col>
+<colgroup style="border:solid 3px"><col><col><col>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="pik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii pik a952c8930">1</td><td class="nik a952c8930">2</td></tr>
+<tr><td class="nik a952c8930">3</td><td class="nik a952c8930">4</td></tr>
+<tr><td class="nik a952c8930">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik a952c8931 a952c8932 a952c8933 a952c8934">1</td><td class="nik a952c8931 a952c8932 a952c8933 a952c8934">2</td></tr>
+<tr><td class="nik a952c8931 a952c8932 a952c8933 a952c8934">3</td><td class="pii pik a952c8931 a952c8932 a952c8933 a952c8934">4</td></tr>
+<tr><td class="nik a952c8931 a952c8932 a952c8933 a952c8934">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+<tr><td class="">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="pik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="pik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik a952c8930">1</td><td class="nik a952c8930">2</td></tr>
+<tr><td class="nik a952c8930">3</td><td class="pii pik a952c8930">4</td></tr>
+<tr><td class="nik a952c8930">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik a952c8931 a952c8932 a952c8933 a952c8934">1</td><td class="nik a952c8931 a952c8932 a952c8933 a952c8934">2</td></tr>
+<tr><td class="pii pik a952c8931 a952c8932 a952c8933 a952c8934">3</td><td class="nik a952c8931 a952c8932 a952c8933 a952c8934">4</td></tr>
+<tr><td class="nik a952c8931 a952c8932 a952c8933 a952c8934">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="pik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="pik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik a952c8930">1</td><td class="nik a952c8930">2</td></tr>
+<tr><td class="nik a952c8930">3</td><td class="nik a952c8930">4</td></tr>
+<tr><td class="pii pik a952c8930">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik a952c8931 a952c8932 a952c8933 a952c8934">1</td><td class="pii pik a952c8931 a952c8932 a952c8933 a952c8934">2</td></tr>
+<tr><td class="nik a952c8931 a952c8932 a952c8933 a952c8934">3</td><td class="nik a952c8931 a952c8932 a952c8933 a952c8934">4</td></tr>
+<tr><td class="nik a952c8931 a952c8932 a952c8933 a952c8934">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="pik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+</tr>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nit a952c8930">1</td><td class="pii a952c8930">2</td></tr>
+<tr><td class="pii a952c8930">3</td><td class="nik a952c8930">4</td></tr>
+<tr><td class="nik a952c8930">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nit a952c8931 a952c8932 a952c8933 a952c8934">1</td><td class="nik a952c8931 a952c8932 a952c8933 a952c8934">2</td></tr>
+<tr><td class="nik a952c8931 a952c8932 a952c8933 a952c8934">3</td><td class="nik a952c8931 a952c8932 a952c8933 a952c8934">4</td></tr>
+<tr><td class="pit a952c8931 a952c8932 a952c8933 a952c8934">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="">3</td><td class="nik">4</td></tr>
+<tr><td class="">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="pik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="">1</td><td class="">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik a952c8930">1</td><td class="pii a952c8930">2</td></tr>
+<tr><td class="pii a952c8930">3</td><td class="nik a952c8930">4</td></tr>
+<tr><td class="nik a952c8930">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pit a952c8931 a952c8932 a952c8933 a952c8934">1</td><td class="nik a952c8931 a952c8932 a952c8933 a952c8934">2</td></tr>
+<tr><td class="nik a952c8931 a952c8932 a952c8933 a952c8934">3</td><td class="nit a952c8931 a952c8932 a952c8933 a952c8934">4</td></tr>
+<tr><td class="nik a952c8931 a952c8932 a952c8933 a952c8934">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+<tr><td class="">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+<tr><td class="">5</td></tr>
+</table>
+</td>
+</tr>
+</table>
+Doing 5  simple deductions 
+<input type='submit' value='Show why' onclick="toggle('id9');"><div id=id9 style='display:none;'>
+<p>Setting field[4,2] is not 1 because:</p>
+<ul>
+<li class='a952c8930'>all elements in column 2 must be different</li>
+<script>hoverByClass("a952c8930","black")</script>
+</ul>
+
+<p>Setting field[4,3] is not 1 because:</p>
+<ul>
+<li class='a952c8930'>all elements in column 3 must be different</li>
+<script>hoverByClass("a952c8930","black")</script>
+</ul>
+
+<p>Setting field[4,3] is 5 because:</p>
+<ul>
+<li class='a952c8930'>all elements in column 3 must be different</li>
+<script>hoverByClass("a952c8930","black")</script>
+</ul>
+
+<p>Setting field[5,3] is 1 because:</p>
+<ul>
+<li class='a952c8930'>all elements in column 3 must be different</li>
+<script>hoverByClass("a952c8930","black")</script>
+</ul>
+
+<p>Setting field[5,3] is not 4 because:</p>
+<ul>
+<li class='a952c8930'>all elements in column 3 must be different</li>
+<script>hoverByClass("a952c8930","black")</script>
+</ul>
+
+</div>
+
+<hr>
+<h3>Step 9 </h3>
+Solver Calls: 124 <br>
+<table style="border-collapse: collapse; border: solid 2px">
+<colgroup style="border:solid 3px"><col><col><col>
+<colgroup style="border:solid 3px"><col><col><col>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="pik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="pik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="">3</td><td class="">4</td></tr>
+<tr><td class="">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="pik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="pik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="pik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="pik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="pik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="pik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="pik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="pik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="pik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+</tr>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pit 0a7e84030 0a7e84031 0a7e84032 0a7e84033 0a7e84034">1</td><td class="nit 0a7e84030 0a7e84031 0a7e84032 0a7e84033 0a7e84034">2</td></tr>
+<tr><td class="nik 0a7e84030 0a7e84031 0a7e84032 0a7e84033 0a7e84034">3</td><td class="nik 0a7e84030 0a7e84031 0a7e84032 0a7e84033 0a7e84034">4</td></tr>
+<tr><td class="nik 0a7e84030 0a7e84031 0a7e84032 0a7e84033 0a7e84034">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik 0a7e84030 0a7e84031 0a7e84032 0a7e84033 0a7e84034">1</td><td class="pit 0a7e84030 0a7e84031 0a7e84032 0a7e84033 0a7e84034">2</td></tr>
+<tr><td class="nit 0a7e84030 0a7e84031 0a7e84032 0a7e84033 0a7e84034">3</td><td class="nik 0a7e84030 0a7e84031 0a7e84032 0a7e84033 0a7e84034">4</td></tr>
+<tr><td class="nik 0a7e84030 0a7e84031 0a7e84032 0a7e84033 0a7e84034">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik 0a7e84030 0a7e84031 0a7e84032 0a7e84033 0a7e84034">1</td><td class="nik 0a7e84030 0a7e84031 0a7e84032 0a7e84033 0a7e84034">2</td></tr>
+<tr><td class="nik 0a7e84030 0a7e84031 0a7e84032 0a7e84033 0a7e84034">3</td><td class="nik 0a7e84030 0a7e84031 0a7e84032 0a7e84033 0a7e84034">4</td></tr>
+<tr><td class="pii pik 0a7e84030 0a7e84031 0a7e84032 0a7e84033 0a7e84034">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik 0a7e84030 0a7e84031 0a7e84032 0a7e84033 0a7e84034">1</td><td class="nik 0a7e84030 0a7e84031 0a7e84032 0a7e84033 0a7e84034">2</td></tr>
+<tr><td class="pit 0a7e84030 0a7e84031 0a7e84032 0a7e84033 0a7e84034">3</td><td class="nik 0a7e84030 0a7e84031 0a7e84032 0a7e84033 0a7e84034">4</td></tr>
+<tr><td class="pii 0a7e84030 0a7e84031 0a7e84032 0a7e84033 0a7e84034">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik 0a7e84030 0a7e84031 0a7e84032 0a7e84033 0a7e84034">1</td><td class="nik 0a7e84030 0a7e84031 0a7e84032 0a7e84033 0a7e84034">2</td></tr>
+<tr><td class="nik 0a7e84030 0a7e84031 0a7e84032 0a7e84033 0a7e84034">3</td><td class="pii pik 0a7e84030 0a7e84031 0a7e84032 0a7e84033 0a7e84034">4</td></tr>
+<tr><td class="nik 0a7e84030 0a7e84031 0a7e84032 0a7e84033 0a7e84034">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nit 0a7e84035 0a7e84036 0a7e84037 0a7e84038 0a7e84039 0a7e840310">1</td><td class="pit 0a7e84035 0a7e84036 0a7e84037 0a7e84038 0a7e84039 0a7e840310">2</td></tr>
+<tr><td class="nik 0a7e84035 0a7e84036 0a7e84037 0a7e84038 0a7e84039 0a7e840310">3</td><td class="nik 0a7e84035 0a7e84036 0a7e84037 0a7e84038 0a7e84039 0a7e840310">4</td></tr>
+<tr><td class="nik 0a7e84035 0a7e84036 0a7e84037 0a7e84038 0a7e84039 0a7e840310">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik 0a7e84035 0a7e84036 0a7e84037 0a7e84038 0a7e84039 0a7e840310">1</td><td class="nit 0a7e84035 0a7e84036 0a7e84037 0a7e84038 0a7e84039 0a7e840310">2</td></tr>
+<tr><td class="pit 0a7e84035 0a7e84036 0a7e84037 0a7e84038 0a7e84039 0a7e840310">3</td><td class="nik 0a7e84035 0a7e84036 0a7e84037 0a7e84038 0a7e84039 0a7e840310">4</td></tr>
+<tr><td class="nik 0a7e84035 0a7e84036 0a7e84037 0a7e84038 0a7e84039 0a7e840310">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii pik 0a7e84035 0a7e84036 0a7e84037 0a7e84038 0a7e84039 0a7e840310">1</td><td class="nik 0a7e84035 0a7e84036 0a7e84037 0a7e84038 0a7e84039 0a7e840310">2</td></tr>
+<tr><td class="nik 0a7e84035 0a7e84036 0a7e84037 0a7e84038 0a7e84039 0a7e840310">3</td><td class="nik 0a7e84035 0a7e84036 0a7e84037 0a7e84038 0a7e84039 0a7e840310">4</td></tr>
+<tr><td class="nik 0a7e84035 0a7e84036 0a7e84037 0a7e84038 0a7e84039 0a7e840310">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik 0a7e84035 0a7e84036 0a7e84037 0a7e84038 0a7e84039 0a7e840310">1</td><td class="nik 0a7e84035 0a7e84036 0a7e84037 0a7e84038 0a7e84039 0a7e840310">2</td></tr>
+<tr><td class="nit 0a7e84035 0a7e84036 0a7e84037 0a7e84038 0a7e84039 0a7e840310">3</td><td class="pii 0a7e84035 0a7e84036 0a7e84037 0a7e84038 0a7e84039 0a7e840310">4</td></tr>
+<tr><td class="pii 0a7e84035 0a7e84036 0a7e84037 0a7e84038 0a7e84039 0a7e840310">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik 0a7e84035 0a7e84036 0a7e84037 0a7e84038 0a7e84039 0a7e840310">1</td><td class="nik 0a7e84035 0a7e84036 0a7e84037 0a7e84038 0a7e84039 0a7e840310">2</td></tr>
+<tr><td class="nit 0a7e84035 0a7e84036 0a7e84037 0a7e84038 0a7e84039 0a7e840310">3</td><td class="pii 0a7e84035 0a7e84036 0a7e84037 0a7e84038 0a7e84039 0a7e840310">4</td></tr>
+<tr><td class="pii 0a7e84035 0a7e84036 0a7e84037 0a7e84038 0a7e84039 0a7e840310">5</td></tr>
+</table>
+</td>
+</tr>
+</table>
+Doing 11  simple deductions 
+<input type='submit' value='Show why' onclick="toggle('id10');"><div id=id10 style='display:none;'>
+<p>Setting field[4,1] is 1 because:</p>
+<ul>
+<li class='0a7e84030'>all elements in row 4 must be different</li>
+<script>hoverByClass("0a7e84030","black")</script>
+</ul>
+
+<p>Setting field[4,1] is not 2 because:</p>
+<ul>
+<li class='0a7e84030'>all elements in row 4 must be different</li>
+<script>hoverByClass("0a7e84030","black")</script>
+</ul>
+
+<p>Setting field[4,2] is 2 because:</p>
+<ul>
+<li class='0a7e84030'>all elements in row 4 must be different</li>
+<script>hoverByClass("0a7e84030","black")</script>
+</ul>
+
+<p>Setting field[4,2] is not 3 because:</p>
+<ul>
+<li class='0a7e84030'>all elements in row 4 must be different</li>
+<script>hoverByClass("0a7e84030","black")</script>
+</ul>
+
+<p>Setting field[4,4] is 3 because:</p>
+<ul>
+<li class='0a7e84030'>all elements in row 4 must be different</li>
+<script>hoverByClass("0a7e84030","black")</script>
+</ul>
+
+<p>Setting field[5,1] is not 1 because:</p>
+<ul>
+<li class='0a7e84030'>all elements in row 5 must be different</li>
+<script>hoverByClass("0a7e84030","black")</script>
+</ul>
+
+<p>Setting field[5,1] is 2 because:</p>
+<ul>
+<li class='0a7e84030'>all elements in row 5 must be different</li>
+<script>hoverByClass("0a7e84030","black")</script>
+</ul>
+
+<p>Setting field[5,2] is not 2 because:</p>
+<ul>
+<li class='0a7e84030'>all elements in row 5 must be different</li>
+<script>hoverByClass("0a7e84030","black")</script>
+</ul>
+
+<p>Setting field[5,2] is 3 because:</p>
+<ul>
+<li class='0a7e84030'>all elements in row 5 must be different</li>
+<script>hoverByClass("0a7e84030","black")</script>
+</ul>
+
+<p>Setting field[5,4] is not 3 because:</p>
+<ul>
+<li class='0a7e84030'>all elements in row 5 must be different</li>
+<script>hoverByClass("0a7e84030","black")</script>
+</ul>
+
+<p>Setting field[5,5] is not 3 because:</p>
+<ul>
+<li class='0a7e84030'>all elements in row 5 must be different</li>
+<script>hoverByClass("0a7e84030","black")</script>
+</ul>
+
+</div>
+
+<hr>
+<h3>Step 10 </h3>
+Solver Calls: 832 <br>
+Skip displaying tiny MUSes..
+<input type='submit' value='Show hidden' onclick="toggle('id11');"><div id=id11 style='display:none;'>
+<p>Setting field[4,4] is not 5 because:</p>
+<p>The basic design of the problem</p>
+</div>
+
+<hr>
+<h3>Step 10 </h3>
+Solver Calls: 52 <br>
+<table style="border-collapse: collapse; border: solid 2px">
+<colgroup style="border:solid 3px"><col><col><col>
+<colgroup style="border:solid 3px"><col><col><col>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="pik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="pik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik 7098f11d0">1</td><td class="nik 7098f11d0">2</td></tr>
+<tr><td class="nit 7098f11d0">3</td><td class="pii 7098f11d0">4</td></tr>
+<tr><td class="pii 7098f11d0">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="pik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="pik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="pik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="pik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik 7098f11d0">1</td><td class="pii pik 7098f11d0">2</td></tr>
+<tr><td class="nik 7098f11d0">3</td><td class="nik 7098f11d0">4</td></tr>
+<tr><td class="nik 7098f11d0">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="pik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="pik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="pik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pii pik 7098f11d0">1</td><td class="nik 7098f11d0">2</td></tr>
+<tr><td class="nik 7098f11d0">3</td><td class="nik 7098f11d0">4</td></tr>
+<tr><td class="nik 7098f11d0">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="pik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+</tr>
+<tbody style="border:solid 3px">
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="pik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="pik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik 7098f11d0">1</td><td class="nik 7098f11d0">2</td></tr>
+<tr><td class="pii pik 7098f11d0">3</td><td class="nik 7098f11d0">4</td></tr>
+<tr><td class="nik 7098f11d0">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="pik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="pik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="pik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="pik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="nik">4</td></tr>
+<tr><td class="nik">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik 7098f11d0">1</td><td class="nik 7098f11d0">2</td></tr>
+<tr><td class="nik 7098f11d0">3</td><td class="pii 7098f11d0">4</td></tr>
+<tr><td class="pii 7098f11d0">5</td></tr>
+</table>
+</td>
+<td style="border:solid 1px">
+<table>
+<tr><td class="nik">1</td><td class="nik">2</td></tr>
+<tr><td class="nik">3</td><td class="">4</td></tr>
+<tr><td class="">5</td></tr>
+</table>
+</td>
+</tr>
+</table>
+Doing 1  simple deductions 
+<input type='submit' value='Show why' onclick="toggle('id12');"><div id=id12 style='display:none;'>
+<p>Setting field[1,4] is not 3 because:</p>
+<ul>
+<li class='7098f11d0'>all elements in column 4 must be different</li>
+<script>hoverByClass("7098f11d0","black")</script>
+</ul>
+
+</div>
+
+<hr>
+Minitrace:  []
