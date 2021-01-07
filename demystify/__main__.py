@@ -45,6 +45,8 @@ parser.add_argument("--incomplete", action="store_true", help="allow problems wi
 
 parser.add_argument("--steps", type=int, default=float('inf'), help="How many steps to perform" )
 
+parser.add_argument("--nodomains", action="store_true", help="Only assign variables, do not remove domain values")
+
 args = parser.parse_args()
 
 if args.puzzle is None and args.eprime is None:
@@ -308,6 +310,10 @@ if fullsolution == "Multiple" and not args.incomplete:
     print("Your problem has multiple solutions!")
     sys.exit(1)
 
+if args.nodomains:
+    print("NODOMAINS", len(puzlits))
+    puzlits = [p for p in puzlits if p.equal]
+    print("!!",len(puzlits))
 
 
 MUS = demystify.MUS.CascadeMUSFinder(solver)
