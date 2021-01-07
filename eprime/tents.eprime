@@ -66,17 +66,17 @@ forAll i:X. forAll j:Y. forAll k: int(0..1). forAll l: int(-1..1). $ We only nee
 
 $ Column sums
 forAll i:X.
-rowsums[i] != -1 -> (rowup[i] -> ((sum j:Y. toInt(grid[i,j]>0)) >= rowsums[i])),
+(rowsums[i] != -1) -> (rowup[i] -> ((sum j:Y. toInt(grid[i,j]>0)) >= rowsums[i])),
 
 forAll i:X.
-rowsums[i] != -1 -> (rowdown[i] -> ((sum j:Y. toInt(grid[i,j]>0)) <= rowsums[i])),
+(rowsums[i] != -1) -> (rowdown[i] -> ((sum j:Y. toInt(grid[i,j]>0)) <= rowsums[i])),
 
 $ Row sums
 forAll j:Y.
-colsums[j] != -1 -> (colup[j] -> ((sum i:X. toInt(grid[i,j]>0)) >= colsums[j])),
+(colsums[j] != -1) -> (colup[j] -> ((sum i:X. toInt(grid[i,j]>0)) >= colsums[j])),
 
 forAll j:Y.
-colsums[j] != -1 -> (coldown[j] -> ((sum i:X. toInt(grid[i,j]>0)) >= colsums[j])),
+(colsums[j] != -1) -> (coldown[j] -> ((sum i:X. toInt(grid[i,j]>0)) <= colsums[j])),
 
 $and(treetent),and(rowup),and(rowdown),and(flatten(adj)),and(colup),and(coldown),
 
