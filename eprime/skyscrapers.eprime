@@ -34,6 +34,8 @@ letting   RANGE  be domain int( 1..SIZE )
 
 given     CLUES : matrix indexed by [int(1..4),RANGE] of VALUES
 
+given GRID : matrix indexed by [RANGE,RANGE] of VALUES
+
 
 $#VAR field
 
@@ -67,6 +69,11 @@ $#AUX variant_fields
 find variant_fields : matrix indexed by [int(1..4),RANGE,RANGE] of RANGE 
 
 such that
+
+$ port over hints grid to final solution
+    forAll row : RANGE .
+        forAll col : RANGE .
+	 		((GRID[row,col] > 0) -> (field[row,col] = GRID[row,col])),
 
 $ all rows have to be different
     forAll row : RANGE .
