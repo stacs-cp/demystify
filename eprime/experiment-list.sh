@@ -19,6 +19,8 @@ $* skyscrapers.eprime skyscrapers/**/*.param
 
 $* solitairebattleship/solitaire_battleship.eprime solitairebattleship/**/*.param
 
-$* star-battle.eprime star-battle*.param
+$* star-battle.eprime star-battle/*.param
 
 $* tents.eprime tents/**/*.param
+
+$* thermometer.eprime thermometer/**/*.param
