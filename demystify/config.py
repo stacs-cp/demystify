@@ -42,7 +42,7 @@ CONFIG = {
     # When "officially" looking for a mus of size k,
     # instead look for cascadeMult*k, because it is not too much
     # more work and we might want it later
-    "cascadeMult": 1,
+    "cascadeMult": 5,
     "checkSmall1": True,
     "checkSmall2": False,
     "checkCloseFirst": False,
