@@ -176,16 +176,21 @@ hide = function(id) {
         else:
             step += 1
 
-            print(list(str(k) for k in sorted(musdict.keys())))
-            if force is not None and len(list(k for k in sorted(musdict.keys()) if str(k) == force[0])) > 0:
-                basemins = [k for k in sorted(musdict.keys()) if str(k) == force[0]]
-                force = force[1:]
-                if len(force) == 0:
-                    force = None
-                print("force = ", force)
-            # Find first thing with smallest value
-            else:
-                basemins = [k for k in sorted(musdict.keys()) if len(musdict[k][0]) == smallest]
+            print(list(str(k) for k in sorted(musdict.keys())), "::", force)
+
+            # Set default value
+            basemins = [k for k in sorted(musdict.keys()) if len(musdict[k][0]) == smallest]
+
+            # Consider overriding 'basemins' value with 'force'
+            if force is not None:
+                inforces = list(f for f in force if len(list(k for k in sorted(musdict.keys()) if str(k) == f)) > 0)
+                if len(inforces) > 0:
+                    basemins = [k for k in sorted(musdict.keys()) if str(k) == inforces[0]]
+                    force.remove(inforces[0])
+                    if len(force) == 0:
+                        force = None
+                    print("force = ", force)
+
             fullinfo = {lit: list_counter(musdict[lit]) for lit in basemins}
             if fulltrace:
                 ftrace.append(fullinfo)
