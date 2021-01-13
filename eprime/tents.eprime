@@ -38,10 +38,13 @@ find treetentup: matrix indexed by [int(1..treecount)] of bool
 $#CON treetentdown "tree {a[0]} must have at most one tent"
 find treetentdown: matrix indexed by [int(1..treecount)] of bool
 
+$#CON tentneartree "the tent for tree {a[0]} must be next to the tree"
+find tentneartree: matrix indexed by [int(1..treecount)] of bool
+
 such that
 
 
-$ Set up trees:
+$ Set up tents:
 forAll i:X. forAll j:Y.
 (trees[i,j]>0 -> grid[i,j]=-trees[i,j]),
 
@@ -51,7 +54,7 @@ forAll i:X. forAll j:Y.
 
 $ Tent for each tree must be next to that tree
 forAll i:X. forAll j:Y. forAll t: int(1..treecount).
-!(trees[i-1,j]=t \/ trees[i+1,j]=t \/ trees[i,j-1]=t \/ trees[i,j+1]=t) -> grid[i,j]!=t,
+tentneartree[t] -> (!(trees[i-1,j]=t \/ trees[i+1,j]=t \/ trees[i,j-1]=t \/ trees[i,j+1]=t) -> grid[i,j]!=t),
 
 $ Every tree must have at least one tent
 forAll t:int(1..treecount). 
