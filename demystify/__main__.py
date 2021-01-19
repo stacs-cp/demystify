@@ -47,6 +47,8 @@ parser.add_argument("--steps", type=int, default=float('inf'), help="How many st
 
 parser.add_argument("--nodomains", action="store_true", help="Only assign variables, do not remove domain values")
 
+parser.add_argument("--force", type=str, action='append', default=None, help="choose first non-trivial variable to be assigned")
+
 args = parser.parse_args()
 
 if args.puzzle is None and args.eprime is None:
@@ -318,7 +320,7 @@ if args.nodomains:
 
 MUS = demystify.MUS.CascadeMUSFinder(solver)
 
-trace = demystify.solve.html_solve(sys.stdout, solver, puzlits, MUS, skip=args.skip, merge=args.merge, steps=args.steps)
+trace = demystify.solve.html_solve(sys.stdout, solver, puzlits, MUS, skip=args.skip, merge=args.merge, steps=args.steps, force=args.force)
 
 print("Minitrace: ", [s for (s, _) in trace])
 

@@ -66,7 +66,7 @@ def html_step(outstream, solver, p, choices, bestchoice):
                     others.getvalue()
                     ), file=others)
 
-def html_solve(outstream, solver, puzlits, MUSFind, steps=math.inf, *, gofast = False, fulltrace=False, forcechoices = None, skip=-1, merge=1):
+def html_solve(outstream, solver, puzlits, MUSFind, steps=math.inf, *, gofast = False, fulltrace=False, forcechoices = None, skip=-1, merge=1, force=None):
     trace = []
     ftrace = []
     total_calls = 0
@@ -176,8 +176,21 @@ hide = function(id) {
         else:
             step += 1
 
-            # Find first thing with smallest value
+            print(list(str(k) for k in sorted(musdict.keys())), "::", force)
+
+            # Set default value
             basemins = [k for k in sorted(musdict.keys()) if len(musdict[k][0]) == smallest]
+
+            # Consider overriding 'basemins' value with 'force'
+            if force is not None:
+                inforces = list(f for f in force if len(list(k for k in sorted(musdict.keys()) if str(k) == f)) > 0)
+                if len(inforces) > 0:
+                    basemins = [k for k in sorted(musdict.keys()) if str(k) == inforces[0]]
+                    force.remove(inforces[0])
+                    if len(force) == 0:
+                        force = None
+                    print("force = ", force)
+
             fullinfo = {lit: list_counter(musdict[lit]) for lit in basemins}
             if fulltrace:
                 ftrace.append(fullinfo)
