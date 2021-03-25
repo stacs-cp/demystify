@@ -23,6 +23,7 @@ import demystify.prettyprint
 import demystify.solve
 import demystify.buildpuz
 import demystify.utils
+import demystify.jsonsolve
 
 
 parser = argparse.ArgumentParser(description = "Demystify")
@@ -48,6 +49,8 @@ parser.add_argument("--steps", type=int, default=float('inf'), help="How many st
 parser.add_argument("--nodomains", action="store_true", help="Only assign variables, do not remove domain values")
 
 parser.add_argument("--force", type=str, action='append', default=None, help="choose first non-trivial variable to be assigned")
+
+parser.add_argument("--json", type=str, action='append', default=None, help="optional JSON file output")
 
 args = parser.parse_args()
 
@@ -320,7 +323,10 @@ if args.nodomains:
 
 MUS = demystify.MUS.CascadeMUSFinder(solver)
 
-trace = demystify.solve.html_solve(sys.stdout, solver, puzlits, MUS, skip=args.skip, merge=args.merge, steps=args.steps, force=args.force)
+if args.json is not None:
+    trace = demystify.jsonsolve.json_solve(args.json[0], sys.stdout, solver, puzlits, MUS, skip=args.skip, merge=args.merge, steps=args.steps, force=args.force)
+else:
+    trace = demystify.solve.html_solve(sys.stdout, solver, puzlits, MUS, skip=args.skip, merge=args.merge, steps=args.steps, force=args.force)
 
 print("Minitrace: ", [s for (s, _) in trace])
 
