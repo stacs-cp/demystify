@@ -68,9 +68,12 @@ def print_matrix(f, matrix, known, involved, involvedset, classprefix, targets, 
     print("</table>", file=f)
 
 
+# print out we have deduced 'targets' using 'mus'
 def print_explanation(f, solver, mus, targets, classprefix):
     vars = solver.puzzle().vars()
+    # literals the solve already knows
     known = solver.getKnownLits()
+    # literals used in the MUS
     involved = [m.clauseset() for m in flatten(mus)]
     
     for matrix in vars:

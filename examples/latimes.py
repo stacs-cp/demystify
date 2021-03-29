@@ -422,6 +422,8 @@ if moves is not None:
 else:
     lits = None
 
+lits = None
+
 sudoku = [[None] * 9 for _ in range(9)]
 for i in range(9):
     for j in range(9):
