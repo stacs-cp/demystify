@@ -51,18 +51,22 @@ def cell_values(variable, known, involved, involvedset, targets):
         for d in dsublist:
             value = {}
             markers = []
-
+            status = ""
+            explanation = ""
             poslit = EqVal(variable, d)
             neglit = NeqVal(variable, d)
             if neglit in targets:
                 markers.append("nit")
+                status = "negative"
             elif poslit in targets:
                 markers.append("pit")
+                status = "positive"
             # Put this neglit check here, as we want to skip displaying it we already know it is gone
             elif neglit in known:
                 markers.append("nik")
             elif poslit in involvedset:
                 markers.append("pii")
+                status = "involved"
             elif neglit in involvedset:
                 markers.append("nii")
 
@@ -71,10 +75,14 @@ def cell_values(variable, known, involved, involvedset, targets):
             
             for i, clause in enumerate(involved):
                 if (poslit in flatten(clause)) or (neglit in flatten(clause)):
-                    markers.append(str(i))
+                    #markers.append(str(i))
+                    explanation = str(i)
+                    # We want this to be "the" explanation that makes d postlit or neglit in targets
 
             value["markers"] = markers
             value["value"] = d
+            value["status"] = status
+            value["explanation"] = explanation
 
             if not "nik" in value["markers"]:
                 cell_values.append(value)
