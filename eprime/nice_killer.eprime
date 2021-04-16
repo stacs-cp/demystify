@@ -24,6 +24,13 @@ find alldiff_hint: matrix indexed by [int(1..n_hints)] of bool
 $#CON sum_hint "hint {a[0]} must sum to {params['hints'][a[0]-1]}"
 find sum_hint    : matrix indexed by [int(1..n_hints)] of bool 
 
+$#CON sum_row "row {a[0]} must sum to 45"
+find sum_row : matrix indexed by [int(1..9)] of bool 
+$#CON sum_col "col {a[0]} must sum to 45"
+find sum_col : matrix indexed by [int(1..9)] of bool 
+$#CON sum_box "box {a[0]} must sum to 45"
+find sum_box : matrix indexed by [int(1..9)] of bool 
+
 such that 
 
 $ rows
@@ -46,7 +53,20 @@ $ elements in a hint must be different
 forAll i: int(1..n_hints) .
     alldiff_hint[i] -> allDiff([ x[r,c] | r: int(1..9), c: int(1..9), grid[r,c] = i]),
 
+$ implicit sum constraints 
+$ rows
+forAll i: int(1..9)  .
+    sum_row[i] -> sum(x[..,i]) = 45,
+
+$ columns
+forAll i: int(1..9)  .
+    sum_col[i] -> sum(x[i,..]) = 45,
+
+$ 3x3 boxes
+forAll i,j: int(0..2) .
+    sum_box[i] -> sum([x[r,c] | r: int(i*3+1..i*3+3), c: int(j*3+1..j*3+3)]) = 45,
+
 $ get a solution please :)
-$and([and(alldiff_row),and(alldiff_col),and(alldiff_box),and(sum_hint),and(alldiff_hint)]),
+$and([and(alldiff_row),and(alldiff_col),and(alldiff_box),and(sum_hint),and(alldiff_hint),and(sum_row),and(sum_col),and(sum_box)]),
 
 true
