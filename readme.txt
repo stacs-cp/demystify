@@ -1,14 +1,8 @@
 Install conjure (in conjure git checkout):
 
-make solvers && make install
+git clone https://github.com/conjure-cp/conjure && cd conjure && make && make solvers && make install
 
-Install an up-to-date savilerow (in an up to date savilerow git checkout)
-
-./compile.sh
-cp savilerow savilerow.jar ~/.local/bin
-
-
-To run demystify:
+Install some python packages:
 
 pip3 install python-sat z3-solver numpy
 
