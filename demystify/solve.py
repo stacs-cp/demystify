@@ -29,16 +29,20 @@ def hidden(name, content):
     return s
 
 
-def explain(solver, lits, reason, classid):
+def explain(solver, lits, reason, classid, enumerateclass = True):
     exp = ""
     exp += "<p>Setting " + ", ".join(str(l) for l in lits) + " because:</p>\n"
     if len(reason) == 0:
         exp += "<p>The basic design of the problem</p>"
     else:
-        exp += "<ul>\n"
+        exp += "<ul>\n"            
         for i,clause in enumerate(sorted(reason)):
-            exp += "<li class='" + classid + str(i) + "'>" + str(solver.explain(clause)) + "</li>\n"
-            exp += '<script>hoverByClass("{}","black")</script>\n'.format(classid+str(i))
+            if enumerateclass:
+                class_str = classid + str(i)
+            else:
+                class_str = classid
+            exp += "<li class='" + class_str + "'>" + str(solver.explain(clause)) + "</li>\n"
+            exp += '<script>hoverByClass("{}","black")</script>\n'.format(class_str)
         exp += "</ul>\n"
 
     return exp
@@ -91,18 +95,18 @@ td {border-width: 3; border-style: solid; border-color:transparent}
 function hoverByClass(classname,colorover,colorout="transparent"){
 	var elms=document.getElementsByClassName(classname);
 	for(var i=0;i<elms.length;i++){
-		elms[i].onmouseover = function(){
+		elms[i].addEventListener("mouseover", function(){
 			for(var k=0;k<elms.length;k++){
 				elms[k].style.borderColor=colorover;
                 elms[k].style.borderWidth=3
                 elms[k].style.borderStyle="solid"
 			}
-		};
-		elms[i].onmouseout = function(){
+		});
+		elms[i].addEventListener("mouseout", function(){
 			for(var k=0;k<elms.length;k++){
 				elms[k].style.borderColor=colorout;
 			}
-		};
+		});
 	}
 }
 </script>
@@ -124,22 +128,50 @@ hide = function(id) {
 </script>
 </head>
 <body>
+<h3>How to read Demystify output:</h3>
+<ul>
+<li> Values in the grids are removed when we know they are no longer allowed</li>
+<li> They become <b>bold</b> when we know the value which occurs in some cell</li>
+<li> Each step either shows:</li>
+<ul> 
+<li> A number of 'simple deductions' merged together (simple deductions involve MUSes of size 1) </li>
+<li> A single "interesting" deduction (to find interesting deductions, try searching for the words 'Smallest mus')</li>
+</ul>
+<li> Colours used are when explaining MUSes are:</li>
+<ul>
+<li> The values which are being deduced in this step are coloured as:</li>
+<ul>
+<li> <span style="background-color:red">Red</span>: This value is being REMOVED in this step</li>
+<li> <span style="background-color:green">Green</span>: This value is deduced as the CORRECT answer in this step</li>
+</ul>
+<li> The values which are involved in the reasoning in this step are coloured as:</li>
+<ul>
+<li> <span style="background-color:lightblue">Light blue</span>: This value is not yet known, but is involved in the reasoning of this step</li>
+<li> <span style="background-color:orange">Orange</span>: This value, which is already known, is involved in the MUS in this step</li>
+</ul>
+<li> Putting the mouse on a literal will highlight all constraints it is involved in, putting the mouse on a constraint will highlight all the literals in that constraint (which have not already been removed)</li>
+</ul>
+</ul>
     """
     , file=outstream)
 
     step = 1
     forcestep = 0
     # Now, we need to check each one in turn to see which is 'cheapest'
+    # puzlits is a list which contains all the 'literals' whose values we have to find.
     while len(puzlits) > 0 and step <= steps:
         logging.info("Starting Step %s", step)
         logging.info("Current state %s", solver.getCurrentDomain())
 
         begin_stats = solver.get_stats()
+
+        # Go and find the MUSes
         musdict = MUSFind.smallestMUS(puzlits)
         end_stats = solver.get_stats()
 
         stats_diff = {"solveCount": end_stats["solveCount"] - begin_stats["solveCount"],
                       "solveTime": end_stats["solveTime"] - begin_stats["solveTime"] }
+        # Find size of smallest MUS
         smallest = musdict_minimum(musdict)
         print("<h3>Step {} </h3>".format(step), file=outstream)
         print("Solver Calls: {} <br>".format(stats_diff["solveCount"]), file=outstream)
@@ -147,14 +179,18 @@ hide = function(id) {
 
 
         if smallest <= skip:
-            # Skip over some cases
+            # Find all literals where the explanation is of size <= skip
             lits = [k for k in sorted(musdict.keys()) if len(musdict[k][0]) <= skip]
             print("Skip displaying tiny MUSes..")
 
+            # Go make explantions for each literal
             exps = "\n".join([explain(solver, [p], musdict[p][0], uuid.uuid4().hex[:8]) for p in sorted(lits)])
+            # Print them out
             print(hidden("Show hidden", exps), file=outstream)
             for p in lits:
+                # Tell we solver we know this
                 solver.addLit(p)
+                # Remove from the things we have to calculate
                 puzlits.remove(p)
 
         elif smallest <= merge:
@@ -163,11 +199,11 @@ hide = function(id) {
             classid = uuid.uuid4().hex[:8]
 
             lits = [k for k in sorted(musdict.keys()) if len(musdict[k][0]) <= merge]
-            print_explanation(outstream, solver, [musdict[l][0] for l in lits], lits, classid)
+            print_explanation(outstream, solver, [musdict[l][0] for l in sorted(lits)], sorted(lits), classid)
 
             print("Doing", len(lits), " simple deductions ", file=outstream)
 
-            exps = "\n".join([explain(solver, [p], musdict[p][0], classid) for p in sorted(lits)])
+            exps = "\n".join([explain(solver, [p], musdict[p][0], str(classid) + str(val), enumerateclass=False) for (val,p) in enumerate(sorted(lits))])
             print(hidden("Show why", exps), file=outstream)
 
             for p in lits:
@@ -176,7 +212,7 @@ hide = function(id) {
         else:
             step += 1
 
-            print(list(str(k) for k in sorted(musdict.keys())), "::", force)
+            # print(list(str(k) for k in sorted(musdict.keys())), "::", force)
 
             # Set default value
             basemins = [k for k in sorted(musdict.keys()) if len(musdict[k][0]) == smallest]
