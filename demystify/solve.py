@@ -128,7 +128,7 @@ hide = function(id) {
 </script>
 </head>
 <body>
-How to read Demystify output:
+<h3>How to read Demystify output:</h3>
 <ul>
 <li> Values in the grids are removed when we know they are no longer allowed</li>
 <li> They become <b>bold</b> when we know the value which occurs in some cell</li>
