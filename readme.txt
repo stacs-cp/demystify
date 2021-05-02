@@ -4,7 +4,7 @@ git clone https://github.com/conjure-cp/conjure && cd conjure && make && make so
 
 Install some python packages:
 
-pip3 install python-sat z3-solver numpy
+pip3 install python-sat z3-solver numpy sortedcontainers
 
 Then try:
 
