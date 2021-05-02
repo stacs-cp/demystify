@@ -12,4 +12,4 @@ done < tests.txt) | parallel
     echo ./go-json.sh $instance
 done < tests.txt) | parallel
 
-git diff . --exit-code
+git diff --exit-code .
