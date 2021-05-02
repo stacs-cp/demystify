@@ -3,6 +3,8 @@ import itertools
 import resource
 import logging
 
+from sortedcontainers import *
+
 from typing import Iterable, List
 from multiprocessing import current_process
 # Some boring utility functions
@@ -86,26 +88,26 @@ def parseSavileRowName(vars, auxvars, n):
 
 
 def getConnectedVars(clauses, con, varlits_in):
-    varlits = set(varlits_in.union([-v for v in varlits_in]))
+    varlits = SortedSet(varlits_in.union([-v for v in varlits_in]))
 
     lit2conmap = dict()
     for c in clauses:
         for l in c:
             if -l not in lit2conmap:
-                lit2conmap[-l] = set()
+                lit2conmap[-l] = SortedSet()
             lit2conmap[-l].update(c)
 
     # Blank out counts for variables in unit clauses
     for c in clauses:
         if len(c) == 1:
-            lit2conmap[c[0]] = set()
-            lit2conmap[-c[0]] = set()
+            lit2conmap[c[0]] = SortedSet()
+            lit2conmap[-c[0]] = SortedSet()
 
     if con not in lit2conmap:
-        return set()
+        return SortedSet()
         
-    found = set(lit2conmap[con])
-    todo = set()
+    found = SortedSet(lit2conmap[con])
+    todo = SortedSet()
     for v in found:
         if v not in varlits:
             todo.add(v)

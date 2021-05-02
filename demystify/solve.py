@@ -3,7 +3,7 @@ import sys
 import math
 import io
 import pprint
-import uuid
+from sortedcontainers import *
 
 from .prettyprint import print_explanation
 
@@ -53,15 +53,21 @@ def list_counter(l):
         d[i] = d.get(i, 0) + 1
     return d
 
+class_counter = 0
+def unique_class_id():
+    global class_counter
+    class_counter += 1
+    return "cl_" + str(class_counter) + "_"
+
 def html_step(outstream, solver, p, choices, bestchoice):
-    classid = uuid.uuid4().hex[:8]
+    classid = unique_class_id()
     print_explanation(outstream, solver, bestchoice, p, classid)
     print("Smallest mus size:", len(bestchoice),  file=outstream)
     print(explain(solver, p, bestchoice, classid), file=outstream)
 
     if len(choices) > 1:
             others = io.StringIO()
-            classid = uuid.uuid4().hex[:8]
+            classid = unique_class_id()
             for c in (c for c in choices if c != bestchoice):
                 print_explanation(others, solver, c, p, classid)
                 print("Smallest mus size:", len(c),  file=others)
@@ -184,7 +190,7 @@ hide = function(id) {
             print("Skip displaying tiny MUSes..")
 
             # Go make explantions for each literal
-            exps = "\n".join([explain(solver, [p], musdict[p][0], uuid.uuid4().hex[:8]) for p in sorted(lits)])
+            exps = "\n".join([explain(solver, [p], musdict[p][0], unique_class_id()) for p in sorted(lits)])
             # Print them out
             print(hidden("Show hidden", exps), file=outstream)
             for p in lits:
@@ -196,7 +202,7 @@ hide = function(id) {
         elif smallest <= merge:
             step += 1
 
-            classid = uuid.uuid4().hex[:8]
+            classid = unique_class_id()
 
             lits = [k for k in sorted(musdict.keys()) if len(musdict[k][0]) <= merge]
             print_explanation(outstream, solver, [musdict[l][0] for l in sorted(lits)], sorted(lits), classid)
@@ -239,10 +245,10 @@ hide = function(id) {
             for b in basemins:
                 deleteddict[b] = {}
                 for mus in musdict[b]:
-                    muslits = set.union(set(),*(set(m.lits()) for m in mus))
-                    puzlitsinmus = set(p for p in puzlits if p in muslits or p.neg() in muslits)
+                    muslits = SortedSet.union(SortedSet(),*(SortedSet(m.lits()) for m in mus))
+                    puzlitsinmus = SortedSet(p for p in puzlits if p in muslits or p.neg() in muslits)
                     # Explictly add 'b', for the case where the MUS is size 0 in particular
-                    deletedlits = set(checkWhichLitsAMUSProves(solver, puzlitsinmus, mus)).union(set([b]))
+                    deletedlits = SortedSet(checkWhichLitsAMUSProves(solver, puzlitsinmus, mus)).union(SortedSet([b]))
                     deleteddict[b][mus] = deletedlits
                     musval = (len(mus), len(puzlitsinmus), -len(deletedlits))
                     if musval < bestmusstat:
@@ -254,7 +260,7 @@ hide = function(id) {
             assert not gofast
 
 
-            choices = tuple(sorted(set(musdict[bestlit])))
+            choices = tuple(sorted(SortedSet(musdict[bestlit])))
             #passkeys = checkWhichLitsAMUSProves(solver, puzlits, choices[0])
             html_step(outstream, solver, bestdeletedlits, choices, bestmus)
 
@@ -264,7 +270,7 @@ hide = function(id) {
                 if len(basemins) > 1:
                     others = io.StringIO()
                     for p in (p for p in basemins if p != bestlit):
-                        choices = tuple(sorted(set(musdict[p])))
+                        choices = tuple(sorted(SortedSet(musdict[p])))
                         html_step(others, solver, deleteddict[p][choices[0]], choices, choices[0])
                         print("<br>\n", file=others)
                     

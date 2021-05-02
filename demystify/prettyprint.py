@@ -1,5 +1,6 @@
 from .utils import flatten, intsqrt, lowsqrt
 from .base import EqVal, NeqVal
+from sortedcontainers import *
 
 
 def print_var(f, variable, known, involved, involvedset, classprefix, targets):
@@ -77,4 +78,4 @@ def print_explanation(f, solver, mus, targets, classprefix):
     involved = [m.clauseset() for m in flatten(mus)]
     
     for matrix in vars:
-        print_matrix(f, matrix, set(known), involved, set(flatten(involved)), classprefix, set(targets), 3)
+        print_matrix(f, matrix, SortedSet(known), involved, SortedSet(flatten(involved)), classprefix, SortedSet(targets), 3)

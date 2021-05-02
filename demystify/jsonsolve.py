@@ -5,8 +5,8 @@ import sys
 import math
 import io
 import pprint
-import uuid
 import json
+from sortedcontainers import *
 
 from .prettyprint import print_explanation
 
@@ -122,8 +122,8 @@ def puzzle_state(solver, mus, targets):
     involved = [m.clauseset() for m in flatten(mus)]
 
     for matrix in vars:
-        state.append(puzzle_matrix(matrix, set(known), involved,
-                                   set(flatten(involved)), set(targets)))
+        state.append(puzzle_matrix(matrix, SortedSet(known), involved,
+                                   SortedSet(flatten(involved)), SortedSet(targets)))
     return {"matrices": state}
 
 
@@ -249,12 +249,12 @@ def json_solve(name, params, outputfile, outstream, solver, puzlits, MUSFind, st
             for b in basemins:
                 deleteddict[b] = {}
                 for mus in musdict[b]:
-                    muslits = set.union(set(), *(set(m.lits()) for m in mus))
-                    puzlitsinmus = set(
+                    muslits = SortedSet.union(SortedSet(), *(SortedSet(m.lits()) for m in mus))
+                    puzlitsinmus = SortedSet(
                         p for p in puzlits if p in muslits or p.neg() in muslits)
                     # Explictly add 'b', for the case where the MUS is size 0 in particular
-                    deletedlits = set(checkWhichLitsAMUSProves(
-                        solver, puzlitsinmus, mus)).union(set([b]))
+                    deletedlits = SortedSet(checkWhichLitsAMUSProves(
+                        solver, puzlitsinmus, mus)).union(SortedSet([b]))
                     deleteddict[b][mus] = deletedlits
                     musval = (len(mus), len(puzlitsinmus), -len(deletedlits))
                     if musval < bestmusstat:
@@ -265,7 +265,7 @@ def json_solve(name, params, outputfile, outstream, solver, puzlits, MUSFind, st
 
             assert not gofast
 
-            choices = tuple(sorted(set(musdict[bestlit])))
+            choices = tuple(sorted(SortedSet(musdict[bestlit])))
             #passkeys = checkWhichLitsAMUSProves(solver, puzlits, choices[0])
             step_object = json_step(solver, bestdeletedlits, choices, bestmus)
 
@@ -277,7 +277,7 @@ def json_solve(name, params, outputfile, outstream, solver, puzlits, MUSFind, st
                 if len(basemins) > 1:
                     others = io.StringIO()
                     for p in (p for p in basemins if p != bestlit):
-                        choices = tuple(sorted(set(musdict[p])))
+                        choices = tuple(sorted(SortedSet(musdict[p])))
                         step_object["otherChoices"].append(json_step(solver,
                                   deleteddict[p][choices[0]], choices, choices[0]))
 

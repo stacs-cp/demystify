@@ -8,6 +8,7 @@ import math
 import numpy
 
 from time import time
+from sortedcontainers import *
 
 from .utils import flatten, chainlist, shuffledcopy, randomFromSeed
 
@@ -16,6 +17,7 @@ from .base import EqVal, NeqVal
 from .config import CONFIG
 
 from .parallel import getPool, setChildSolver, getChildSolver
+
 
 # This calculates Minimum Unsatisfiable Sets
 # It uses internals from solver, but is put in another file just for "neatness"
@@ -75,7 +77,7 @@ def MUS(r, solver, assume, minsize, *, config, initial_cons=None, just_check=Fal
 
     if initial_cons is None:
         if config["checkCloseFirst"]:
-            closecons = set(flatten([solver._varlit2con[l] for l in assume]))
+            closecons = SortedSet(flatten([solver._varlit2con[l] for l in assume]))
             farcons = solver._conlits - closecons
             cons = r.sample(closecons, len(closecons)) + r.sample(farcons, len(farcons))
         else:
@@ -86,7 +88,7 @@ def MUS(r, solver, assume, minsize, *, config, initial_cons=None, just_check=Fal
         cons = [solver._conlit2conmap[x] for x in initial_cons]
         r.shuffle(cons)
 
-    # Need to use 'sample' as solver._conlits is a set
+    # Need to use 'sample' as solver._conlits is a SortedSet
     # cons = r.sample(initial_conlits, len(initial_conlits))
     core = cons
 
