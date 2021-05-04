@@ -272,7 +272,7 @@ else:
                 print("Could not evaluate "+cons[v])
                 constraintname = cons[v]
             logging.debug(constraintname)
-            connected = SortedSet(lit for s in demystify.utils.getConnectedVars(formula.clauses, varmap[v][k][1], varlits) for lit in invlitmap[s])
+            connected = SortedSet(lit for s in demystify.utils.getConnectedVars(formula, varmap[v][k][1], varlits) for lit in invlitmap[s])
             # Savilerow is too clever, so just put both negative + positive version of all literals in
             connected = connected.union(SortedSet(lit.neg() for lit in connected))
             constraintmap[demystify.base.DummyClause(constraintname, connected)] = varmap[v][k][1]
