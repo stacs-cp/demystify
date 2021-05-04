@@ -260,7 +260,7 @@ hide = function(id) {
             assert not gofast
 
 
-            choices = tuple(sorted(SortedSet(musdict[bestlit])))
+            choices = tuple(SortedSet(musdict[bestlit]))
             #passkeys = checkWhichLitsAMUSProves(solver, puzlits, choices[0])
             html_step(outstream, solver, bestdeletedlits, choices, bestmus)
 
@@ -270,7 +270,7 @@ hide = function(id) {
                 if len(basemins) > 1:
                     others = io.StringIO()
                     for p in (p for p in basemins if p != bestlit):
-                        choices = tuple(sorted(SortedSet(musdict[p])))
+                        choices = tuple(SortedSet(musdict[p]))
                         html_step(others, solver, deleteddict[p][choices[0]], choices, choices[0])
                         print("<br>\n", file=others)
                     

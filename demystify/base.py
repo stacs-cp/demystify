@@ -51,7 +51,7 @@ class DummyClause:
         self._clause = clause
         self._clausenames = clausenames
         self._frozen = tuple([tuple(sorted(self._clause))])
-        self._lits = tuple(sorted(SortedSet(flatten(self._frozen))))
+        self._lits = tuple(SortedSet(flatten(self._frozen)))
 
     def explain(self, knownvars):
         if self._clausenames is None:
@@ -92,7 +92,7 @@ class Clause:
         self._clause = clause
         self._clausenames = clausenames
         self._frozen = tuple([tuple(sorted(self._clause))])
-        self._lits = tuple(sorted(SortedSet(flatten(self._frozen))))
+        self._lits = tuple(SortedSet(flatten(self._frozen)))
 
     def explain(self, knownvars):
         if self._clausenames is None:
