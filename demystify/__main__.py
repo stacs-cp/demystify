@@ -272,7 +272,7 @@ else:
                 print("Could not evaluate "+cons[v])
                 constraintname = cons[v]
             logging.debug(constraintname)
-            connected = SortedSet(lit for s in demystify.utils.getConnectedVars(formula.clauses, varmap[v][k][1], varlits) for lit in invlitmap[s])
+            connected = SortedSet(lit for s in demystify.utils.getConnectedVars(formula, varmap[v][k][1], varlits) for lit in invlitmap[s])
             # Savilerow is too clever, so just put both negative + positive version of all literals in
             connected = connected.union(SortedSet(lit.neg() for lit in connected))
             constraintmap[demystify.base.DummyClause(constraintname, connected)] = varmap[v][k][1]
@@ -284,12 +284,12 @@ else:
         if dim==0:
             printvarlist.append(demystify.base.VarMatrix(None, (1,1), (), varmat = [[printvarmap[v].values()[0]]]))
         elif dim==1:
-            varlist = list(printvarmap[v][k] for k in sorted(SortedSet(printvarmap[v].keys())))
+            varlist = list(printvarmap[v][k] for k in SortedSet(printvarmap[v].keys()))
             printvarlist.append(demystify.base.VarMatrix(None, (1,len(varlist)), (), varmat = [varlist]))
         elif dim == 2:
             varlist = []
-            for index1 in sorted(SortedSet(k[0] for k in printvarmap[v].keys())):
-                index2 = sorted(SortedSet([k for k in printvarmap[v].keys() if k[0]==index1]))
+            for index1 in SortedSet(k[0] for k in printvarmap[v].keys()):
+                index2 = SortedSet([k for k in printvarmap[v].keys() if k[0]==index1])
                 varlist.append(list(printvarmap[v][k] for k in index2))
             logging.debug(varlist)
             printvarlist.append(demystify.base.VarMatrix(None, (len(varlist), len(varlist[0])), (), varmat = varlist))

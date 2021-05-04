@@ -2,6 +2,7 @@ import math
 import itertools
 import resource
 import logging
+import sys
 
 from sortedcontainers import *
 
@@ -86,10 +87,7 @@ def parseSavileRowName(vars, auxvars, n):
         args.append(c)
     return (varmatch, tuple(args))
 
-
-def getConnectedVars(clauses, con, varlits_in):
-    varlits = SortedSet(varlits_in.union([-v for v in varlits_in]))
-
+def build_lit2conmap(clauses):
     lit2conmap = dict()
     for c in clauses:
         for l in c:
@@ -102,10 +100,19 @@ def getConnectedVars(clauses, con, varlits_in):
         if len(c) == 1:
             lit2conmap[c[0]] = SortedSet()
             lit2conmap[-c[0]] = SortedSet()
+    return lit2conmap
+
+def getConnectedVars(formula, con, varlits_in):
+    varlits = SortedSet(varlits_in.union([-v for v in varlits_in]))
+
+    if not hasattr(formula, "lit2conmap"):
+        formula.lit2conmap = build_lit2conmap(formula.clauses)
+
+    lit2conmap = formula.lit2conmap
 
     if con not in lit2conmap:
         return SortedSet()
-        
+
     found = SortedSet(lit2conmap[con])
     todo = SortedSet()
     for v in found:

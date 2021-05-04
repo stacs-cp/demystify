@@ -265,7 +265,7 @@ def json_solve(name, params, outputfile, outstream, solver, puzlits, MUSFind, st
 
             assert not gofast
 
-            choices = tuple(sorted(SortedSet(musdict[bestlit])))
+            choices = tuple(SortedSet(musdict[bestlit]))
             #passkeys = checkWhichLitsAMUSProves(solver, puzlits, choices[0])
             step_object = json_step(solver, bestdeletedlits, choices, bestmus)
 
@@ -277,7 +277,7 @@ def json_solve(name, params, outputfile, outstream, solver, puzlits, MUSFind, st
                 if len(basemins) > 1:
                     others = io.StringIO()
                     for p in (p for p in basemins if p != bestlit):
-                        choices = tuple(sorted(SortedSet(musdict[p])))
+                        choices = tuple(SortedSet(musdict[p]))
                         step_object["otherChoices"].append(json_step(solver,
                                   deleteddict[p][choices[0]], choices, choices[0]))
 
