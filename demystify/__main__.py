@@ -259,10 +259,18 @@ else:
         for k in SortedSet(varmap[v].keys()):
             # This should be a boolean -- if this fails, check with Chris
             assert SortedSet(varmap[v][k].keys()).issubset(SortedSet([0,1]))
-            assert 0 in varmap[v][k].keys()
+            print(varmap)
+            print(k)
+            print(v)
+            print(varmap[v][k])
+            # assert 0 in varmap[v][k].keys()
+            if 0 not in varmap[v][k].keys():
+                print(f"ERROR: Constraint {v}{k} cannot be made false..")
+                sys.exit(1)
             if 1 not in varmap[v][k].keys():
                 print(f"ERROR: Constraint {v}{k} cannot be satisfied..")
                 sys.exit(1)
+
 
             # Note that 'a' can be accessed in the f string
             a = tuple(k)
