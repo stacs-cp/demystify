@@ -1,21 +1,21 @@
 language ESSENCE' 1.0
 
-given op : matrix indexed by [int(0..19)] of int(1..3) $ 1 is plus, 2 is minus, 3 is multiply.
-given presetvals : matrix indexed by [int(0..8),int(0..6)] of int(-2..9)
+given op : matrix indexed by [int(1..20)] of int(1..3) $ 1 is plus, 2 is minus, 3 is multiply.
+given presetvals : matrix indexed by [int(1..9),int(1..7)] of int(-2..9)
 
 
 letting VALUES be domain int(-2..9)
-letting NROWS be domain int(0..8)
-letting NCOLS be domain int(0..6)
+letting NROWS be domain int(1..9)
+letting NCOLS be domain int(1..7)
 
 $#VAR res
 find res : matrix indexed by [NROWS,NCOLS] of VALUES
 
 $ Here comes the MUS/SAT reasoning mess
 $#CON ops_bool "equation {a[0]} holds"
-find ops_bool : matrix indexed by [int(0..19)] of bool
+find ops_bool : matrix indexed by [int(1..20)] of bool
 $#CON two_digit "this number {a[0]} cannot be 0 since it is the beginning of a 2 digit number"
-find two_digit : matrix indexed by [int(0..7)] of bool
+find two_digit : matrix indexed by [int(1..8)] of bool
 
 such that
 
@@ -31,96 +31,96 @@ $ set initial values
 			((presetvals[row,col] > -1) -> (res[row,col] = presetvals[row,col])),
 
 $ operation constraints
-	ops_bool[0] -> (
-		((op[0] = 1) -> (res[0,0] + res[0,1] = res[0,2]))/\
-		((op[0] = 2) -> (res[0,0] - res[0,1] = res[0,2]))/\
-		((op[0] = 3) -> (res[0,0] * res[0,1] = res[0,2]))),
 	ops_bool[1] -> (
-		((op[1] = 1) -> (res[0,4] + res[0,5] = res[0,6]))/\
-		((op[1] = 2) -> (res[0,4] - res[0,5] = res[0,6]))/\
-		((op[1] = 3) -> (res[0,4] * res[0,5] = res[0,6]))),
+		((op[1] = 1) -> (res[1,1] + res[1,2] = res[1,3]))/\
+		((op[1] = 2) -> (res[1,1] - res[1,2] = res[1,3]))/\
+		((op[1] = 3) -> (res[1,1] * res[1,2] = res[1,3]))),
 	ops_bool[2] -> (
-		((op[2] = 1) -> (res[0,0] + res[1,0] = res[2,0]*10 + res[3,0]))/\
-		((op[2] = 2) -> (res[0,0] - res[1,0] = res[2,0]*10 + res[3,0]))/\
-		((op[2] = 3) -> (res[0,0] * res[1,0] = res[2,0]*10 + res[3,0]))),
+		((op[2] = 1) -> (res[1,5] + res[1,6] = res[1,7]))/\
+		((op[2] = 2) -> (res[1,5] - res[1,6] = res[1,7]))/\
+		((op[2] = 3) -> (res[1,5] * res[1,6] = res[1,7]))),
 	ops_bool[3] -> (
-		((op[3] = 1) -> (res[0,2] + res[1,2] = res[2,2]*10 + res[3,2]))/\
-		((op[3] = 2) -> (res[0,2] - res[1,2] = res[2,2]*10 + res[3,2]))/\
-		((op[3] = 3) -> (res[0,2] * res[1,2] = res[2,2]*10 + res[3,2]))),
+		((op[3] = 1) -> (res[1,1] + res[2,1] = res[3,1]*10 + res[4,1]))/\
+		((op[3] = 2) -> (res[1,1] - res[2,1] = res[3,1]*10 + res[4,1]))/\
+		((op[3] = 3) -> (res[1,1] * res[2,1] = res[3,1]*10 + res[4,1]))),
 	ops_bool[4] -> (
-		((op[4] = 1) -> (res[0,4] + res[1,4] = res[2,4]*10 + res[3,4]))/\
-		((op[4] = 2) -> (res[0,4] - res[1,4] = res[2,4]*10 + res[3,4]))/\
-		((op[4] = 3) -> (res[0,4] * res[1,4] = res[2,4]*10 + res[3,4]))),
+		((op[4] = 1) -> (res[1,3] + res[2,3] = res[3,3]*10 + res[4,3]))/\
+		((op[4] = 2) -> (res[1,3] - res[2,3] = res[3,3]*10 + res[4,3]))/\
+		((op[4] = 3) -> (res[1,3] * res[2,3] = res[3,3]*10 + res[4,3]))),
 	ops_bool[5] -> (
-		((op[5] = 1) -> (res[0,6] + res[1,6] = res[2,6]*10 + res[3,6]))/\
-		((op[5] = 2) -> (res[0,6] - res[1,6] = res[2,6]*10 + res[3,6]))/\
-		((op[5] = 3) -> (res[0,6] * res[1,6] = res[2,6]*10 + res[3,6]))),
+		((op[5] = 1) -> (res[1,5] + res[2,5] = res[3,5]*10 + res[4,5]))/\
+		((op[5] = 2) -> (res[1,5] - res[2,5] = res[3,5]*10 + res[4,5]))/\
+		((op[5] = 3) -> (res[1,5] * res[2,5] = res[3,5]*10 + res[4,5]))),
 	ops_bool[6] -> (
-		((op[6] = 1) -> (res[1,2] + res[1,3] = res[1,4]))/\
-		((op[6] = 2) -> (res[1,2] - res[1,3] = res[1,4]))/\
-		((op[6] = 3) -> (res[1,2] * res[1,3] = res[1,4]))),
+		((op[6] = 1) -> (res[1,7] + res[2,7] = res[3,7]*10 + res[4,7]))/\
+		((op[6] = 2) -> (res[1,7] - res[2,7] = res[3,7]*10 + res[4,7]))/\
+		((op[6] = 3) -> (res[1,7] * res[2,7] = res[3,7]*10 + res[4,7]))),
 	ops_bool[7] -> (
-		((op[7] = 1) -> (res[3,0] + res[3,1] = res[3,2]))/\
-		((op[7] = 2) -> (res[3,0] - res[3,1] = res[3,2]))/\
-		((op[7] = 3) -> (res[3,0] * res[3,1] = res[3,2]))),
+		((op[7] = 1) -> (res[2,3] + res[2,4] = res[2,5]))/\
+		((op[7] = 2) -> (res[2,3] - res[2,4] = res[2,5]))/\
+		((op[7] = 3) -> (res[2,3] * res[2,4] = res[2,5]))),
 	ops_bool[8] -> (
-		((op[8] = 1) -> (res[3,4] + res[3,5] = res[3,6]))/\
-		((op[8] = 2) -> (res[3,4] - res[3,5] = res[3,6]))/\
-		((op[8] = 3) -> (res[3,4] * res[3,5] = res[3,6]))),
+		((op[8] = 1) -> (res[4,1] + res[4,2] = res[4,3]))/\
+		((op[8] = 2) -> (res[4,1] - res[4,2] = res[4,3]))/\
+		((op[8] = 3) -> (res[4,1] * res[4,2] = res[4,3]))),
 	ops_bool[9] -> (
-		((op[9] = 1) -> (res[3,1] + res[4,1] = res[5,1]))/\
-		((op[9] = 2) -> (res[3,1] - res[4,1] = res[5,1]))/\
-		((op[9] = 3) -> (res[3,1] * res[4,1] = res[5,1]))),
+		((op[9] = 1) -> (res[4,5] + res[4,6] = res[4,7]))/\
+		((op[9] = 2) -> (res[4,5] - res[4,6] = res[4,7]))/\
+		((op[9] = 3) -> (res[4,5] * res[4,6] = res[4,7]))),
 	ops_bool[10] -> (
-		((op[10] = 1) -> (res[3,5] + res[4,5] = res[5,5]))/\
-		((op[10] = 2) -> (res[3,5] - res[4,5] = res[5,5]))/\
-		((op[10] = 3) -> (res[3,5] * res[4,5] = res[5,5]))),
+		((op[10] = 1) -> (res[4,2] + res[5,2] = res[6,2]))/\
+		((op[10] = 2) -> (res[4,2] - res[5,2] = res[6,2]))/\
+		((op[10] = 3) -> (res[4,2] * res[5,2] = res[6,2]))),
 	ops_bool[11] -> (
-		((op[11] = 1) -> (res[5,0] + res[5,1] = res[5,2]))/\
-		((op[11] = 2) -> (res[5,0] - res[5,1] = res[5,2]))/\
-		((op[11] = 3) -> (res[5,0] * res[5,1] = res[5,2]))),
+		((op[11] = 1) -> (res[4,6] + res[5,6] = res[6,6]))/\
+		((op[11] = 2) -> (res[4,6] - res[5,6] = res[6,6]))/\
+		((op[11] = 3) -> (res[4,6] * res[5,6] = res[6,6]))),
 	ops_bool[12] -> (
-		((op[12] = 1) -> (res[5,4] + res[5,5] = res[5,6]))/\
-		((op[12] = 2) -> (res[5,4] - res[5,5] = res[5,6]))/\
-		((op[12] = 3) -> (res[5,4] * res[5,5] = res[5,6]))),
+		((op[12] = 1) -> (res[6,1] + res[6,2] = res[6,3]))/\
+		((op[12] = 2) -> (res[6,1] - res[6,2] = res[6,3]))/\
+		((op[12] = 3) -> (res[6,1] * res[6,2] = res[6,3]))),
 	ops_bool[13] -> (
-		((op[13] = 1) -> (res[5,0] + res[6,0] = res[7,0]*10 + res[8,0]))/\
-		((op[13] = 2) -> (res[5,0] - res[6,0] = res[7,0]*10 + res[8,0]))/\
-		((op[13] = 3) -> (res[5,0] * res[6,0] = res[7,0]*10 + res[8,0]))),
+		((op[13] = 1) -> (res[6,5] + res[6,6] = res[6,7]))/\
+		((op[13] = 2) -> (res[6,5] - res[6,6] = res[6,7]))/\
+		((op[13] = 3) -> (res[6,5] * res[6,6] = res[6,7]))),
 	ops_bool[14] -> (
-		((op[14] = 1) -> (res[5,2] + res[6,2] = res[7,2]*10 + res[8,2]))/\
-		((op[14] = 2) -> (res[5,2] - res[6,2] = res[7,2]*10 + res[8,2]))/\
-		((op[14] = 3) -> (res[5,2] * res[6,2] = res[7,2]*10 + res[8,2]))),
+		((op[14] = 1) -> (res[6,1] + res[7,1] = res[8,1]*10 + res[9,1]))/\
+		((op[14] = 2) -> (res[6,1] - res[7,1] = res[8,1]*10 + res[9,1]))/\
+		((op[14] = 3) -> (res[6,1] * res[7,1] = res[8,1]*10 + res[9,1]))),
 	ops_bool[15] -> (
-		((op[15] = 1) -> (res[5,4] + res[6,4] = res[7,4]*10 + res[8,4]))/\
-		((op[15] = 2) -> (res[5,4] - res[6,4] = res[7,4]*10 + res[8,4]))/\
-		((op[15] = 3) -> (res[5,4] * res[6,4] = res[7,4]*10 + res[8,4]))),
+		((op[15] = 1) -> (res[6,3] + res[7,3] = res[8,3]*10 + res[9,3]))/\
+		((op[15] = 2) -> (res[6,3] - res[7,3] = res[8,3]*10 + res[9,3]))/\
+		((op[15] = 3) -> (res[6,3] * res[7,3] = res[8,3]*10 + res[9,3]))),
 	ops_bool[16] -> (
-		((op[16] = 1) -> (res[5,6] + res[6,6] = res[7,6]*10 + res[8,6]))/\
-		((op[16] = 2) -> (res[5,6] - res[6,6] = res[7,6]*10 + res[8,6]))/\
-		((op[16] = 3) -> (res[5,6] * res[6,6] = res[7,6]*10 + res[8,6]))),
+		((op[16] = 1) -> (res[6,5] + res[7,5] = res[8,5]*10 + res[9,5]))/\
+		((op[16] = 2) -> (res[6,5] - res[7,5] = res[8,5]*10 + res[9,5]))/\
+		((op[16] = 3) -> (res[6,5] * res[7,5] = res[8,5]*10 + res[9,5]))),
 	ops_bool[17] -> (
-		((op[17] = 1) -> (res[6,2] + res[6,3] = res[6,4]))/\
-		((op[17] = 2) -> (res[6,2] - res[6,3] = res[6,4]))/\
-		((op[17] = 3) -> (res[6,2] * res[6,3] = res[6,4]))),
+		((op[17] = 1) -> (res[6,7] + res[7,7] = res[8,7]*10 + res[9,7]))/\
+		((op[17] = 2) -> (res[6,7] - res[7,7] = res[8,7]*10 + res[9,7]))/\
+		((op[17] = 3) -> (res[6,7] * res[7,7] = res[8,7]*10 + res[9,7]))),
 	ops_bool[18] -> (
-		((op[18] = 1) -> (res[8,0] + res[8,1] = res[8,2]))/\
-		((op[18] = 2) -> (res[8,0] - res[8,1] = res[8,2]))/\
-		((op[18] = 3) -> (res[8,0] * res[8,1] = res[8,2]))),
+		((op[18] = 1) -> (res[7,3] + res[7,4] = res[7,5]))/\
+		((op[18] = 2) -> (res[7,3] - res[7,4] = res[7,5]))/\
+		((op[18] = 3) -> (res[7,3] * res[7,4] = res[7,5]))),
 	ops_bool[19] -> (
-		((op[19] = 1) -> (res[8,4] + res[8,5] = res[8,6]))/\
-		((op[19] = 2) -> (res[8,4] - res[8,5] = res[8,6]))/\
-		((op[19] = 3) -> (res[8,4] * res[8,5] = res[8,6]))),
+		((op[19] = 1) -> (res[9,1] + res[9,2] = res[9,3]))/\
+		((op[19] = 2) -> (res[9,1] - res[9,2] = res[9,3]))/\
+		((op[19] = 3) -> (res[9,1] * res[9,2] = res[9,3]))),
+	ops_bool[20] -> (
+		((op[20] = 1) -> (res[9,5] + res[9,6] = res[9,7]))/\
+		((op[20] = 2) -> (res[9,5] - res[9,6] = res[9,7]))/\
+		((op[20] = 3) -> (res[9,5] * res[9,6] = res[9,7]))),
 
 $ the following HAVE TO be > 0
-	two_digit[0] -> (res[2,0] > 0),
-	two_digit[1] -> (res[2,2] > 0),
-	two_digit[2] -> (res[2,4] > 0),
-	two_digit[3] -> (res[2,6] > 0),
-	two_digit[4] -> (res[7,0] > 0),
-	two_digit[5] -> (res[7,2] > 0),
-	two_digit[6] -> (res[7,4] > 0),
-	two_digit[7] -> (res[7,6] > 0),
+	two_digit[1] -> (res[3,1] > 0),
+	two_digit[2] -> (res[3,3] > 0),
+	two_digit[3] -> (res[3,5] > 0),
+	two_digit[4] -> (res[3,7] > 0),
+	two_digit[5] -> (res[8,1] > 0),
+	two_digit[6] -> (res[8,3] > 0),
+	two_digit[7] -> (res[8,5] > 0),
+	two_digit[8] -> (res[8,7] > 0),
 
 $ check if problem is SAT
 	$and([and(ops_bool), and(two_digit)]),
