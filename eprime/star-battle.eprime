@@ -1,7 +1,7 @@
 language ESSENCE' 1.0
 
 given grid: int
-letting griddim be int(1..grid)
+letting griddim be domain int(1..grid)
 given starcount: int
 given numblocks: int
 given blocks: matrix indexed by [griddim, griddim] of int(1..numblocks)
@@ -59,7 +59,9 @@ forAll i: griddim.
 blockup[i] -> (sum([stars[x,y] /\ blocks[x,y]=i | x,y:griddim]) >= starcount),
 
 forAll i: int(1..numblocks).
-blockdown[i] -> (sum([stars[x,y] /\ blocks[x,y]=i | x,y:griddim]) <= starcount)
+blockdown[i] -> (sum([stars[x,y] /\ blocks[x,y]=i | x,y:griddim]) <= starcount),
 
 $ Check problem is solvable!
-$and([and(rowup),and(rowdown),and(colup),and(coldown),and(blockup),and(blockdown)])
+$and([and(flatten(adj)), and(rowup),and(rowdown),and(colup),and(coldown),and(blockup),and(blockdown)]),
+
+true
