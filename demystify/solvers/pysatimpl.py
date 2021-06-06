@@ -1,5 +1,6 @@
 import copy
 import logging
+from sortedcontainers import *
 
 from pysat.solvers import Solver
 from ..utils import chainlist, get_cpu_time, randomFromSeed
@@ -28,7 +29,7 @@ class SATSolver:
 
         self._stack = []
         self._boolnames = {}
-        self._knownlits = set()
+        self._knownlits = SortedSet()
         if CONFIG["dumpSAT"]:
             assert(cnf is None)
             self._rawclauses = []
@@ -76,10 +77,10 @@ class SATSolver:
     
     def dumpSAT(self, filename, assume):
         assert len(assume) == 1
-        known = set(list(self._knownlits) + assume)
+        known = SortedSet(list(self._knownlits) + assume)
         needed = [c for c in self._rawclauses if len(known.intersection(c)) == 0]
         simplified = [ [x for x in c if (-x) not in known ] for c in needed ]
-        #simplified = set([ tuple(s) for s in simplified if len(s) > 0 ])
+        #simplified = SortedSet([ tuple(s) for s in simplified if len(s) > 0 ])
         with open(filename, "w") as f:
             print("p cnf {} {}".format(max(abs(x) for c in self._clauses for x in c), len(simplified) ), file=f)
             for c in simplified:

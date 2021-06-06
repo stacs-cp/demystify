@@ -1,16 +1,10 @@
 Install conjure (in conjure git checkout):
 
-make solvers && make install
+git clone https://github.com/conjure-cp/conjure && cd conjure && make && make solvers && make install
 
-Install an up-to-date savilerow (in an up to date savilerow git checkout)
+Install some python packages:
 
-./compile.sh
-cp savilerow savilerow.jar ~/.local/bin
-
-
-To run demystify:
-
-pip3 install python-sat z3-solver numpy
+pip3 install python-sat z3-solver numpy sortedcontainers
 
 Then try:
 

@@ -8,6 +8,9 @@ from .utils import flatten
 
 from .config import CONFIG
 
+from sortedcontainers import *
+
+
 # Represent 'var == val'
 @functools.total_ordering
 class Lit:
@@ -48,7 +51,7 @@ class DummyClause:
         self._clause = clause
         self._clausenames = clausenames
         self._frozen = tuple([tuple(sorted(self._clause))])
-        self._lits = tuple(sorted(set(flatten(self._frozen))))
+        self._lits = tuple(SortedSet(flatten(self._frozen)))
 
     def explain(self, knownvars):
         if self._clausenames is None:
@@ -89,7 +92,7 @@ class Clause:
         self._clause = clause
         self._clausenames = clausenames
         self._frozen = tuple([tuple(sorted(self._clause))])
-        self._lits = tuple(sorted(set(flatten(self._frozen))))
+        self._lits = tuple(SortedSet(flatten(self._frozen)))
 
     def explain(self, knownvars):
         if self._clausenames is None:
@@ -246,7 +249,7 @@ class Var:
                 assert assignment in self._dom
                 return EqVal(self, assignment)
             else:
-                assert set(assignment).issubset(set(self._dom))
+                assert SortedSet(assignment).issubset(SortedSet(self._dom))
                 lits = [NeqVal(self, d) for d in self._dom if not (d in assignment)]
                 if len(assignment) == 1:
                     lits.append([EqVal(self, assignment[0])])
@@ -338,10 +341,10 @@ class Puzzle:
         self._vars = vars
         # The Clause / Clause Sets
         self._constraints = []
-        # A place where we store the added constraints as a set. This
+        # A place where we store the added constraints as a SortedSet. This
         # lets us filter out any repeats. This is not required for
         # correctness, but improves efficiency greatly
-        self._constraintset = set()
+        self._constraintset = SortedSet()
 
     def addConstraint(self, constraint):
         cset = constraint.clauseset()

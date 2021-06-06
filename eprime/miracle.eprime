@@ -1,0 +1,77 @@
+language ESSENCE' 1.0
+
+letting D be domain int(1..9)
+letting Ds be {1,2,3,4,5,6,7,8,9}
+
+letting C be domain int(0..2)
+
+given fixed : matrix indexed by [D,D] of int(0..9) 
+
+$#VAR grid
+find grid : matrix indexed by [D,D] of D
+
+$#CON con_alldiff "cells ({a[0]},{a[1]}) and ({a[0]},{a[2]}) cannot both be {a[3]} as they are in the same column"
+find con_alldiff: matrix indexed by [D,D,D,D] of bool
+
+$#CON row_alldiff "cells ({a[0]},{a[1]}) and ({a[0]},{a[2]}) cannot both be {a[3]} as they are in the same row"
+find row_alldiff: matrix indexed by [D,D,D,D] of bool
+
+$#CON box_alldiff "cells ({3*a[0]+a[2]},{3*a[1]+a[3]}) and ({3*a[0]+a[4]},{3*a[1]+a[5]}) cannot both be {a[6]} as they are in the same box"
+find box_alldiff: matrix indexed by [C,C,C,C,C,C,D] of bool
+
+$#CON orthogonally "cells ({a[0]},{a[1]}) and ({a[0]+a[2]},{a[1]+a[3]}) cannot be {a[4]} and {a[4]+a[5]} cannot contain consecutive digits as they are orthogonally adjacent"
+find orthogonally: matrix indexed by [D,D,int(0..1),int(0..1),D,int(-1,1)] of bool
+
+$#CON king "cells ({a[0]},{a[1]}) and ({a[0]+a[2]},{a[1]+a[3]}) cannot both be {a[4]} as they are a king's move apart"
+find king: matrix indexed by [D,D,int(-1..1),int(-1..1),D] of bool
+
+$#CON knight "cells ({a[0]},{a[1]}) and ({a[0]+a[2]},{a[1]+a[3]}) cannot both be {a[4]} as they are a knight's move apart"
+find knight: matrix indexed by [D,D,int(-2..2),int(-2..2),D] of bool
+
+such that
+forAll i,j: D.
+    fixed[i,j] != 0 -> grid[i,j]=fixed[i,j],
+
+forAll i:D.
+    forAll j1,j2:D. j1 < j2 ->
+        forAll d:D. con_alldiff[i,j1,j2,d] -> !(grid[i,j1] = d /\ grid[i,j2]=d),
+
+
+forAll j:D.
+    forAll i1,i2:D. i1 < i2 ->
+        forAll d:D. row_alldiff[j,i1,i2,d] -> !(grid[i1,j] = d /\ grid[i2,j]=d),
+
+
+forAll a,b,i1,j1,i2,j2:C. (i1*3+j1) < (i2*3+j2) ->
+    (
+        forAll d:D. box_alldiff[a,b,i1,j1,i2,j2,d] ->
+            !(grid[1+3*a+i1,1+3*b+j1] = d /\ grid[1+3*a+i2,1+3*b+j2] = d)
+    ),
+
+
+forAll i,j: D. forAll a,b:int(0..1). forAll d:D. forAll d_diff:int(-1,1).
+    (a + b = 1 /\ i+a in Ds /\ j+b in Ds /\ d+d_diff in Ds) ->
+    (
+        orthogonally[i,j,a,b,d,d_diff] ->
+            !(grid[i,j] = d /\ grid[i+a,j+b] = d+d_diff)
+    ),
+
+
+forAll i,j: D. forAll a,b:int(-1..1). forAll d:D.
+    $ |a| is identical to a, but this works around a bug in SavileRow
+    ( (|a| != 0 \/ |b| != 0) /\ (i+a) in Ds /\ (j+b) in Ds) ->
+    (
+        king[i,j,a,b,d] ->
+            !(grid[i,j] = d /\ grid[i+a,j+b] = d)
+    ),
+
+
+ forAll i,j: D. forAll a,b:int(-2..2). forAll d:D.
+    ( ( (|a| = 1 /\ |b| = 2) \/ (|a| = 2 /\ |b| = 1) ) /\ (i+a) in Ds /\ (j+b) in Ds) ->
+    (
+        knight[i,j,a,b,d] ->
+           !(grid[i,j] = d /\ grid[i+a,j+b] = d)
+    ),
+
+1=1
+$and(flatten([flatten(con_alldiff),flatten(row_alldiff),flatten(box_alldiff),flatten(orthogonally),flatten(king),flatten(knight)]))

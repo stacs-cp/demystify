@@ -1,4 +1,5 @@
 import math
+from sortedcontainers import *
 
 from itertools import combinations
 from demystify.base import *
@@ -313,7 +314,7 @@ def buildJigsaw(varmat, jigsaw):
 
     jigsawrows = [jigsaw[i:i+size] for i in range(0,size*size,size)]
 
-    for val in set(jigsaw):
+    for val in SortedSet(jigsaw):
         cells = []
         for i in range(9):
             for j in range(9):

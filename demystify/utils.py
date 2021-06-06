@@ -2,6 +2,9 @@ import math
 import itertools
 import resource
 import logging
+import sys
+
+from sortedcontainers import *
 
 from typing import Iterable, List
 from multiprocessing import current_process
@@ -84,28 +87,34 @@ def parseSavileRowName(vars, auxvars, n):
         args.append(c)
     return (varmatch, tuple(args))
 
-
-def getConnectedVars(clauses, con, varlits_in):
-    varlits = set(varlits_in.union([-v for v in varlits_in]))
-
+def build_lit2conmap(clauses):
     lit2conmap = dict()
     for c in clauses:
         for l in c:
             if -l not in lit2conmap:
-                lit2conmap[-l] = set()
+                lit2conmap[-l] = SortedSet()
             lit2conmap[-l].update(c)
 
     # Blank out counts for variables in unit clauses
     for c in clauses:
         if len(c) == 1:
-            lit2conmap[c[0]] = set()
-            lit2conmap[-c[0]] = set()
+            lit2conmap[c[0]] = SortedSet()
+            lit2conmap[-c[0]] = SortedSet()
+    return lit2conmap
+
+def getConnectedVars(formula, con, varlits_in):
+    varlits = SortedSet(varlits_in.union([-v for v in varlits_in]))
+
+    if not hasattr(formula, "lit2conmap"):
+        formula.lit2conmap = build_lit2conmap(formula.clauses)
+
+    lit2conmap = formula.lit2conmap
 
     if con not in lit2conmap:
-        return set()
-        
-    found = set(lit2conmap[con])
-    todo = set()
+        return SortedSet()
+
+    found = SortedSet(lit2conmap[con])
+    todo = SortedSet()
     for v in found:
         if v not in varlits:
             todo.add(v)

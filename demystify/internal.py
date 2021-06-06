@@ -4,6 +4,7 @@ import copy
 import types
 import random
 import logging
+from sortedcontainers import *
 
 from .utils import flatten, chainlist, randomFromSeed
 
@@ -35,7 +36,7 @@ class Solver:
         self._conlit2conmap = {}
 
         # Quick access to every internal boolean which represents a constraint
-        self._conlits = set()
+        self._conlits = SortedSet()
 
         # Set up variable mappings -- we make a bunch as we need these to be fast.
         # 'lit' refers to base.EqVal and base.NeqVar, objects which users should see.
@@ -51,7 +52,7 @@ class Solver:
         self._varsmt2neglitmap = {}
 
         # Set, so we quickly know is an internal variable represents a variable
-        self._varsmt = set([])
+        self._varsmt = SortedSet([])
 
         # Used for tracking in push/pop/addLits
         self._stackknownlits = []
@@ -75,8 +76,8 @@ class Solver:
 
                     self._varlit2smtmap[lit] = b
                     self._varlit2smtmap[neglit] = self._solver.negate(b)
-                    self._varsmt2litmap.setdefault(b,set()).add(lit)
-                    self._varsmt2neglitmap.setdefault(b,set()).add(neglit)
+                    self._varsmt2litmap.setdefault(b,SortedSet()).add(lit)
+                    self._varsmt2neglitmap.setdefault(b,SortedSet()).add(neglit)
                     self._varsmt.add(b)
 
         # Unique identifier for each introduced variable
@@ -120,8 +121,8 @@ class Solver:
             self._varlit2smtmap[lit] = b
             self._varlit2smtmap[neglit] = self._solver.negate(b)
             
-            self._varsmt2litmap.setdefault(b,set()).add(lit)
-            self._varsmt2neglitmap.setdefault(b,set()).add(neglit)
+            self._varsmt2litmap.setdefault(b,SortedSet()).add(lit)
+            self._varsmt2neglitmap.setdefault(b,SortedSet()).add(neglit)
             self._varsmt.add(b)
         
         for (con, var) in conmap.items():
@@ -134,11 +135,11 @@ class Solver:
     def init_litmappings(self):
         # Set up some mappings for efficient finding of tiny MUSes
         # Map from a var lit to all the constraints it is in
-        self._varlit2con = {l: set() for l in self._varlit2smtmap.keys()}
+        self._varlit2con = {l: SortedSet() for l in self._varlit2smtmap.keys()}
 
         # Map from a var lit to the negation of all lits it is in a constraint with
         # (to later make distance 2 mappings)
-        self._varlit2negconnectedlits = {l: set() for l in self._varlit2smtmap.keys()}
+        self._varlit2negconnectedlits = {l: SortedSet() for l in self._varlit2smtmap.keys()}
 
         for (cvar, con) in self._conmap.items():
             lits = con.lits()
@@ -149,9 +150,9 @@ class Solver:
                 self._varlit2negconnectedlits[l].update(neglits)
 
         # Map from a var lit to all constraints it is distance 2 from
-        self._varlit2con2 = {}  # {l : set() for l in self._varlit2smtmap.keys() }
+        self._varlit2con2 = {}  # {l : SortedSet() for l in self._varlit2smtmap.keys() }
         for (lit, connected) in self._varlit2negconnectedlits.items():
-            allcon = set.union(*[self._varlit2con[x] for x in connected],set()).union(
+            allcon = SortedSet.union(*[self._varlit2con[x] for x in connected],SortedSet()).union(
                 self._varlit2con[lit]
             )
             self._varlit2con2[lit] = allcon
@@ -239,7 +240,7 @@ class Solver:
             return None
         if CONFIG["useUnsatCores"]:
             core = self._solver.unsat_core()
-            assert set(core).issubset(set(lits))
+            assert SortedSet(core).issubset(SortedSet(lits))
         else:
             core = lits
         return core

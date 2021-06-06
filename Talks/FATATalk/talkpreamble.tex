@@ -1,0 +1,161 @@
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{amsmath}                   % \operatorname
+\usepackage{amssymb}                   % \nexists
+\usepackage{amsthm}
+
+\usepackage{float}      % Allows for [H] positioning option in
+\usepackage{subfigure}
+
+\usepackage{fontawesome}
+
+\usepackage{media9}
+
+\usepackage{listings}
+\lstset{basicstyle=\footnotesize}
+
+\usepackage{tikz}
+\usetikzlibrary{automata,shapes,arrows,positioning}
+\usetikzlibrary{decorations.pathreplacing}
+
+\usetikzlibrary{overlay-beamer-styles}
+
+\tikzset{initial text={}}
+
+
+\definecolor{uofstablue}{RGB}{0,83,155}
+\definecolor{uofstalightblue}{RGB}{0,174,239}
+\definecolor{uofstapurple}{RGB}{147,111,177}
+\definecolor{uofstared}{RGB}{194,42,34}
+\definecolor{uofstayellow}{RGB}{255,238,0}
+\definecolor{uofstablack}{RGB}{0,0,0}
+\definecolor{uofstaorange}{RGB}{248,152,29}
+\definecolor{uofstaburgundy}{RGB}{139,18,51}
+\definecolor{uofstagreen}{RGB}{120,194,64}
+\definecolor{uofstagrey}{RGB}{113,112,116}
+\definecolor{uofstadarkgreen}{RGB}{0,89,83}
+
+\definecolor{uofstablueprint}{cmyk}{1,0.68,0,0.12}
+\definecolor{uofstalightblueprint}{cmyk}{1,0,0,0}
+\definecolor{uofstapurpleprint}{cmyk}{0.46,0.63,0,0}
+\definecolor{uofstaredprint}{cmyk}{0,0.95,1,0}
+\definecolor{uofstayellowprint}{cmyk}{0,0,1,0}
+\definecolor{uofstablackprint}{cmyk}{0,0,0,1}
+\definecolor{uofstaorangeprint}{cmyk}{0,0.48,1,0}
+\definecolor{uofstaburgundyprint}{cmyk}{0,1,0.6,0.37}
+\definecolor{uofstagreenprint}{cmyk}{0.69,0,1,0}
+\definecolor{uofstagreyprint}{cmyk}{0,0.02,0,0.68}
+\definecolor{uofstadarkgreenprint}{cmyk}{1,0,0.48,0.6}
+
+% \definecolor{uofguniversityblue}{rgb}{0, 0.219608, 0.396078}
+%
+% \definecolor{uofgheather}{rgb}{0.356863, 0.32549, 0.490196}
+% \definecolor{uofgaquamarine}{rgb}{0.603922, 0.72549, 0.678431}
+% \definecolor{uofgslate}{rgb}{0.309804, 0.34902, 0.380392}
+% \definecolor{uofgrose}{rgb}{0.823529, 0.470588, 0.709804}
+% \definecolor{uofgmocha}{rgb}{0.709804, 0.564706, 0.47451}
+% \definecolor{uofgsandstone}{rgb}{0.321569, 0.278431, 0.231373}
+% \definecolor{uofgforest}{rgb}{0, 0.2, 0.129412}
+% \definecolor{uofglawn}{rgb}{0.517647, 0.741176, 0}
+% \definecolor{uofgcobalt}{rgb}{0, 0.615686, 0.92549}
+% \definecolor{uofgturquoise}{rgb}{0, 0.709804, 0.819608}
+% \definecolor{uofgsunshine}{rgb}{1.0, 0.862745, 0.211765}
+% \definecolor{uofgpumpkin}{rgb}{1.0, 0.72549, 0.282353}
+% \definecolor{uofgthistle}{rgb}{0.584314, 0.070588, 0.447059}
+% \definecolor{uofgrust}{rgb}{0.603922, 0.227451, 0.023529}
+% \definecolor{uofgburgundy}{rgb}{0.490196, 0.133333, 0.223529}
+% \definecolor{uofgpillarbox}{rgb}{0.701961, 0.047059, 0}
+% \definecolor{uofglavendar}{rgb}{0.356863, 0.301961, 0.580392}
+
+%\tikzset{vertex/.style={draw, circle, inner sep=0pt, minimum size=0.5cm, font=\small\bfseries}}
+%\tikzset{notvertex/.style={vertex, color=white, text=black}}
+%\tikzset{plainvertex/.style={vertex}}
+%\tikzset{vertexc1/.style={vertex, fill=uofgcobalt}}
+%\tikzset{vertexc2/.style={vertex, fill=uofglawn}}
+%\tikzset{vertexc3/.style={vertex, fill=uofgpumpkin}}
+%\tikzset{vertexc4/.style={vertex, fill=uofgheather}}
+%\tikzset{edge/.style={color=black!50!white}}
+%\tikzset{bedge/.style={ultra thick}}
+%\tikzset{edged/.style={color=screengrey, dashed}}
+%\tikzset{edgel3/.style={color=uofgthistle, ultra thick}}
+
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+            \node[shape=circle,draw,inner sep=0pt] (char) {#1};}}
+
+% {{{ theme things
+\useoutertheme[footline=authortitle]{miniframes}
+\useinnertheme{rectangles}
+
+\setbeamerfont{block title}{size={}}
+\setbeamerfont{title}{size=\Large,series=\bfseries}
+\setbeamerfont{section title}{size=\large,series=\mdseries}
+\setbeamerfont{author}{size=\large,series=\mdseries}
+\setbeamercolor*{structure}{fg=uofstablue}
+\setbeamercolor*{palette primary}{use=structure,fg=uofstablack,bg=white}
+\setbeamercolor*{palette secondary}{use=structure,fg=white,bg=uofstalightblue}
+\setbeamercolor*{palette tertiary}{use=structure,fg=white,bg=uofstablue}
+\setbeamercolor*{palette quaternary}{fg=white,bg=uofstablack}
+
+\setbeamercolor*{titlelike}{parent=palette primary}
+
+\beamertemplatenavigationsymbolsempty
+
+\setbeamertemplate{title page}
+{
+    \begin{tikzpicture}[remember picture, overlay]
+        \node at (current page.north west) {
+            \begin{tikzpicture}[remember picture, overlay]
+                \fill [fill=uofstablue, anchor=north west] (0, 0) rectangle (\paperwidth, -2.6cm);
+            \end{tikzpicture}
+        };
+
+        \node (logo) [anchor=north east, shift={(-0.25cm,-0.1cm)}] at (current page.north east) {
+            \includegraphics[keepaspectratio=true,scale=0.15]{02-standard-white.png}
+        };
+    \end{tikzpicture}
+    \begin{tikzpicture}
+        \node [anchor=west, xshift=0.2cm] at (current page.west) {
+            \begin{minipage}{0.85\paperwidth}\raggedright
+                \vskip 1.5cm
+                {\usebeamerfont{title}\usebeamercolor[uofstadarkgreen]{}\inserttitle}\\[0.4cm]
+                {\usebeamerfont{author}\usebeamercolor[uofstadarkgreen]{}\insertauthor}\\[0.6cm]
+                {\usebeamerfont{author}\usebeamercolor[uofstadarkgreen]{}\insertinstitute}
+            \end{minipage}
+        };
+    \end{tikzpicture}
+}
+
+\setbeamertemplate{section page}
+{
+    \begin{centering}
+        \begin{beamercolorbox}[sep=12pt,center]{part title}
+            \usebeamerfont{section title}\insertsection\par
+        \end{beamercolorbox}
+    \end{centering}
+}
+
+\newcommand{\frameofframes}{/}
+\newcommand{\setframeofframes}[1]{\renewcommand{\frameofframes}{#1}}
+
+\makeatletter
+\setbeamertemplate{footline}
+{%
+    \begin{beamercolorbox}[colsep=1.5pt]{upper separation line foot}
+    \end{beamercolorbox}
+    \begin{beamercolorbox}[ht=2.5ex,dp=1.125ex,%
+        leftskip=.3cm,rightskip=.3cm plus1fil]{author in head/foot}%
+        \leavevmode{\usebeamerfont{author in head/foot}\insertshortauthor}%
+        \hfill%
+        {\usebeamerfont{institute in head/foot}\usebeamercolor[fg]{institute in head/foot}\insertshortinstitute}%
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[ht=2.5ex,dp=1.125ex,%
+        leftskip=.3cm,rightskip=.3cm plus1fil]{title in head/foot}%
+        {\usebeamerfont{title in head/foot}\insertshorttitle}%
+        \hfill%
+%        {\usebeamerfont{frame number}\usebeamercolor[fg]{frame number}\insertframenumber~\frameofframes~\inserttotalframenumber}
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[colsep=1.5pt]{lower separation line foot}
+    \end{beamercolorbox}
+}
+
+% }}}

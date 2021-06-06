@@ -11,6 +11,7 @@ import logging
 import subprocess
 
 from pysat.formula import CNF
+from sortedcontainers import *
 
 # Let me import demystify
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
@@ -68,7 +69,8 @@ if args.eprime is not None and args.eprimeparam is None:
 
 if args.debuginfo:
     logging.basicConfig(
-    level=logging.DEBUG, format="%(levelname)s:%(name)s:%(relativeCreated)d:%(message)s"
+    #level=logging.DEBUG, format="%(levelname)s:%(name)s:%(relativeCreated)d:%(message)s"
+    level=logging.DEBUG, format="%(levelname)s:%(pathname)s:%(lineno)d:%(name)s:%(message)s"
 )
 demystify.config.LoadConfigFromDict({"repeats" : args.repeats, "cores": args.cores})
 
@@ -153,8 +155,8 @@ else:
     ovarmatch = re.compile("c Var '(.*)' order represents '(.*)' with '(.*)'")
 
     with open(args.eprime) as eprime_data:
-        vars = set()
-        auxvars = set()
+        vars = SortedSet()
+        auxvars = SortedSet()
         cons = dict()
         conmatch = re.compile('\$\#CON (.*) "(.*)"')
         for line in eprime_data:
@@ -182,7 +184,7 @@ else:
                         sys.exit(1)
                     auxvars.add(v)
 
-    identifiers = set.union(vars, cons.keys())
+    identifiers = SortedSet.union(vars, cons.keys())
 
     with open(args.eprimeparam+".dimacs") as sat_data:
         varmap = dict()
@@ -221,10 +223,10 @@ else:
             print("WARNING: Unknown variable: '{}'".format(v))
 
 
-    varlits = set()
+    varlits = SortedSet()
 
     # For each variable / literal, establish maps between the demysify literal and SAT literal
-    for v in set(varmap.keys()).intersection(vars):
+    for v in SortedSet(varmap.keys()).intersection(vars):
             printvarmap[v] = dict()
 
             
@@ -245,22 +247,26 @@ else:
                 # For 'order' variables, just map them to the whole CP variable
                 if v in ordervarmap and loc in ordervarmap[v]:
                     for (dom, sat) in ordervarmap[v][loc].items():
-                        invlitmap[sat] = set(litsforvar)
+                        invlitmap[sat] = SortedSet(litsforvar)
                         if -sat not in invlitmap:
-                            invlitmap[-sat] = set(litsforvar)
+                            invlitmap[-sat] = SortedSet(litsforvar)
                         varlits.add(sat)
 
 
 
-    for v in set(varmap.keys()).intersection(set(cons.keys())):
+    for v in SortedSet(varmap.keys()).intersection(SortedSet(cons.keys())):
         # Only want matching '1'
-        for k in varmap[v].keys():
+        for k in SortedSet(varmap[v].keys()):
             # This should be a boolean -- if this fails, check with Chris
-            assert set(varmap[v][k].keys()).issubset(set([0,1]))
-            assert 0 in varmap[v][k].keys()
+            assert SortedSet(varmap[v][k].keys()).issubset(SortedSet([0,1]))
+            # assert 0 in varmap[v][k].keys() -- Removed in place of the error below
+            if 0 not in varmap[v][k].keys():
+                print(f"ERROR: Constraint {v}{k} cannot be made false..")
+                sys.exit(1)
             if 1 not in varmap[v][k].keys():
                 print(f"ERROR: Constraint {v}{k} cannot be satisfied..")
                 sys.exit(1)
+
 
             # Note that 'a' can be accessed in the f string
             a = tuple(k)
@@ -270,9 +276,9 @@ else:
                 print("Could not evaluate "+cons[v])
                 constraintname = cons[v]
             logging.debug(constraintname)
-            connected = set(lit for s in demystify.utils.getConnectedVars(formula.clauses, varmap[v][k][1], varlits) for lit in invlitmap[s])
+            connected = SortedSet(lit for s in demystify.utils.getConnectedVars(formula, varmap[v][k][1], varlits) for lit in invlitmap[s])
             # Savilerow is too clever, so just put both negative + positive version of all literals in
-            connected = connected.union(set(lit.neg() for lit in connected))
+            connected = connected.union(SortedSet(lit.neg() for lit in connected))
             constraintmap[demystify.base.DummyClause(constraintname, connected)] = varmap[v][k][1]
 
     printvarlist = []
@@ -282,12 +288,12 @@ else:
         if dim==0:
             printvarlist.append(demystify.base.VarMatrix(None, (1,1), (), varmat = [[printvarmap[v].values()[0]]]))
         elif dim==1:
-            varlist = list(printvarmap[v][k] for k in sorted(set(printvarmap[v].keys())))
+            varlist = list(printvarmap[v][k] for k in SortedSet(printvarmap[v].keys()))
             printvarlist.append(demystify.base.VarMatrix(None, (1,len(varlist)), (), varmat = [varlist]))
         elif dim == 2:
             varlist = []
-            for index1 in sorted(set(k[0] for k in printvarmap[v].keys())):
-                index2 = sorted(set([k for k in printvarmap[v].keys() if k[0]==index1]))
+            for index1 in SortedSet(k[0] for k in printvarmap[v].keys()):
+                index2 = SortedSet([k for k in printvarmap[v].keys() if k[0]==index1])
                 varlist.append(list(printvarmap[v][k] for k in index2))
             logging.debug(varlist)
             printvarlist.append(demystify.base.VarMatrix(None, (len(varlist), len(varlist[0])), (), varmat = varlist))
