@@ -10,6 +10,9 @@ import numpy
 from time import time
 from sortedcontainers import *
 
+from pysat.examples.optux import OptUx
+from pysat.formula import WCNF
+
 from .utils import flatten, chainlist, shuffledcopy, randomFromSeed
 
 from .base import EqVal, NeqVal
@@ -19,70 +22,48 @@ from .config import CONFIG
 from .parallel import getPool, setChildSolver, getChildSolver
 
 
-# This calculates Minimum Unsatisfiable Sets
-# It uses internals from solver, but is put in another file just for "neatness"
-
-# Deal with y being too large, or x being a fraction
-def safepow(x, y):
-    p = math.pow(float(x), float(y))
-    if p < 1000000:
-        return int(p)
-    else:
-        return math.inf
-
-
-def tinyMUS(solver, assume, distance):
-    smtassume = [solver._varlit2smtmap[l] for l in assume]
-
-    if distance == 1:
-        cons = flatten([solver._varlit2con[l] for l in assume])
-    elif distance == 2:
-        cons = flatten([solver._varlit2con2[l] for l in assume])
-    else:
-        sys.exit(1)
-
-    core = solver.basicCore(smtassume + cons)
-    if core is None:
-        return None
-
-    corecpy = list(core)
-    badcount = 1
-    for lit in corecpy:
-        if lit in core and len(core) > 2:
-            to_test = list(core)
-            to_test.remove(lit)
-            newcore = solver.basicCore(to_test)
-            if newcore is not None:
-                core = newcore
-            else:
-                badcount += 1
-                if badcount > 5:
-                    return None
-
-    return [solver._conmap[x] for x in core if x in solver._conmap]
-
-
-count = 0
+# This calculates Minimum Unsatisfiable Sets using the FORQES algorithm
 
 
 def MUS(r, solver, assume, minsize, *, config, initial_cons=None, just_check=False):
-    # print("!!",assume)
+
+    # The negation of a literal we know to be in the solution
     smtassume = [solver._varlit2smtmap[a] for a in assume]
 
-    """
-    smtassume = [solver._varlit2smtmap[a] for a in assume]
+    # The 'switches' for the constraints
     cons = list(solver._conlits)
+
+    # Literals the solver has already 
+    knownlits = solver._solver._knownlits
+
+    # The puzzle rules in CNF
+    puzzleCNF = solver._cnf
+
+    weightedCNF = WCNF()
     
-    # smtassume: hard, cons: soft
-    # solver._knownlits: hard
+    # Hard clauses
+    for assumption in smtassume:
+        weightedCNF.append([assumption])
     
-    wcnf = makeWCNF(smtassume, cons)
+    for knownlit in knownlits:
+        weightedCNF.append([knownlit])
+    
+    weightedCNF.extend(puzzleCNF.clauses)
 
-    magicMUSFIND(wcnf)
+    # Soft clauses
+    for constraint in cons:
+        weightedCNF.append([constraint], weight=1)
 
-    """
+    # Maybe FORQES will just work
+    smallestMUS = []
+    with OptUx(weightedCNF) as forqes:
+        """
+        for mus in optux.enumerate():
+            print('mus {0} has cost {1}'.format(mus, optux.cost))
+        """
+        smallestMUS = forqes.compute()
 
-    return [solver._conmap[x] for x in core if x in solver._conmap]
+    return [solver._conmap[x] for x in smallestMUS if x in solver._conmap]
 
 
 def update_musdict(musdict, p, mus):
@@ -108,29 +89,6 @@ def musdict_minimum(musdict):
         return math.inf
     return min(len(v[0]) for v in musdict.values())
 
-
-def _parfunc_dotinymus(args):
-    (p, distance) = args
-    return (p, tinyMUS(getChildSolver(), [p.neg()], distance))
-
-
-def getTinyMUSes(solver, puzlits, musdict, *, distance, repeats):
-    setChildSolver(solver)
-    logging.info(
-        "Getting tiny MUSes, distance %s, for %s puzlits, %s repeats",
-        distance,
-        len(puzlits),
-        repeats,
-    )
-    with getPool(CONFIG["cores"]) as pool:
-        res = pool.map(
-            _parfunc_dotinymus, [(p, distance)
-                                 for r in range(repeats) for p in puzlits]
-        )
-        for (p, mus) in res:
-            update_musdict(musdict, p, mus)
-
-
 def _parfunc_docheckmus(args):
     (p, oldmus) = args
     return (
@@ -144,7 +102,6 @@ def _parfunc_docheckmus(args):
             config=CONFIG
         ),
     )
-
 
 # Check an existing dictionary. Reject any invalid MUS and squash any good MUS
 def checkMUS(solver, puzlits, oldmus, musdict):
@@ -177,8 +134,6 @@ def _parfunc_dochecklitsmus(args):
     )
 
 # Check which literals are filtered by a particular MUS
-
-
 def checkWhichLitsAMUSProves(solver, puzlits, mus):
     setChildSolver(solver)
     if len(puzlits) > 0:
@@ -189,7 +144,6 @@ def checkWhichLitsAMUSProves(solver, puzlits, mus):
             return list(p for (p, musvalid) in res if musvalid)
     else:
         return []
-
 
 def _findSmallestMUS_func(tup):
     (p, randstr, minsize, config) = tup
@@ -205,8 +159,7 @@ def _findSmallestMUS_func(tup):
         ),
     )
 
-
-def cascadeMUS(solver, puzlits, repeats, musdict, config):
+def forqesMUS(solver, puzlits, repeats, musdict, config):
     # We need this to be accessible by the pool
     setChildSolver(solver)
 
@@ -253,6 +206,6 @@ class ForqesMUSFinder:
     def smallestMUS(self, puzlits):
         musdict = {}
 
-        cascadeMUS(self._solver, puzlits, CONFIG["repeats"], musdict, CONFIG)
+        forqesMUS(self._solver, puzlits, CONFIG["repeats"], musdict, CONFIG)
 
         return musdict

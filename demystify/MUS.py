@@ -22,8 +22,6 @@ from .parallel import getPool, setChildSolver, getChildSolver
 # This calculates Minimum Unsatisfiable Sets
 # It uses internals from solver, but is put in another file just for "neatness"
 
-
-
 # Deal with y being too large, or x being a fraction
 def safepow(x,y):
     p = math.pow(float(x),float(y))
@@ -68,19 +66,7 @@ count = 0
 def MUS(r, solver, assume, minsize, *, config, initial_cons=None, just_check=False):
     #print("!!",assume)
     smtassume = [solver._varlit2smtmap[a] for a in assume]
-
-    """
-    smtassume = [solver._varlit2smtmap[a] for a in assume]
-    cons = list(solver._conlits)
-    # smtassume: hard, cons: soft
-
-    wcnf = makeWCNF(smtassume, cons)
-
-    magicMUSFIND(wcnf)
-
-
-    """
-
+    known = solver._knownlits
     if config["dumpSAT"]:
         global count
         count += 1
@@ -252,7 +238,9 @@ def MUS(r, solver, assume, minsize, *, config, initial_cons=None, just_check=Fal
     # Final cleanup
     # We need to be prepared for things to disappear as
     # we reduce the core, so make a copy and iterate through
-    # that
+    # that.
+
+    # Algorithm 1 Basic MUS finding algorithm as referenced in the paper.
     stepcount = 0
     badcount = 0
     corecpy = list(core)
@@ -290,7 +278,9 @@ def MUS(r, solver, assume, minsize, *, config, initial_cons=None, just_check=Fal
         minsize,
         badcount,
     )
-    return [solver._conmap[x] for x in core if x in solver._conmap]
+
+    result = [solver._conmap[x] for x in core if x in solver._conmap]
+    return result
 
 
 def update_musdict(musdict, p, mus):

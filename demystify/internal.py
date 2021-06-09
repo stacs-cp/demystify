@@ -61,6 +61,8 @@ class Solver:
         # For benchmarking
         self._corecount = 0
 
+        self._cnf = []
+
         if cnf is not None:
             self.init_fromCNF(cnf,litmap,conmap)
 
@@ -113,6 +115,7 @@ class Solver:
     def init_fromCNF(self,cnf,litmap,conmap):
         assert(CONFIG["solver"] != "z3")
         self._solver = SATSolver(cnf)
+        self._cnf = cnf
         for (lit, b) in litmap.items():
             neglit = lit.neg()
             if b < 0:
@@ -129,7 +132,7 @@ class Solver:
             self._conmap[var] = con
             self._conlit2conmap[con] = var
             self._conlits.add(var)
-
+        
 
 
     def init_litmappings(self):

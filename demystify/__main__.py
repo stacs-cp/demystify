@@ -20,6 +20,7 @@ import demystify
 import demystify.base
 import demystify.internal
 import demystify.MUS
+import demystify.MUSForqes
 import demystify.prettyprint
 import demystify.solve
 import demystify.buildpuz
@@ -52,6 +53,8 @@ parser.add_argument("--nodomains", action="store_true", help="Only assign variab
 parser.add_argument("--force", type=str, action='append', default=None, help="choose first non-trivial variable to be assigned")
 
 parser.add_argument("--json", type=str, action='append', default=None, help="optional JSON file output")
+
+parser.add_argument("--forqes", action="store_true", default=None, help="Use the FORQES algorithm for MUS finding")
 
 args = parser.parse_args()
 
@@ -325,8 +328,11 @@ if args.nodomains:
     puzlits = [p for p in puzlits if p.equal]
     print("!!",len(puzlits))
 
+if args.forqes:    
+    MUS = demystify.MUSForqes.ForqesMUSFinder(solver)
+else:
+    MUS = demystify.MUS.CascadeMUSFinder(solver)
 
-MUS = demystify.MUS.CascadeMUSFinder(solver)
 
 if args.json is not None:
     trace = demystify.jsonsolve.json_solve(os.path.basename(args.eprime), params, args.json[0], sys.stdout, solver, puzlits, MUS, skip=args.skip, merge=args.merge, steps=args.steps, force=args.force)
