@@ -229,7 +229,6 @@ else:
     for v in SortedSet(varmap.keys()).intersection(vars):
             printvarmap[v] = dict()
 
-            
             for loc in varmap[v]:
                 litsforvar = []
                 var = demystify.base.Var(f'{v}[{",".join(str(l) for l in loc)}]', tuple(varmap[v][loc].keys()), loc)

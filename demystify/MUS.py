@@ -34,6 +34,7 @@ def safepow(x,y):
 
 def tinyMUS(solver, assume, distance):
     smtassume = [solver._varlit2smtmap[l] for l in assume]
+    
     if distance == 1:
         cons = flatten([solver._varlit2con[l] for l in assume])
     elif distance == 2:
@@ -67,6 +68,18 @@ count = 0
 def MUS(r, solver, assume, minsize, *, config, initial_cons=None, just_check=False):
     #print("!!",assume)
     smtassume = [solver._varlit2smtmap[a] for a in assume]
+
+    """
+    smtassume = [solver._varlit2smtmap[a] for a in assume]
+    cons = list(solver._conlits)
+    # smtassume: hard, cons: soft
+
+    wcnf = makeWCNF(smtassume, cons)
+
+    magicMUSFIND(wcnf)
+
+
+    """
 
     if config["dumpSAT"]:
         global count
