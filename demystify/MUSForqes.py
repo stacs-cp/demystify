@@ -23,10 +23,7 @@ from .parallel import getPool, setChildSolver, getChildSolver
 
 
 # This calculates Minimum Unsatisfiable Sets using the FORQES algorithm
-
-
-def MUS(r, solver, assume, minsize, *, config, initial_cons=None, just_check=False):
-
+def MUS(solver, assume, config):
     # The negation of a literal we know to be in the solution
     smtassume = [solver._varlit2smtmap[a] for a in assume]
 
@@ -58,12 +55,18 @@ def MUS(r, solver, assume, minsize, *, config, initial_cons=None, just_check=Fal
     smallestMUS = []
     with OptUx(weightedCNF) as forqes:
         """
-        for mus in optux.enumerate():
-            print('mus {0} has cost {1}'.format(mus, optux.cost))
+        for mus in forqes.enumerate():
+            print('mus {0} has cost {1}'.format(mus, forqes.cost))
         """
-        smallestMUS = forqes.compute()
+        # forqes.compute returns the best must in reference to the soft
+        # clauses of the WCNF.
+        softClauseIndices = forqes.compute()
 
-    return [solver._conmap[x] for x in smallestMUS if x in solver._conmap]
+    # Indices appear to be out by 1 for some reason?
+    bestMUS = flatten([weightedCNF.soft[i - 1] for i in softClauseIndices])
+
+    result = [solver._conmap[x] for x in bestMUS if x in solver._conmap]
+    return result
 
 
 def update_musdict(musdict, p, mus):
@@ -94,11 +97,8 @@ def _parfunc_docheckmus(args):
     return (
         p,
         MUS(
-            randomFromSeed("X"),
             getChildSolver(),
             [p.neg()],
-            math.inf,
-            initial_cons=oldmus,
             config=CONFIG
         ),
     )
@@ -123,12 +123,8 @@ def _parfunc_dochecklitsmus(args):
     return (
         p,
         MUS(
-            randomFromSeed("X"),
             getChildSolver(),
             [p.neg()],
-            math.inf,
-            initial_cons=oldmus,
-            just_check=True,
             config=CONFIG
         ),
     )
@@ -146,56 +142,26 @@ def checkWhichLitsAMUSProves(solver, puzlits, mus):
         return []
 
 def _findSmallestMUS_func(tup):
-    (p, randstr, minsize, config) = tup
-    # logging.info("Random str: '%s'", randstr)
+    (p, config) = tup
     return (
         p,
         MUS(
-            randomFromSeed(randstr),
             getChildSolver(),
             [p.neg()],
-            minsize,
             config=config,
         ),
     )
 
 def forqesMUS(solver, puzlits, repeats, musdict, config):
-    # We need this to be accessible by the pool
+    # Removed parallelisation for now.
+    # For future return though, we need the solver to be accessible by the pool
     setChildSolver(solver)
 
-    with getPool(CONFIG["cores"]) as pool:
-        for minsize in range(config["baseSizeMUS"], max(config["baseSizeMUS"]+1, 10000), 1):
-            # Do 'range(repeats)' first, so when we distribute we get an even spread of literals on different cores
-            # minsize+1 for MUS size, as the MUS will include 'p'
-            logging.info(
-                  "Considering %s * %s jobs for minsize=%s",
-                  repeats,
-                  len(puzlits),
-                  minsize,
-                  )
-            res = pool.map(
-                   _findSmallestMUS_func,
-                   [
-                        (
-                            p,
-                            "{}:{}:{}".format(r, p, minsize),
-                            minsize * CONFIG["cascadeMult"],
-                            config
-                        )
-                        for r in range(repeats)
-                        for p in puzlits
-                    ],
-                   )
-            for (p, mus) in res:
-                    if mus is not None and len(mus) < minsize:
-                        logging.info(
-                            "!! Found smaller !!!! {} {}".format(len(mus), minsize))
-                    if mus is not None and len(mus) > minsize:
-                        logging.info(
-                            "!! Found bigger !!!! {} {}".format(len(mus), minsize))
-                    update_musdict(musdict, p, mus)
-            if musdict_minimum(musdict) <= minsize:
-                return
+    res = [_findSmallestMUS_func((p,config)) for p in puzlits]              
+    for (p, mus) in res:
+        update_musdict(musdict, p, mus)
+    
+    return
 
 
 class ForqesMUSFinder:

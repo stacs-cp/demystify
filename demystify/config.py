@@ -11,7 +11,7 @@ import sys
 CONFIG = {
     # How many cores to use when running in parallel
     # Set to 1 (or 0) to disable parallelisation
-    "cores": 8,
+    "cores": 0,
     # How many times to look for very tiny cores
     # Incrasing this past 2 doesn't (seem) to be useful
     "smallRepeats": 2,
@@ -44,7 +44,7 @@ CONFIG = {
     # instead look for cascadeMult*k, because it is not too much
     # more work and we might want it later
     "cascadeMult": 5,
-    "checkSmall1": True,
+    "checkSmall1": False,
     "checkSmall2": False,
     "checkCloseFirst": False,
 
