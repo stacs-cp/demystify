@@ -10,7 +10,7 @@ import numpy
 from time import time
 from sortedcontainers import *
 
-from pysat.examples.optux import OptUx
+from .optux import OptUx
 from pysat.formula import WCNF
 
 from .utils import flatten, chainlist, shuffledcopy, randomFromSeed
