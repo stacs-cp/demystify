@@ -1,0 +1,419 @@
+<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg version="1.1" width="1200" height="794" onload="init(evt)" viewBox="0 0 1200 794" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><!--Flame graph stack visualization. See https://github.com/brendangregg/FlameGraph for latest version, and http://www.brendangregg.com/flamegraphs.html for examples.--><!--NOTES: --><defs><linearGradient id="background" y1="0" y2="1" x1="0" x2="0"><stop stop-color="#eeeeee" offset="5%"/><stop stop-color="#eeeeb0" offset="95%"/></linearGradient></defs><style type="text/css">
+text { font-family:"Verdana"; font-size:12px; fill:rgb(0,0,0); }
+#title { text-anchor:middle; font-size:17px; }
+#search { opacity:0.1; cursor:pointer; }
+#search:hover, #search.show { opacity:1; }
+#subtitle { text-anchor:middle; font-color:rgb(160,160,160); }
+#unzoom { cursor:pointer; }
+#frames > *:hover { stroke:black; stroke-width:0.5; cursor:pointer; }
+.hide { display:none; }
+.parent { opacity:0.5; }
+</style><script type="text/ecmascript"><![CDATA[var nametype = 'Function:';
+var fontsize = 12;
+var fontwidth = 0.59;
+var xpad = 10;
+var inverted = true;
+var searchcolor = 'rgb(230,0,230)';
+var fluiddrawing = true;
+var truncate_text_right = false;]]><![CDATA["use strict";
+var details, searchbtn, unzoombtn, matchedtxt, svg, searching, frames;
+function init(evt) {
+    details = document.getElementById("details").firstChild;
+    searchbtn = document.getElementById("search");
+    unzoombtn = document.getElementById("unzoom");
+    matchedtxt = document.getElementById("matched");
+    svg = document.getElementsByTagName("svg")[0];
+    frames = document.getElementById("frames");
+    searching = 0;
+
+    // Use GET parameters to restore a flamegraph's state.
+    var restore_state = function() {
+        var params = get_params();
+        if (params.x && params.y)
+            zoom(find_group(document.querySelector('[x="' + params.x + '"][y="' + params.y + '"]')));
+        if (params.s)
+            search(params.s);
+    };
+
+    if (fluiddrawing) {
+        // Make width dynamic so the SVG fits its parent's width.
+        svg.removeAttribute("width");
+        // Edge requires us to have a viewBox that gets updated with size changes.
+        var isEdge = /Edge\/\d./i.test(navigator.userAgent);
+        if (!isEdge) {
+          svg.removeAttribute("viewBox");
+        }
+        var update_for_width_change = function() {
+            if (isEdge) {
+                svg.attributes.viewBox.value = "0 0 " + svg.width.baseVal.value + " " + svg.height.baseVal.value;
+            }
+
+            // Keep consistent padding on left and right of frames container.
+            frames.attributes.width.value = svg.width.baseVal.value - xpad * 2;
+
+            // Text truncation needs to be adjusted for the current width.
+            var el = frames.children;
+            for(var i = 0; i < el.length; i++) {
+                update_text(el[i]);
+            }
+
+            // Keep search elements at a fixed distance from right edge.
+            var svgWidth = svg.width.baseVal.value;
+            searchbtn.attributes.x.value = svgWidth - xpad - 100;
+            matchedtxt.attributes.x.value = svgWidth - xpad - 100;
+        };
+        window.addEventListener('resize', function() {
+            update_for_width_change();
+        });
+        // This needs to be done asynchronously for Safari to work.
+        setTimeout(function() {
+            unzoom();
+            update_for_width_change();
+            restore_state();
+        }, 0);
+    } else {
+        restore_state();
+    }
+}
+// event listeners
+window.addEventListener("click", function(e) {
+    var target = find_group(e.target);
+    if (target) {
+        if (target.nodeName == "a") {
+            if (e.ctrlKey === false) return;
+            e.preventDefault();
+        }
+        if (target.classList.contains("parent")) unzoom();
+        zoom(target);
+
+        // set parameters for zoom state
+        var el = target.querySelector("rect");
+        if (el && el.attributes && el.attributes.y && el.attributes._orig_x) {
+            var params = get_params()
+            params.x = el.attributes._orig_x.value;
+            params.y = el.attributes.y.value;
+            history.replaceState(null, null, parse_params(params));
+        }
+    }
+    else if (e.target.id == "unzoom") {
+        unzoom();
+
+        // remove zoom state
+        var params = get_params();
+        if (params.x) delete params.x;
+        if (params.y) delete params.y;
+        history.replaceState(null, null, parse_params(params));
+    }
+    else if (e.target.id == "search") search_prompt();
+}, false)
+// mouse-over for info
+// show
+window.addEventListener("mouseover", function(e) {
+    var target = find_group(e.target);
+    if (target) details.nodeValue = nametype + " " + g_to_text(target);
+}, false)
+// clear
+window.addEventListener("mouseout", function(e) {
+    var target = find_group(e.target);
+    if (target) details.nodeValue = ' ';
+}, false)
+// ctrl-F for search
+window.addEventListener("keydown",function (e) {
+    if (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 70)) {
+        e.preventDefault();
+        search_prompt();
+    }
+}, false)
+// functions
+function get_params() {
+    var params = {};
+    var paramsarr = window.location.search.substr(1).split('&');
+    for (var i = 0; i < paramsarr.length; ++i) {
+        var tmp = paramsarr[i].split("=");
+        if (!tmp[0] || !tmp[1]) continue;
+        params[tmp[0]]  = decodeURIComponent(tmp[1]);
+    }
+    return params;
+}
+function parse_params(params) {
+    var uri = "?";
+    for (var key in params) {
+        uri += key + '=' + encodeURIComponent(params[key]) + '&';
+    }
+    if (uri.slice(-1) == "&")
+        uri = uri.substring(0, uri.length - 1);
+    if (uri == '?')
+        uri = window.location.href.split('?')[0];
+    return uri;
+}
+function find_child(node, selector) {
+    var children = node.querySelectorAll(selector);
+    if (children.length) return children[0];
+    return;
+}
+function find_group(node) {
+    var parent = node.parentElement;
+    if (!parent) return;
+    if (parent.id == "frames") return node;
+    return find_group(parent);
+}
+function orig_save(e, attr, val) {
+    if (e.attributes["_orig_" + attr] != undefined) return;
+    if (e.attributes[attr] == undefined) return;
+    if (val == undefined) val = e.attributes[attr].value;
+    e.setAttribute("_orig_" + attr, val);
+}
+function orig_load(e, attr) {
+    if (e.attributes["_orig_"+attr] == undefined) return;
+    e.attributes[attr].value = e.attributes["_orig_" + attr].value;
+    e.removeAttribute("_orig_" + attr);
+}
+function g_to_text(e) {
+    var text = find_child(e, "title").firstChild.nodeValue;
+    return (text)
+}
+function g_to_func(e) {
+    var func = g_to_text(e);
+    // if there's any manipulation we want to do to the function
+    // name before it's searched, do it here before returning.
+    return (func);
+}
+function update_text(e) {
+    var r = find_child(e, "rect");
+    var t = find_child(e, "text");
+    var w = parseFloat(r.attributes.width.value) * frames.attributes.width.value / 100 - 3;
+    var txt = find_child(e, "title").textContent.replace(/\([^(]*\)$/,"");
+    t.attributes.x.value = format_percent((parseFloat(r.attributes.x.value) + (100 * 3 / frames.attributes.width.value)));
+    // Smaller than this size won't fit anything
+    if (w < 2 * fontsize * fontwidth) {
+        t.textContent = "";
+        return;
+    }
+    t.textContent = txt;
+    // Fit in full text width
+    if (/^ *\$/.test(txt) || t.getComputedTextLength() < w)
+        return;
+    if (truncate_text_right) {
+        // Truncate the right side of the text.
+        for (var x = txt.length - 2; x > 0; x--) {
+            if (t.getSubStringLength(0, x + 2) <= w) {
+                t.textContent = txt.substring(0, x) + "..";
+                return;
+            }
+        }
+    } else {
+        // Truncate the left side of the text.
+        for (var x = 2; x < txt.length; x++) {
+            if (t.getSubStringLength(x - 2, txt.length) <= w) {
+                t.textContent = ".." + txt.substring(x, txt.length);
+                return;
+            }
+        }
+    }
+    t.textContent = "";
+}
+// zoom
+function zoom_reset(e) {
+    if (e.attributes != undefined) {
+        orig_load(e, "x");
+        orig_load(e, "width");
+    }
+    if (e.childNodes == undefined) return;
+    for(var i = 0, c = e.childNodes; i < c.length; i++) {
+        zoom_reset(c[i]);
+    }
+}
+function zoom_child(e, x, ratio) {
+    if (e.attributes != undefined) {
+        if (e.attributes.x != undefined) {
+            orig_save(e, "x");
+            e.attributes.x.value = format_percent((parseFloat(e.attributes.x.value) - x) * ratio);
+            if (e.tagName == "text") {
+                e.attributes.x.value = format_percent(parseFloat(find_child(e.parentNode, "rect[x]").attributes.x.value) + (100 * 3 / frames.attributes.width.value));
+            }
+        }
+        if (e.attributes.width != undefined) {
+            orig_save(e, "width");
+            e.attributes.width.value = format_percent(parseFloat(e.attributes.width.value) * ratio);
+        }
+    }
+    if (e.childNodes == undefined) return;
+    for(var i = 0, c = e.childNodes; i < c.length; i++) {
+        zoom_child(c[i], x, ratio);
+    }
+}
+function zoom_parent(e) {
+    if (e.attributes) {
+        if (e.attributes.x != undefined) {
+            orig_save(e, "x");
+            e.attributes.x.value = "0.0%";
+        }
+        if (e.attributes.width != undefined) {
+            orig_save(e, "width");
+            e.attributes.width.value = "100.0%";
+        }
+    }
+    if (e.childNodes == undefined) return;
+    for(var i = 0, c = e.childNodes; i < c.length; i++) {
+        zoom_parent(c[i]);
+    }
+}
+function zoom(node) {
+    var attr = find_child(node, "rect").attributes;
+    var width = parseFloat(attr.width.value);
+    var xmin = parseFloat(attr.x.value);
+    var xmax = xmin + width;
+    var ymin = parseFloat(attr.y.value);
+    var ratio = 100 / width;
+    // XXX: Workaround for JavaScript float issues (fix me)
+    var fudge = 0.001;
+    unzoombtn.classList.remove("hide");
+    var el = frames.children;
+    for (var i = 0; i < el.length; i++) {
+        var e = el[i];
+        var a = find_child(e, "rect").attributes;
+        var ex = parseFloat(a.x.value);
+        var ew = parseFloat(a.width.value);
+        // Is it an ancestor
+        if (!inverted) {
+            var upstack = parseFloat(a.y.value) > ymin;
+        } else {
+            var upstack = parseFloat(a.y.value) < ymin;
+        }
+        if (upstack) {
+            // Direct ancestor
+            if (ex <= xmin && (ex+ew+fudge) >= xmax) {
+                e.classList.add("parent");
+                zoom_parent(e);
+                update_text(e);
+            }
+            // not in current path
+            else
+                e.classList.add("hide");
+        }
+        // Children maybe
+        else {
+            // no common path
+            if (ex < xmin || ex + fudge >= xmax) {
+                e.classList.add("hide");
+            }
+            else {
+                zoom_child(e, xmin, ratio);
+                update_text(e);
+            }
+        }
+    }
+}
+function unzoom() {
+    unzoombtn.classList.add("hide");
+    var el = frames.children;
+    for(var i = 0; i < el.length; i++) {
+        el[i].classList.remove("parent");
+        el[i].classList.remove("hide");
+        zoom_reset(el[i]);
+        update_text(el[i]);
+    }
+}
+// search
+function reset_search() {
+    var el = document.querySelectorAll("#frames rect");
+    for (var i = 0; i < el.length; i++) {
+        orig_load(el[i], "fill")
+    }
+    var params = get_params();
+    delete params.s;
+    history.replaceState(null, null, parse_params(params));
+}
+function search_prompt() {
+    if (!searching) {
+        var term = prompt("Enter a search term (regexp " +
+            "allowed, eg: ^ext4_)", "");
+        if (term != null) {
+            search(term)
+        }
+    } else {
+        reset_search();
+        searching = 0;
+        searchbtn.classList.remove("show");
+        searchbtn.firstChild.nodeValue = "Search"
+        matchedtxt.classList.add("hide");
+        matchedtxt.firstChild.nodeValue = ""
+    }
+}
+function search(term) {
+    var re = new RegExp(term);
+    var el = frames.children;
+    var matches = new Object();
+    var maxwidth = 0;
+    for (var i = 0; i < el.length; i++) {
+        var e = el[i];
+        var func = g_to_func(e);
+        var rect = find_child(e, "rect");
+        if (func == null || rect == null)
+            continue;
+        // Save max width. Only works as we have a root frame
+        var w = parseFloat(rect.attributes.width.value);
+        if (w > maxwidth)
+            maxwidth = w;
+        if (func.match(re)) {
+            // highlight
+            var x = parseFloat(rect.attributes.x.value);
+            orig_save(rect, "fill");
+            rect.attributes.fill.value = searchcolor;
+            // remember matches
+            if (matches[x] == undefined) {
+                matches[x] = w;
+            } else {
+                if (w > matches[x]) {
+                    // overwrite with parent
+                    matches[x] = w;
+                }
+            }
+            searching = 1;
+        }
+    }
+    if (!searching)
+        return;
+    var params = get_params();
+    params.s = term;
+    history.replaceState(null, null, parse_params(params));
+
+    searchbtn.classList.add("show");
+    searchbtn.firstChild.nodeValue = "Reset Search";
+    // calculate percent matched, excluding vertical overlap
+    var count = 0;
+    var lastx = -1;
+    var lastw = 0;
+    var keys = Array();
+    for (k in matches) {
+        if (matches.hasOwnProperty(k))
+            keys.push(k);
+    }
+    // sort the matched frames by their x location
+    // ascending, then width descending
+    keys.sort(function(a, b){
+        return a - b;
+    });
+    // Step through frames saving only the biggest bottom-up frames
+    // thanks to the sort order. This relies on the tree property
+    // where children are always smaller than their parents.
+    var fudge = 0.0001;    // JavaScript floating point
+    for (var k in keys) {
+        var x = parseFloat(keys[k]);
+        var w = matches[keys[k]];
+        if (x >= lastx + lastw - fudge) {
+            count += w;
+            lastx = x;
+            lastw = w;
+        }
+    }
+    // display matched percent
+    matchedtxt.classList.remove("hide");
+    var pct = 100 * count / maxwidth;
+    if (pct != 100) pct = pct.toFixed(1);
+    matchedtxt.firstChild.nodeValue = "Matched: " + pct + "%";
+}
+function format_percent(n) {
+    return n.toFixed(4) + "%";
+}
+]]></script><rect x="0" y="0" width="100%" height="794" fill="url(#background)"/><text id="title" x="50.0000%" y="24.00">py-spy record -- python3 demystify --eprime ./eprime/nice_killer.eprime --eprimeparam ./eprime/killersudoku/killersudoku.param --forqes</text><text id="details" x="10" y="40.00"> </text><text id="unzoom" class="hide" x="10" y="24.00">Reset Zoom</text><text id="search" x="1090" y="24.00">Search</text><text id="matched" x="1090" y="783.00"> </text><svg id="frames" x="10" width="1180"><g><title>&lt;module&gt; (demystify/__main__.py:150) (13 samples, 0.58%)</title><rect x="0.0447%" y="100" width="0.5806%" height="15" fill="rgb(227,0,7)"/><text x="0.2947%" y="110.50"></text></g><g><title>run (subprocess.py:425) (13 samples, 0.58%)</title><rect x="0.0447%" y="116" width="0.5806%" height="15" fill="rgb(217,0,24)"/><text x="0.2947%" y="126.50"></text></g><g><title>communicate (subprocess.py:855) (13 samples, 0.58%)</title><rect x="0.0447%" y="132" width="0.5806%" height="15" fill="rgb(221,193,54)"/><text x="0.2947%" y="142.50"></text></g><g><title>wait (subprocess.py:1477) (13 samples, 0.58%)</title><rect x="0.0447%" y="148" width="0.5806%" height="15" fill="rgb(248,212,6)"/><text x="0.2947%" y="158.50"></text></g><g><title>_try_wait (subprocess.py:1424) (13 samples, 0.58%)</title><rect x="0.0447%" y="164" width="0.5806%" height="15" fill="rgb(208,68,35)"/><text x="0.2947%" y="174.50"></text></g><g><title>from_fp (pysat/formula.py:500) (23 samples, 1.03%)</title><rect x="0.8039%" y="148" width="1.0272%" height="15" fill="rgb(232,128,0)"/><text x="1.0539%" y="158.50"></text></g><g><title>&lt;listcomp&gt; (pysat/formula.py:500) (12 samples, 0.54%)</title><rect x="1.2952%" y="164" width="0.5360%" height="15" fill="rgb(207,160,47)"/><text x="1.5452%" y="174.50"></text></g><g><title>from_fp (pysat/formula.py:501) (8 samples, 0.36%)</title><rect x="1.8312%" y="148" width="0.3573%" height="15" fill="rgb(228,23,34)"/><text x="2.0812%" y="158.50"></text></g><g><title>&lt;listcomp&gt; (pysat/formula.py:501) (5 samples, 0.22%)</title><rect x="1.9652%" y="164" width="0.2233%" height="15" fill="rgb(218,30,26)"/><text x="2.2152%" y="174.50"></text></g><g><title>&lt;module&gt; (demystify/__main__.py:157) (38 samples, 1.70%)</title><rect x="0.6253%" y="100" width="1.6972%" height="15" fill="rgb(220,122,19)"/><text x="0.8753%" y="110.50"></text></g><g><title>__init__ (pysat/formula.py:420) (38 samples, 1.70%)</title><rect x="0.6253%" y="116" width="1.6972%" height="15" fill="rgb(250,228,42)"/><text x="0.8753%" y="126.50"></text></g><g><title>from_file (pysat/formula.py:464) (38 samples, 1.70%)</title><rect x="0.6253%" y="132" width="1.6972%" height="15" fill="rgb(240,193,28)"/><text x="0.8753%" y="142.50"></text></g><g><title>&lt;module&gt; (numpy/core/__init__.py:22) (3 samples, 0.13%)</title><rect x="2.6351%" y="516" width="0.1340%" height="15" fill="rgb(216,20,37)"/><text x="2.8851%" y="526.50"></text></g><g><title>_handle_fromlist (&lt;frozen importlib._bootstrap&gt;:1023) (3 samples, 0.13%)</title><rect x="2.6351%" y="532" width="0.1340%" height="15" fill="rgb(206,188,39)"/><text x="2.8851%" y="542.50"></text></g><g><title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:219) (3 samples, 0.13%)</title><rect x="2.6351%" y="548" width="0.1340%" height="15" fill="rgb(217,207,13)"/><text x="2.8851%" y="558.50"></text></g><g><title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:971) (3 samples, 0.13%)</title><rect x="2.6351%" y="564" width="0.1340%" height="15" fill="rgb(231,73,38)"/><text x="2.8851%" y="574.50"></text></g><g><title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:955) (3 samples, 0.13%)</title><rect x="2.6351%" y="580" width="0.1340%" height="15" fill="rgb(225,20,46)"/><text x="2.8851%" y="590.50"></text></g><g><title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:665) (3 samples, 0.13%)</title><rect x="2.6351%" y="596" width="0.1340%" height="15" fill="rgb(210,31,41)"/><text x="2.8851%" y="606.50"></text></g><g><title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:678) (3 samples, 0.13%)</title><rect x="2.6351%" y="612" width="0.1340%" height="15" fill="rgb(221,200,47)"/><text x="2.8851%" y="622.50"></text></g><g><title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:219) (3 samples, 0.13%)</title><rect x="2.6351%" y="628" width="0.1340%" height="15" fill="rgb(226,26,5)"/><text x="2.8851%" y="638.50"></text></g><g><title>&lt;module&gt; (numpy/core/multiarray.py:12) (3 samples, 0.13%)</title><rect x="2.6351%" y="644" width="0.1340%" height="15" fill="rgb(249,33,26)"/><text x="2.8851%" y="654.50"></text></g><g><title>_handle_fromlist (&lt;frozen importlib._bootstrap&gt;:1023) (3 samples, 0.13%)</title><rect x="2.6351%" y="660" width="0.1340%" height="15" fill="rgb(235,183,28)"/><text x="2.8851%" y="670.50"></text></g><g><title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:219) (3 samples, 0.13%)</title><rect x="2.6351%" y="676" width="0.1340%" height="15" fill="rgb(221,5,38)"/><text x="2.8851%" y="686.50"></text></g><g><title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:971) (3 samples, 0.13%)</title><rect x="2.6351%" y="692" width="0.1340%" height="15" fill="rgb(247,18,42)"/><text x="2.8851%" y="702.50"></text></g><g><title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:955) (3 samples, 0.13%)</title><rect x="2.6351%" y="708" width="0.1340%" height="15" fill="rgb(241,131,45)"/><text x="2.8851%" y="718.50"></text></g><g><title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:665) (3 samples, 0.13%)</title><rect x="2.6351%" y="724" width="0.1340%" height="15" fill="rgb(249,31,29)"/><text x="2.8851%" y="734.50"></text></g><g><title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:678) (3 samples, 0.13%)</title><rect x="2.6351%" y="740" width="0.1340%" height="15" fill="rgb(225,111,53)"/><text x="2.8851%" y="750.50"></text></g><g><title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:219) (3 samples, 0.13%)</title><rect x="2.6351%" y="756" width="0.1340%" height="15" fill="rgb(238,160,17)"/><text x="2.8851%" y="766.50"></text></g><g><title>&lt;module&gt; (numpy/__init__.py:140) (6 samples, 0.27%)</title><rect x="2.6351%" y="388" width="0.2680%" height="15" fill="rgb(214,148,48)"/><text x="2.8851%" y="398.50"></text></g><g><title>_handle_fromlist (&lt;frozen importlib._bootstrap&gt;:1023) (6 samples, 0.27%)</title><rect x="2.6351%" y="404" width="0.2680%" height="15" fill="rgb(232,36,49)"/><text x="2.8851%" y="414.50"></text></g><g><title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:219) (6 samples, 0.27%)</title><rect x="2.6351%" y="420" width="0.2680%" height="15" fill="rgb(209,103,24)"/><text x="2.8851%" y="430.50"></text></g><g><title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:971) (6 samples, 0.27%)</title><rect x="2.6351%" y="436" width="0.2680%" height="15" fill="rgb(229,88,8)"/><text x="2.8851%" y="446.50"></text></g><g><title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:955) (6 samples, 0.27%)</title><rect x="2.6351%" y="452" width="0.2680%" height="15" fill="rgb(213,181,19)"/><text x="2.8851%" y="462.50"></text></g><g><title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:665) (6 samples, 0.27%)</title><rect x="2.6351%" y="468" width="0.2680%" height="15" fill="rgb(254,191,54)"/><text x="2.8851%" y="478.50"></text></g><g><title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:678) (6 samples, 0.27%)</title><rect x="2.6351%" y="484" width="0.2680%" height="15" fill="rgb(241,83,37)"/><text x="2.8851%" y="494.50"></text></g><g><title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:219) (6 samples, 0.27%)</title><rect x="2.6351%" y="500" width="0.2680%" height="15" fill="rgb(233,36,39)"/><text x="2.8851%" y="510.50"></text></g><g><title>&lt;module&gt; (numpy/__init__.py:143) (4 samples, 0.18%)</title><rect x="2.9031%" y="388" width="0.1787%" height="15" fill="rgb(226,3,54)"/><text x="3.1531%" y="398.50"></text></g><g><title>_handle_fromlist (&lt;frozen importlib._bootstrap&gt;:1023) (4 samples, 0.18%)</title><rect x="2.9031%" y="404" width="0.1787%" height="15" fill="rgb(245,192,40)"/><text x="3.1531%" y="414.50"></text></g><g><title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:219) (4 samples, 0.18%)</title><rect x="2.9031%" y="420" width="0.1787%" height="15" fill="rgb(238,167,29)"/><text x="3.1531%" y="430.50"></text></g><g><title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:971) (4 samples, 0.18%)</title><rect x="2.9031%" y="436" width="0.1787%" height="15" fill="rgb(232,182,51)"/><text x="3.1531%" y="446.50"></text></g><g><title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:955) (4 samples, 0.18%)</title><rect x="2.9031%" y="452" width="0.1787%" height="15" fill="rgb(231,60,39)"/><text x="3.1531%" y="462.50"></text></g><g><title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:665) (4 samples, 0.18%)</title><rect x="2.9031%" y="468" width="0.1787%" height="15" fill="rgb(208,69,12)"/><text x="3.1531%" y="478.50"></text></g><g><title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:678) (4 samples, 0.18%)</title><rect x="2.9031%" y="484" width="0.1787%" height="15" fill="rgb(235,93,37)"/><text x="3.1531%" y="494.50"></text></g><g><title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:219) (4 samples, 0.18%)</title><rect x="2.9031%" y="500" width="0.1787%" height="15" fill="rgb(213,116,39)"/><text x="3.1531%" y="510.50"></text></g><g><title>&lt;module&gt; (demystify/__main__.py:21) (13 samples, 0.58%)</title><rect x="2.6351%" y="100" width="0.5806%" height="15" fill="rgb(222,207,29)"/><text x="2.8851%" y="110.50"></text></g><g><title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:971) (13 samples, 0.58%)</title><rect x="2.6351%" y="116" width="0.5806%" height="15" fill="rgb(206,96,30)"/><text x="2.8851%" y="126.50"></text></g><g><title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:955) (13 samples, 0.58%)</title><rect x="2.6351%" y="132" width="0.5806%" height="15" fill="rgb(218,138,4)"/><text x="2.8851%" y="142.50"></text></g><g><title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:665) (13 samples, 0.58%)</title><rect x="2.6351%" y="148" width="0.5806%" height="15" fill="rgb(250,191,14)"/><text x="2.8851%" y="158.50"></text></g><g><title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:678) (13 samples, 0.58%)</title><rect x="2.6351%" y="164" width="0.5806%" height="15" fill="rgb(239,60,40)"/><text x="2.8851%" y="174.50"></text></g><g><title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:219) (13 samples, 0.58%)</title><rect x="2.6351%" y="180" width="0.5806%" height="15" fill="rgb(206,27,48)"/><text x="2.8851%" y="190.50"></text></g><g><title>&lt;module&gt; (demystify/base.py:7) (13 samples, 0.58%)</title><rect x="2.6351%" y="196" width="0.5806%" height="15" fill="rgb(225,35,8)"/><text x="2.8851%" y="206.50"></text></g><g><title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:971) (13 samples, 0.58%)</title><rect x="2.6351%" y="212" width="0.5806%" height="15" fill="rgb(250,213,24)"/><text x="2.8851%" y="222.50"></text></g><g><title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:955) (13 samples, 0.58%)</title><rect x="2.6351%" y="228" width="0.5806%" height="15" fill="rgb(247,123,22)"/><text x="2.8851%" y="238.50"></text></g><g><title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:665) (13 samples, 0.58%)</title><rect x="2.6351%" y="244" width="0.5806%" height="15" fill="rgb(231,138,38)"/><text x="2.8851%" y="254.50"></text></g><g><title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:678) (13 samples, 0.58%)</title><rect x="2.6351%" y="260" width="0.5806%" height="15" fill="rgb(231,145,46)"/><text x="2.8851%" y="270.50"></text></g><g><title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:219) (13 samples, 0.58%)</title><rect x="2.6351%" y="276" width="0.5806%" height="15" fill="rgb(251,118,11)"/><text x="2.8851%" y="286.50"></text></g><g><title>&lt;module&gt; (demystify/utils.py:57) (13 samples, 0.58%)</title><rect x="2.6351%" y="292" width="0.5806%" height="15" fill="rgb(217,147,25)"/><text x="2.8851%" y="302.50"></text></g><g><title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:971) (13 samples, 0.58%)</title><rect x="2.6351%" y="308" width="0.5806%" height="15" fill="rgb(247,81,37)"/><text x="2.8851%" y="318.50"></text></g><g><title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:955) (13 samples, 0.58%)</title><rect x="2.6351%" y="324" width="0.5806%" height="15" fill="rgb(209,12,38)"/><text x="2.8851%" y="334.50"></text></g><g><title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:665) (13 samples, 0.58%)</title><rect x="2.6351%" y="340" width="0.5806%" height="15" fill="rgb(227,1,9)"/><text x="2.8851%" y="350.50"></text></g><g><title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:678) (13 samples, 0.58%)</title><rect x="2.6351%" y="356" width="0.5806%" height="15" fill="rgb(248,47,43)"/><text x="2.8851%" y="366.50"></text></g><g><title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:219) (13 samples, 0.58%)</title><rect x="2.6351%" y="372" width="0.5806%" height="15" fill="rgb(221,10,30)"/><text x="2.8851%" y="382.50"></text></g><g><title>&lt;module&gt; (z3/__init__.py:1) (5 samples, 0.22%)</title><rect x="3.2157%" y="388" width="0.2233%" height="15" fill="rgb(210,229,1)"/><text x="3.4657%" y="398.50"></text></g><g><title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:971) (5 samples, 0.22%)</title><rect x="3.2157%" y="404" width="0.2233%" height="15" fill="rgb(222,148,37)"/><text x="3.4657%" y="414.50"></text></g><g><title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:955) (5 samples, 0.22%)</title><rect x="3.2157%" y="420" width="0.2233%" height="15" fill="rgb(234,67,33)"/><text x="3.4657%" y="430.50"></text></g><g><title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:665) (5 samples, 0.22%)</title><rect x="3.2157%" y="436" width="0.2233%" height="15" fill="rgb(247,98,35)"/><text x="3.4657%" y="446.50"></text></g><g><title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:678) (5 samples, 0.22%)</title><rect x="3.2157%" y="452" width="0.2233%" height="15" fill="rgb(247,138,52)"/><text x="3.4657%" y="462.50"></text></g><g><title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:219) (5 samples, 0.22%)</title><rect x="3.2157%" y="468" width="0.2233%" height="15" fill="rgb(213,79,30)"/><text x="3.4657%" y="478.50"></text></g><g><title>&lt;module&gt; (z3/z3.py:43) (5 samples, 0.22%)</title><rect x="3.2157%" y="484" width="0.2233%" height="15" fill="rgb(246,177,23)"/><text x="3.4657%" y="494.50"></text></g><g><title>_handle_fromlist (&lt;frozen importlib._bootstrap&gt;:1023) (5 samples, 0.22%)</title><rect x="3.2157%" y="500" width="0.2233%" height="15" fill="rgb(230,62,27)"/><text x="3.4657%" y="510.50"></text></g><g><title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:219) (5 samples, 0.22%)</title><rect x="3.2157%" y="516" width="0.2233%" height="15" fill="rgb(216,154,8)"/><text x="3.4657%" y="526.50"></text></g><g><title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:971) (5 samples, 0.22%)</title><rect x="3.2157%" y="532" width="0.2233%" height="15" fill="rgb(244,35,45)"/><text x="3.4657%" y="542.50"></text></g><g><title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:955) (5 samples, 0.22%)</title><rect x="3.2157%" y="548" width="0.2233%" height="15" fill="rgb(251,115,12)"/><text x="3.4657%" y="558.50"></text></g><g><title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:665) (5 samples, 0.22%)</title><rect x="3.2157%" y="564" width="0.2233%" height="15" fill="rgb(240,54,50)"/><text x="3.4657%" y="574.50"></text></g><g><title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:678) (5 samples, 0.22%)</title><rect x="3.2157%" y="580" width="0.2233%" height="15" fill="rgb(233,84,52)"/><text x="3.4657%" y="590.50"></text></g><g><title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:219) (5 samples, 0.22%)</title><rect x="3.2157%" y="596" width="0.2233%" height="15" fill="rgb(207,117,47)"/><text x="3.4657%" y="606.50"></text></g><g><title>&lt;module&gt; (z3/z3core.py:5) (5 samples, 0.22%)</title><rect x="3.2157%" y="612" width="0.2233%" height="15" fill="rgb(249,43,39)"/><text x="3.4657%" y="622.50"></text></g><g><title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:971) (5 samples, 0.22%)</title><rect x="3.2157%" y="628" width="0.2233%" height="15" fill="rgb(209,38,44)"/><text x="3.4657%" y="638.50"></text></g><g><title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:955) (5 samples, 0.22%)</title><rect x="3.2157%" y="644" width="0.2233%" height="15" fill="rgb(236,212,23)"/><text x="3.4657%" y="654.50"></text></g><g><title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:665) (5 samples, 0.22%)</title><rect x="3.2157%" y="660" width="0.2233%" height="15" fill="rgb(242,79,21)"/><text x="3.4657%" y="670.50"></text></g><g><title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:678) (4 samples, 0.18%)</title><rect x="3.2604%" y="676" width="0.1787%" height="15" fill="rgb(211,96,35)"/><text x="3.5104%" y="686.50"></text></g><g><title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:219) (4 samples, 0.18%)</title><rect x="3.2604%" y="692" width="0.1787%" height="15" fill="rgb(253,215,40)"/><text x="3.5104%" y="702.50"></text></g><g><title>&lt;module&gt; (demystify/__main__.py:22) (6 samples, 0.27%)</title><rect x="3.2157%" y="100" width="0.2680%" height="15" fill="rgb(211,81,21)"/><text x="3.4657%" y="110.50"></text></g><g><title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:971) (6 samples, 0.27%)</title><rect x="3.2157%" y="116" width="0.2680%" height="15" fill="rgb(208,190,38)"/><text x="3.4657%" y="126.50"></text></g><g><title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:955) (6 samples, 0.27%)</title><rect x="3.2157%" y="132" width="0.2680%" height="15" fill="rgb(235,213,38)"/><text x="3.4657%" y="142.50"></text></g><g><title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:665) (6 samples, 0.27%)</title><rect x="3.2157%" y="148" width="0.2680%" height="15" fill="rgb(237,122,38)"/><text x="3.4657%" y="158.50"></text></g><g><title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:678) (6 samples, 0.27%)</title><rect x="3.2157%" y="164" width="0.2680%" height="15" fill="rgb(244,218,35)"/><text x="3.4657%" y="174.50"></text></g><g><title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:219) (6 samples, 0.27%)</title><rect x="3.2157%" y="180" width="0.2680%" height="15" fill="rgb(240,68,47)"/><text x="3.4657%" y="190.50"></text></g><g><title>&lt;module&gt; (demystify/internal.py:17) (6 samples, 0.27%)</title><rect x="3.2157%" y="196" width="0.2680%" height="15" fill="rgb(210,16,53)"/><text x="3.4657%" y="206.50"></text></g><g><title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:971) (6 samples, 0.27%)</title><rect x="3.2157%" y="212" width="0.2680%" height="15" fill="rgb(235,124,12)"/><text x="3.4657%" y="222.50"></text></g><g><title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:955) (6 samples, 0.27%)</title><rect x="3.2157%" y="228" width="0.2680%" height="15" fill="rgb(224,169,11)"/><text x="3.4657%" y="238.50"></text></g><g><title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:665) (6 samples, 0.27%)</title><rect x="3.2157%" y="244" width="0.2680%" height="15" fill="rgb(250,166,2)"/><text x="3.4657%" y="254.50"></text></g><g><title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:678) (6 samples, 0.27%)</title><rect x="3.2157%" y="260" width="0.2680%" height="15" fill="rgb(242,216,29)"/><text x="3.4657%" y="270.50"></text></g><g><title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:219) (6 samples, 0.27%)</title><rect x="3.2157%" y="276" width="0.2680%" height="15" fill="rgb(230,116,27)"/><text x="3.4657%" y="286.50"></text></g><g><title>&lt;module&gt; (z3impl.py:1) (6 samples, 0.27%)</title><rect x="3.2157%" y="292" width="0.2680%" height="15" fill="rgb(228,99,48)"/><text x="3.4657%" y="302.50"></text></g><g><title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:971) (6 samples, 0.27%)</title><rect x="3.2157%" y="308" width="0.2680%" height="15" fill="rgb(253,11,6)"/><text x="3.4657%" y="318.50"></text></g><g><title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:955) (6 samples, 0.27%)</title><rect x="3.2157%" y="324" width="0.2680%" height="15" fill="rgb(247,143,39)"/><text x="3.4657%" y="334.50"></text></g><g><title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:665) (6 samples, 0.27%)</title><rect x="3.2157%" y="340" width="0.2680%" height="15" fill="rgb(236,97,10)"/><text x="3.4657%" y="350.50"></text></g><g><title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:678) (6 samples, 0.27%)</title><rect x="3.2157%" y="356" width="0.2680%" height="15" fill="rgb(233,208,19)"/><text x="3.4657%" y="366.50"></text></g><g><title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:219) (6 samples, 0.27%)</title><rect x="3.2157%" y="372" width="0.2680%" height="15" fill="rgb(216,164,2)"/><text x="3.4657%" y="382.50"></text></g><g><title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:951) (4 samples, 0.18%)</title><rect x="3.5730%" y="324" width="0.1787%" height="15" fill="rgb(220,129,5)"/><text x="3.8230%" y="334.50"></text></g><g><title>&lt;module&gt; (demystify/__main__.py:24) (9 samples, 0.40%)</title><rect x="3.4837%" y="100" width="0.4020%" height="15" fill="rgb(242,17,10)"/><text x="3.7337%" y="110.50"></text></g><g><title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:971) (9 samples, 0.40%)</title><rect x="3.4837%" y="116" width="0.4020%" height="15" fill="rgb(242,107,0)"/><text x="3.7337%" y="126.50"></text></g><g><title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:955) (9 samples, 0.40%)</title><rect x="3.4837%" y="132" width="0.4020%" height="15" fill="rgb(251,28,31)"/><text x="3.7337%" y="142.50"></text></g><g><title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:665) (9 samples, 0.40%)</title><rect x="3.4837%" y="148" width="0.4020%" height="15" fill="rgb(233,223,10)"/><text x="3.7337%" y="158.50"></text></g><g><title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:678) (9 samples, 0.40%)</title><rect x="3.4837%" y="164" width="0.4020%" height="15" fill="rgb(215,21,27)"/><text x="3.7337%" y="174.50"></text></g><g><title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:219) (9 samples, 0.40%)</title><rect x="3.4837%" y="180" width="0.4020%" height="15" fill="rgb(232,23,21)"/><text x="3.7337%" y="190.50"></text></g><g><title>&lt;module&gt; (demystify/MUSForqes.py:13) (9 samples, 0.40%)</title><rect x="3.4837%" y="196" width="0.4020%" height="15" fill="rgb(244,5,23)"/><text x="3.7337%" y="206.50"></text></g><g><title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:971) (9 samples, 0.40%)</title><rect x="3.4837%" y="212" width="0.4020%" height="15" fill="rgb(226,81,46)"/><text x="3.7337%" y="222.50"></text></g><g><title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:955) (9 samples, 0.40%)</title><rect x="3.4837%" y="228" width="0.4020%" height="15" fill="rgb(247,70,30)"/><text x="3.7337%" y="238.50"></text></g><g><title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:665) (9 samples, 0.40%)</title><rect x="3.4837%" y="244" width="0.4020%" height="15" fill="rgb(212,68,19)"/><text x="3.7337%" y="254.50"></text></g><g><title>exec_module (&lt;frozen importlib._bootstrap_external&gt;:678) (8 samples, 0.36%)</title><rect x="3.5284%" y="260" width="0.3573%" height="15" fill="rgb(240,187,13)"/><text x="3.7784%" y="270.50"></text></g><g><title>_call_with_frames_removed (&lt;frozen importlib._bootstrap&gt;:219) (8 samples, 0.36%)</title><rect x="3.5284%" y="276" width="0.3573%" height="15" fill="rgb(223,113,26)"/><text x="3.7784%" y="286.50"></text></g><g><title>&lt;module&gt; (demystify/optuxext.py:1) (8 samples, 0.36%)</title><rect x="3.5284%" y="292" width="0.3573%" height="15" fill="rgb(206,192,2)"/><text x="3.7784%" y="302.50"></text></g><g><title>_find_and_load (&lt;frozen importlib._bootstrap&gt;:971) (7 samples, 0.31%)</title><rect x="3.5730%" y="308" width="0.3126%" height="15" fill="rgb(241,108,4)"/><text x="3.8230%" y="318.50"></text></g><g><title>_find_and_load_unlocked (&lt;frozen importlib._bootstrap&gt;:955) (3 samples, 0.13%)</title><rect x="3.7517%" y="324" width="0.1340%" height="15" fill="rgb(247,173,49)"/><text x="4.0017%" y="334.50"></text></g><g><title>_load_unlocked (&lt;frozen importlib._bootstrap&gt;:665) (3 samples, 0.13%)</title><rect x="3.7517%" y="340" width="0.1340%" height="15" fill="rgb(224,114,35)"/><text x="4.0017%" y="350.50"></text></g><g><title>&lt;module&gt; (demystify/__main__.py:255) (4 samples, 0.18%)</title><rect x="4.0643%" y="100" width="0.1787%" height="15" fill="rgb(245,159,27)"/><text x="4.3143%" y="110.50"></text></g><g><title>__init__ (sortedcontainers/sortedset.py:168) (4 samples, 0.18%)</title><rect x="4.0643%" y="116" width="0.1787%" height="15" fill="rgb(245,172,44)"/><text x="4.3143%" y="126.50"></text></g><g><title>update (sortedcontainers/sortedset.py:682) (6 samples, 0.27%)</title><rect x="4.2876%" y="132" width="0.2680%" height="15" fill="rgb(236,23,11)"/><text x="4.5376%" y="142.50"></text></g><g><title>__hash__ (demystify/base.py:35) (3 samples, 0.13%)</title><rect x="4.4216%" y="148" width="0.1340%" height="15" fill="rgb(205,117,38)"/><text x="4.6716%" y="158.50"></text></g><g><title>__init__ (sortedcontainers/sortedset.py:168) (13 samples, 0.58%)</title><rect x="4.2876%" y="116" width="0.5806%" height="15" fill="rgb(237,72,25)"/><text x="4.5376%" y="126.50"></text></g><g><title>update (sortedcontainers/sortedset.py:687) (7 samples, 0.31%)</title><rect x="4.5556%" y="132" width="0.3126%" height="15" fill="rgb(244,70,9)"/><text x="4.8056%" y="142.50"></text></g><g><title>update (sortedcontainers/sortedlist.py:338) (7 samples, 0.31%)</title><rect x="4.5556%" y="148" width="0.3126%" height="15" fill="rgb(217,125,39)"/><text x="4.8056%" y="158.50"></text></g><g><title>__lt__ (demystify/base.py:32) (5 samples, 0.22%)</title><rect x="4.6449%" y="164" width="0.2233%" height="15" fill="rgb(235,36,10)"/><text x="4.8949%" y="174.50"></text></g><g><title>__init__ (sortedcontainers/sortedset.py:168) (3 samples, 0.13%)</title><rect x="4.8682%" y="132" width="0.1340%" height="15" fill="rgb(251,123,47)"/><text x="5.1182%" y="142.50"></text></g><g><title>getConnectedVars (demystify/utils.py:106) (6 samples, 0.27%)</title><rect x="4.8682%" y="116" width="0.2680%" height="15" fill="rgb(221,13,13)"/><text x="5.1182%" y="126.50"></text></g><g><title>union (sortedcontainers/sortedset.py:658) (3 samples, 0.13%)</title><rect x="5.0022%" y="132" width="0.1340%" height="15" fill="rgb(238,131,9)"/><text x="5.2522%" y="142.50"></text></g><g><title>__init__ (sortedcontainers/sortedset.py:168) (3 samples, 0.13%)</title><rect x="5.0022%" y="148" width="0.1340%" height="15" fill="rgb(211,50,8)"/><text x="5.2522%" y="158.50"></text></g><g><title>build_lit2conmap (demystify/utils.py:94) (3 samples, 0.13%)</title><rect x="5.1362%" y="132" width="0.1340%" height="15" fill="rgb(245,182,24)"/><text x="5.3862%" y="142.50"></text></g><g><title>update (sortedcontainers/sortedlist.py:354) (9 samples, 0.40%)</title><rect x="5.7168%" y="180" width="0.4020%" height="15" fill="rgb(242,14,37)"/><text x="5.9668%" y="190.50"></text></g><g><title>__init__ (sortedcontainers/sortedset.py:141) (21 samples, 0.94%)</title><rect x="5.5382%" y="148" width="0.9379%" height="15" fill="rgb(246,228,12)"/><text x="5.7882%" y="158.50"></text></g><g><title>__init__ (sortedcontainers/sortedlist.py:171) (19 samples, 0.85%)</title><rect x="5.6275%" y="164" width="0.8486%" height="15" fill="rgb(213,55,15)"/><text x="5.8775%" y="174.50"></text></g><g><title>update (sortedcontainers/sortedlist.py:355) (8 samples, 0.36%)</title><rect x="6.1188%" y="180" width="0.3573%" height="15" fill="rgb(209,9,3)"/><text x="6.3688%" y="190.50"></text></g><g><title>build_lit2conmap (demystify/utils.py:95) (30 samples, 1.34%)</title><rect x="5.2702%" y="132" width="1.3399%" height="15" fill="rgb(230,59,30)"/><text x="5.5202%" y="142.50"></text></g><g><title>update (sortedcontainers/sortedset.py:680) (3 samples, 0.13%)</title><rect x="7.0567%" y="148" width="0.1340%" height="15" fill="rgb(209,121,21)"/><text x="7.3067%" y="158.50"></text></g><g><title>update (sortedcontainers/sortedset.py:682) (11 samples, 0.49%)</title><rect x="7.2354%" y="148" width="0.4913%" height="15" fill="rgb(220,109,13)"/><text x="7.4854%" y="158.50"></text></g><g><title>update (sortedcontainers/sortedset.py:685) (3 samples, 0.13%)</title><rect x="7.8160%" y="148" width="0.1340%" height="15" fill="rgb(232,18,1)"/><text x="8.0660%" y="158.50"></text></g><g><title>update (sortedcontainers/sortedset.py:686) (6 samples, 0.27%)</title><rect x="7.9500%" y="148" width="0.2680%" height="15" fill="rgb(215,41,42)"/><text x="8.2000%" y="158.50"></text></g><g><title>update (sortedcontainers/sortedlist.py:338) (6 samples, 0.27%)</title><rect x="8.3073%" y="164" width="0.2680%" height="15" fill="rgb(224,123,36)"/><text x="8.5573%" y="174.50"></text></g><g><title>update (sortedcontainers/sortedlist.py:354) (13 samples, 0.58%)</title><rect x="8.6646%" y="164" width="0.5806%" height="15" fill="rgb(240,125,3)"/><text x="8.9146%" y="174.50"></text></g><g><title>&lt;genexpr&gt; (sortedcontainers/sortedlist.py:354) (3 samples, 0.13%)</title><rect x="9.1112%" y="180" width="0.1340%" height="15" fill="rgb(205,98,50)"/><text x="9.3612%" y="190.50"></text></g><g><title>update (sortedcontainers/sortedlist.py:355) (16 samples, 0.71%)</title><rect x="9.2452%" y="164" width="0.7146%" height="15" fill="rgb(205,185,37)"/><text x="9.4952%" y="174.50"></text></g><g><title>update (sortedcontainers/sortedset.py:687) (41 samples, 1.83%)</title><rect x="8.2180%" y="148" width="1.8312%" height="15" fill="rgb(238,207,15)"/><text x="8.4680%" y="158.50">u..</text></g><g><title>add (sortedcontainers/sortedset.py:356) (3 samples, 0.13%)</title><rect x="10.4064%" y="164" width="0.1340%" height="15" fill="rgb(213,199,42)"/><text x="10.6564%" y="174.50"></text></g><g><title>add (sortedcontainers/sortedset.py:357) (5 samples, 0.22%)</title><rect x="10.5404%" y="164" width="0.2233%" height="15" fill="rgb(235,201,11)"/><text x="10.7904%" y="174.50"></text></g><g><title>add (sortedcontainers/sortedlist.py:272) (3 samples, 0.13%)</title><rect x="11.2104%" y="180" width="0.1340%" height="15" fill="rgb(207,46,11)"/><text x="11.4604%" y="190.50"></text></g><g><title>add (sortedcontainers/sortedlist.py:279) (6 samples, 0.27%)</title><rect x="11.4337%" y="180" width="0.2680%" height="15" fill="rgb(241,35,35)"/><text x="11.6837%" y="190.50"></text></g><g><title>add (sortedcontainers/sortedlist.py:281) (6 samples, 0.27%)</title><rect x="11.7017%" y="180" width="0.2680%" height="15" fill="rgb(243,32,47)"/><text x="11.9517%" y="190.50"></text></g><g><title>getConnectedVars (demystify/utils.py:109) (154 samples, 6.88%)</title><rect x="5.1362%" y="116" width="6.8781%" height="15" fill="rgb(247,202,23)"/><text x="5.3862%" y="126.50">getConnec..</text></g><g><title>build_lit2conmap (demystify/utils.py:96) (121 samples, 5.40%)</title><rect x="6.6101%" y="132" width="5.4042%" height="15" fill="rgb(219,102,11)"/><text x="6.8601%" y="142.50">build_l..</text></g><g><title>update (sortedcontainers/sortedset.py:691) (41 samples, 1.83%)</title><rect x="10.1831%" y="148" width="1.8312%" height="15" fill="rgb(243,110,44)"/><text x="10.4331%" y="158.50">u..</text></g><g><title>add (sortedcontainers/sortedset.py:359) (26 samples, 1.16%)</title><rect x="10.8531%" y="164" width="1.1612%" height="15" fill="rgb(222,74,54)"/><text x="11.1031%" y="174.50"></text></g><g><title>getConnectedVars (demystify/utils.py:122) (3 samples, 0.13%)</title><rect x="12.0143%" y="116" width="0.1340%" height="15" fill="rgb(216,99,12)"/><text x="12.2643%" y="126.50"></text></g><g><title>getConnectedVars (demystify/utils.py:123) (3 samples, 0.13%)</title><rect x="12.1483%" y="116" width="0.1340%" height="15" fill="rgb(226,22,26)"/><text x="12.3983%" y="126.50"></text></g><g><title>getConnectedVars (demystify/utils.py:124) (9 samples, 0.40%)</title><rect x="12.2823%" y="116" width="0.4020%" height="15" fill="rgb(217,163,10)"/><text x="12.5323%" y="126.50"></text></g><g><title>__contains__ (sortedcontainers/sortedset.py:209) (3 samples, 0.13%)</title><rect x="12.5502%" y="132" width="0.1340%" height="15" fill="rgb(213,25,53)"/><text x="12.8002%" y="142.50"></text></g><g><title>getConnectedVars (demystify/utils.py:125) (3 samples, 0.13%)</title><rect x="12.6842%" y="116" width="0.1340%" height="15" fill="rgb(252,105,26)"/><text x="12.9342%" y="126.50"></text></g><g><title>add (sortedcontainers/sortedset.py:359) (3 samples, 0.13%)</title><rect x="12.6842%" y="132" width="0.1340%" height="15" fill="rgb(220,39,43)"/><text x="12.9342%" y="142.50"></text></g><g><title>&lt;module&gt; (demystify/__main__.py:283) (194 samples, 8.66%)</title><rect x="4.2876%" y="100" width="8.6646%" height="15" fill="rgb(229,68,48)"/><text x="4.5376%" y="110.50">&lt;module&gt; (de..</text></g><g><title>__init__ (sortedcontainers/sortedset.py:168) (7 samples, 0.31%)</title><rect x="12.9969%" y="116" width="0.3126%" height="15" fill="rgb(252,8,32)"/><text x="13.2469%" y="126.50"></text></g><g><title>update (sortedcontainers/sortedset.py:687) (5 samples, 0.22%)</title><rect x="13.0862%" y="132" width="0.2233%" height="15" fill="rgb(223,20,43)"/><text x="13.3362%" y="142.50"></text></g><g><title>update (sortedcontainers/sortedlist.py:338) (5 samples, 0.22%)</title><rect x="13.0862%" y="148" width="0.2233%" height="15" fill="rgb(229,81,49)"/><text x="13.3362%" y="158.50"></text></g><g><title>__lt__ (demystify/base.py:32) (5 samples, 0.22%)</title><rect x="13.0862%" y="164" width="0.2233%" height="15" fill="rgb(236,28,36)"/><text x="13.3362%" y="174.50"></text></g><g><title>update (sortedcontainers/sortedset.py:682) (4 samples, 0.18%)</title><rect x="13.3542%" y="148" width="0.1787%" height="15" fill="rgb(249,185,26)"/><text x="13.6042%" y="158.50"></text></g><g><title>&lt;module&gt; (demystify/__main__.py:285) (16 samples, 0.71%)</title><rect x="12.9522%" y="100" width="0.7146%" height="15" fill="rgb(249,174,33)"/><text x="13.2022%" y="110.50"></text></g><g><title>union (sortedcontainers/sortedset.py:658) (8 samples, 0.36%)</title><rect x="13.3095%" y="116" width="0.3573%" height="15" fill="rgb(233,201,37)"/><text x="13.5595%" y="126.50"></text></g><g><title>__init__ (sortedcontainers/sortedset.py:168) (7 samples, 0.31%)</title><rect x="13.3542%" y="132" width="0.3126%" height="15" fill="rgb(221,78,26)"/><text x="13.6042%" y="142.50"></text></g><g><title>update (sortedcontainers/sortedset.py:687) (3 samples, 0.13%)</title><rect x="13.5328%" y="148" width="0.1340%" height="15" fill="rgb(250,127,30)"/><text x="13.7828%" y="158.50"></text></g><g><title>update (sortedcontainers/sortedlist.py:338) (3 samples, 0.13%)</title><rect x="13.5328%" y="164" width="0.1340%" height="15" fill="rgb(230,49,44)"/><text x="13.7828%" y="174.50"></text></g><g><title>__init__ (sortedcontainers/sortedset.py:168) (5 samples, 0.22%)</title><rect x="13.7115%" y="132" width="0.2233%" height="15" fill="rgb(229,67,23)"/><text x="13.9615%" y="142.50"></text></g><g><title>update (sortedcontainers/sortedset.py:687) (4 samples, 0.18%)</title><rect x="13.7561%" y="148" width="0.1787%" height="15" fill="rgb(249,83,47)"/><text x="14.0061%" y="158.50"></text></g><g><title>update (sortedcontainers/sortedlist.py:338) (4 samples, 0.18%)</title><rect x="13.7561%" y="164" width="0.1787%" height="15" fill="rgb(215,43,3)"/><text x="14.0061%" y="174.50"></text></g><g><title>__lt__ (demystify/base.py:32) (3 samples, 0.13%)</title><rect x="13.8008%" y="180" width="0.1340%" height="15" fill="rgb(238,154,13)"/><text x="14.0508%" y="190.50"></text></g><g><title>&lt;module&gt; (demystify/__main__.py:286) (7 samples, 0.31%)</title><rect x="13.6668%" y="100" width="0.3126%" height="15" fill="rgb(219,56,2)"/><text x="13.9168%" y="110.50"></text></g><g><title>__init__ (demystify/base.py:54) (6 samples, 0.27%)</title><rect x="13.7115%" y="116" width="0.2680%" height="15" fill="rgb(233,0,4)"/><text x="13.9615%" y="126.50"></text></g><g><title>add_clause (pysat/solvers.py:2645) (6 samples, 0.27%)</title><rect x="14.1581%" y="228" width="0.2680%" height="15" fill="rgb(235,30,7)"/><text x="14.4081%" y="238.50"></text></g><g><title>init_fromCNF (demystify/internal.py:117) (10 samples, 0.45%)</title><rect x="14.0241%" y="132" width="0.4466%" height="15" fill="rgb(250,79,13)"/><text x="14.2741%" y="142.50"></text></g><g><title>__init__ (pysatimpl.py:26) (10 samples, 0.45%)</title><rect x="14.0241%" y="148" width="0.4466%" height="15" fill="rgb(211,146,34)"/><text x="14.2741%" y="158.50"></text></g><g><title>__init__ (pysat/solvers.py:329) (10 samples, 0.45%)</title><rect x="14.0241%" y="164" width="0.4466%" height="15" fill="rgb(228,22,38)"/><text x="14.2741%" y="174.50"></text></g><g><title>new (pysat/solvers.py:374) (10 samples, 0.45%)</title><rect x="14.0241%" y="180" width="0.4466%" height="15" fill="rgb(235,168,5)"/><text x="14.2741%" y="190.50"></text></g><g><title>__init__ (pysat/solvers.py:2393) (10 samples, 0.45%)</title><rect x="14.0241%" y="196" width="0.4466%" height="15" fill="rgb(221,155,16)"/><text x="14.2741%" y="206.50"></text></g><g><title>new (pysat/solvers.py:2426) (9 samples, 0.40%)</title><rect x="14.0688%" y="212" width="0.4020%" height="15" fill="rgb(215,215,53)"/><text x="14.3188%" y="222.50"></text></g><g><title>__init__ (demystify/internal.py:67) (11 samples, 0.49%)</title><rect x="14.0241%" y="116" width="0.4913%" height="15" fill="rgb(223,4,10)"/><text x="14.2741%" y="126.50"></text></g><g><title>init_litmappings (demystify/internal.py:141) (4 samples, 0.18%)</title><rect x="14.5154%" y="132" width="0.1787%" height="15" fill="rgb(234,103,6)"/><text x="14.7654%" y="142.50"></text></g><g><title>&lt;dictcomp&gt; (demystify/internal.py:141) (4 samples, 0.18%)</title><rect x="14.5154%" y="148" width="0.1787%" height="15" fill="rgb(227,97,0)"/><text x="14.7654%" y="158.50"></text></g><g><title>init_litmappings (demystify/internal.py:145) (14 samples, 0.63%)</title><rect x="14.6941%" y="132" width="0.6253%" height="15" fill="rgb(234,150,53)"/><text x="14.9441%" y="142.50"></text></g><g><title>&lt;dictcomp&gt; (demystify/internal.py:145) (14 samples, 0.63%)</title><rect x="14.6941%" y="148" width="0.6253%" height="15" fill="rgb(228,201,54)"/><text x="14.9441%" y="158.50"></text></g><g><title>__init__ (sortedcontainers/sortedset.py:141) (14 samples, 0.63%)</title><rect x="14.6941%" y="164" width="0.6253%" height="15" fill="rgb(222,22,37)"/><text x="14.9441%" y="174.50"></text></g><g><title>__init__ (sortedcontainers/sortedlist.py:171) (14 samples, 0.63%)</title><rect x="14.6941%" y="180" width="0.6253%" height="15" fill="rgb(237,53,32)"/><text x="14.9441%" y="190.50"></text></g><g><title>init_litmappings (demystify/internal.py:152) (3 samples, 0.13%)</title><rect x="15.3640%" y="132" width="0.1340%" height="15" fill="rgb(233,25,53)"/><text x="15.6140%" y="142.50"></text></g><g><title>update (sortedcontainers/sortedset.py:682) (112 samples, 5.00%)</title><rect x="15.7660%" y="148" width="5.0022%" height="15" fill="rgb(210,40,34)"/><text x="16.0160%" y="158.50">update..</text></g><g><title>__hash__ (demystify/base.py:35) (75 samples, 3.35%)</title><rect x="17.4185%" y="164" width="3.3497%" height="15" fill="rgb(241,220,44)"/><text x="17.6685%" y="174.50">__h..</text></g><g><title>__hash__ (demystify/base.py:268) (25 samples, 1.12%)</title><rect x="19.6516%" y="180" width="1.1166%" height="15" fill="rgb(235,28,35)"/><text x="19.9016%" y="190.50"></text></g><g><title>update (sortedcontainers/sortedset.py:685) (45 samples, 2.01%)</title><rect x="20.7682%" y="148" width="2.0098%" height="15" fill="rgb(210,56,17)"/><text x="21.0182%" y="158.50">u..</text></g><g><title>__eq__ (demystify/base.py:29) (20 samples, 0.89%)</title><rect x="21.8848%" y="164" width="0.8933%" height="15" fill="rgb(224,130,29)"/><text x="22.1348%" y="174.50"></text></g><g><title>__lt__ (demystify/base.py:31) (13 samples, 0.58%)</title><rect x="38.0080%" y="180" width="0.5806%" height="15" fill="rgb(235,212,8)"/><text x="38.2580%" y="190.50"></text></g><g><title>__eq__ (demystify/base.py:261) (3 samples, 0.13%)</title><rect x="74.7655%" y="196" width="0.1340%" height="15" fill="rgb(223,33,50)"/><text x="75.0155%" y="206.50"></text></g><g><title>__eq__ (demystify/base.py:262) (121 samples, 5.40%)</title><rect x="74.8995%" y="196" width="5.4042%" height="15" fill="rgb(219,149,13)"/><text x="75.1495%" y="206.50">__eq__ ..</text></g><g><title>update (sortedcontainers/sortedlist.py:338) (1,405 samples, 62.75%)</title><rect x="22.8227%" y="164" width="62.7512%" height="15" fill="rgb(250,156,29)"/><text x="23.0727%" y="174.50">update (sortedcontainers/sortedlist.py:338)</text></g><g><title>__lt__ (demystify/base.py:32) (1,052 samples, 46.99%)</title><rect x="38.5887%" y="180" width="46.9853%" height="15" fill="rgb(216,193,19)"/><text x="38.8387%" y="190.50">__lt__ (demystify/base.py:32)</text></g><g><title>__lt__ (demystify/base.py:265) (117 samples, 5.23%)</title><rect x="80.3484%" y="196" width="5.2255%" height="15" fill="rgb(216,135,14)"/><text x="80.5984%" y="206.50">__lt__..</text></g><g><title>update (sortedcontainers/sortedset.py:687) (1,407 samples, 62.84%)</title><rect x="22.8227%" y="148" width="62.8406%" height="15" fill="rgb(241,47,5)"/><text x="23.0727%" y="158.50">update (sortedcontainers/sortedset.py:687)</text></g><g><title>add (sortedcontainers/sortedset.py:357) (13 samples, 0.58%)</title><rect x="85.7972%" y="164" width="0.5806%" height="15" fill="rgb(233,42,35)"/><text x="86.0472%" y="174.50"></text></g><g><title>__hash__ (demystify/base.py:35) (3 samples, 0.13%)</title><rect x="86.2439%" y="180" width="0.1340%" height="15" fill="rgb(231,13,6)"/><text x="86.4939%" y="190.50"></text></g><g><title>init_litmappings (demystify/internal.py:153) (1,591 samples, 71.06%)</title><rect x="15.4980%" y="132" width="71.0585%" height="15" fill="rgb(207,181,40)"/><text x="15.7480%" y="142.50">init_litmappings (demystify/internal.py:153)</text></g><g><title>update (sortedcontainers/sortedset.py:691) (20 samples, 0.89%)</title><rect x="85.6632%" y="148" width="0.8933%" height="15" fill="rgb(254,173,49)"/><text x="85.9132%" y="158.50"></text></g><g><title>add (sortedcontainers/sortedset.py:359) (4 samples, 0.18%)</title><rect x="86.3778%" y="164" width="0.1787%" height="15" fill="rgb(221,1,38)"/><text x="86.6278%" y="174.50"></text></g><g><title>__eq__ (demystify/base.py:29) (15 samples, 0.67%)</title><rect x="87.8517%" y="164" width="0.6699%" height="15" fill="rgb(206,124,46)"/><text x="88.1017%" y="174.50"></text></g><g><title>&lt;listcomp&gt; (demystify/internal.py:158) (73 samples, 3.26%)</title><rect x="86.6012%" y="148" width="3.2604%" height="15" fill="rgb(249,21,11)"/><text x="86.8512%" y="158.50">&lt;li..</text></g><g><title>__hash__ (demystify/base.py:35) (30 samples, 1.34%)</title><rect x="88.5217%" y="164" width="1.3399%" height="15" fill="rgb(222,201,40)"/><text x="88.7717%" y="174.50"></text></g><g><title>__hash__ (demystify/base.py:268) (11 samples, 0.49%)</title><rect x="89.3703%" y="180" width="0.4913%" height="15" fill="rgb(235,61,29)"/><text x="89.6203%" y="190.50"></text></g><g><title>init_litmappings (demystify/internal.py:158) (126 samples, 5.63%)</title><rect x="86.5565%" y="132" width="5.6275%" height="15" fill="rgb(219,207,3)"/><text x="86.8065%" y="142.50">init_li..</text></g><g><title>union (sortedcontainers/sortedset.py:658) (50 samples, 2.23%)</title><rect x="89.9509%" y="148" width="2.2331%" height="15" fill="rgb(222,56,46)"/><text x="90.2009%" y="158.50">u..</text></g><g><title>__init__ (sortedcontainers/sortedset.py:168) (48 samples, 2.14%)</title><rect x="90.0402%" y="164" width="2.1438%" height="15" fill="rgb(239,76,54)"/><text x="90.2902%" y="174.50">_..</text></g><g><title>update (sortedcontainers/sortedset.py:682) (47 samples, 2.10%)</title><rect x="90.0849%" y="180" width="2.0992%" height="15" fill="rgb(231,124,27)"/><text x="90.3349%" y="190.50">u..</text></g><g><title>__iter__ (sortedcontainers/sortedset.py:326) (24 samples, 1.07%)</title><rect x="91.1121%" y="196" width="1.0719%" height="15" fill="rgb(249,195,6)"/><text x="91.3621%" y="206.50"></text></g><g><title>__iter__ (sortedcontainers/sortedlist.py:929) (8 samples, 0.36%)</title><rect x="91.8267%" y="212" width="0.3573%" height="15" fill="rgb(237,174,47)"/><text x="92.0767%" y="222.50"></text></g><g><title>&lt;module&gt; (demystify/__main__.py:308) (1,755 samples, 78.38%)</title><rect x="14.0241%" y="100" width="78.3832%" height="15" fill="rgb(206,201,31)"/><text x="14.2741%" y="110.50">&lt;module&gt; (demystify/__main__.py:308)</text></g><g><title>__init__ (demystify/internal.py:69) (1,744 samples, 77.89%)</title><rect x="14.5154%" y="116" width="77.8919%" height="15" fill="rgb(231,57,52)"/><text x="14.7654%" y="126.50">__init__ (demystify/internal.py:69)</text></g><g><title>init_litmappings (demystify/internal.py:159) (5 samples, 0.22%)</title><rect x="92.1840%" y="132" width="0.2233%" height="15" fill="rgb(248,177,22)"/><text x="92.4340%" y="142.50"></text></g><g><title>union (sortedcontainers/sortedset.py:658) (4 samples, 0.18%)</title><rect x="92.2287%" y="148" width="0.1787%" height="15" fill="rgb(215,211,37)"/><text x="92.4787%" y="158.50"></text></g><g><title>solveSingle (pysatimpl.py:153) (9 samples, 0.40%)</title><rect x="92.4073%" y="148" width="0.4020%" height="15" fill="rgb(241,128,51)"/><text x="92.6573%" y="158.50"></text></g><g><title>solve (pysatimpl.py:106) (9 samples, 0.40%)</title><rect x="92.4073%" y="164" width="0.4020%" height="15" fill="rgb(227,165,31)"/><text x="92.6573%" y="174.50"></text></g><g><title>solve (pysat/solvers.py:459) (9 samples, 0.40%)</title><rect x="92.4073%" y="180" width="0.4020%" height="15" fill="rgb(228,167,24)"/><text x="92.6573%" y="190.50"></text></g><g><title>solve (pysat/solvers.py:2461) (9 samples, 0.40%)</title><rect x="92.4073%" y="196" width="0.4020%" height="15" fill="rgb(228,143,12)"/><text x="92.6573%" y="206.50"></text></g><g><title>solveSingle (demystify/internal.py:222) (39 samples, 1.74%)</title><rect x="92.4073%" y="116" width="1.7418%" height="15" fill="rgb(249,149,8)"/><text x="92.6573%" y="126.50"></text></g><g><title>_solveSingle (demystify/internal.py:183) (39 samples, 1.74%)</title><rect x="92.4073%" y="132" width="1.7418%" height="15" fill="rgb(243,35,44)"/><text x="92.6573%" y="142.50"></text></g><g><title>solveSingle (pysatimpl.py:155) (30 samples, 1.34%)</title><rect x="92.8093%" y="148" width="1.3399%" height="15" fill="rgb(246,89,9)"/><text x="93.0593%" y="158.50"></text></g><g><title>solve (pysatimpl.py:106) (30 samples, 1.34%)</title><rect x="92.8093%" y="164" width="1.3399%" height="15" fill="rgb(233,213,13)"/><text x="93.0593%" y="174.50"></text></g><g><title>solve (pysat/solvers.py:459) (30 samples, 1.34%)</title><rect x="92.8093%" y="180" width="1.3399%" height="15" fill="rgb(233,141,41)"/><text x="93.0593%" y="190.50"></text></g><g><title>solve (pysat/solvers.py:2461) (30 samples, 1.34%)</title><rect x="92.8093%" y="196" width="1.3399%" height="15" fill="rgb(239,167,4)"/><text x="93.0593%" y="206.50"></text></g><g><title>&lt;module&gt; (demystify/__main__.py:315) (40 samples, 1.79%)</title><rect x="92.4073%" y="100" width="1.7865%" height="15" fill="rgb(209,217,16)"/><text x="92.6573%" y="110.50">&lt;..</text></g><g><title>append (pysat/formula.py:1432) (5 samples, 0.22%)</title><rect x="94.3725%" y="148" width="0.2233%" height="15" fill="rgb(219,88,35)"/><text x="94.6225%" y="158.50"></text></g><g><title>&lt;listcomp&gt; (pysat/formula.py:1432) (3 samples, 0.13%)</title><rect x="94.4618%" y="164" width="0.1340%" height="15" fill="rgb(220,193,23)"/><text x="94.7118%" y="174.50"></text></g><g><title>__init__ (demystify/MUSForqes.py:216) (9 samples, 0.40%)</title><rect x="94.2385%" y="116" width="0.4020%" height="15" fill="rgb(230,90,52)"/><text x="94.4885%" y="126.50"></text></g><g><title>extend (pysat/formula.py:1481) (9 samples, 0.40%)</title><rect x="94.2385%" y="132" width="0.4020%" height="15" fill="rgb(252,106,19)"/><text x="94.4885%" y="142.50"></text></g><g><title>_deepcopy_list (copy.py:214) (3 samples, 0.13%)</title><rect x="94.6851%" y="196" width="0.1340%" height="15" fill="rgb(206,74,20)"/><text x="94.9351%" y="206.50"></text></g><g><title>_deepcopy_list (copy.py:212) (3 samples, 0.13%)</title><rect x="95.0871%" y="228" width="0.1340%" height="15" fill="rgb(230,138,44)"/><text x="95.3371%" y="238.50"></text></g><g><title>_deepcopy_list (copy.py:214) (20 samples, 0.89%)</title><rect x="95.2211%" y="228" width="0.8933%" height="15" fill="rgb(235,182,43)"/><text x="95.4711%" y="238.50"></text></g><g><title>deepcopy (copy.py:142) (4 samples, 0.18%)</title><rect x="96.4270%" y="244" width="0.1787%" height="15" fill="rgb(242,16,51)"/><text x="96.6770%" y="254.50"></text></g><g><title>deepcopy (copy.py:148) (6 samples, 0.27%)</title><rect x="96.6950%" y="244" width="0.2680%" height="15" fill="rgb(248,9,4)"/><text x="96.9450%" y="254.50"></text></g><g><title>deepcopy (copy.py:150) (44 samples, 1.97%)</title><rect x="95.0871%" y="212" width="1.9652%" height="15" fill="rgb(210,31,22)"/><text x="95.3371%" y="222.50">d..</text></g><g><title>_deepcopy_list (copy.py:215) (21 samples, 0.94%)</title><rect x="96.1143%" y="228" width="0.9379%" height="15" fill="rgb(239,54,39)"/><text x="96.3643%" y="238.50"></text></g><g><title>deepcopy (copy.py:184) (6 samples, 0.27%)</title><rect x="97.0523%" y="212" width="0.2680%" height="15" fill="rgb(230,99,41)"/><text x="97.3023%" y="222.50"></text></g><g><title>__init__ (demystify/optuxext.py:35) (60 samples, 2.68%)</title><rect x="94.6851%" y="132" width="2.6798%" height="15" fill="rgb(253,106,12)"/><text x="94.9351%" y="142.50">__..</text></g><g><title>copy (pysat/formula.py:2387) (60 samples, 2.68%)</title><rect x="94.6851%" y="148" width="2.6798%" height="15" fill="rgb(213,46,41)"/><text x="94.9351%" y="158.50">co..</text></g><g><title>copy (pysat/formula.py:1206) (60 samples, 2.68%)</title><rect x="94.6851%" y="164" width="2.6798%" height="15" fill="rgb(215,133,35)"/><text x="94.9351%" y="174.50">co..</text></g><g><title>deepcopy (copy.py:150) (60 samples, 2.68%)</title><rect x="94.6851%" y="180" width="2.6798%" height="15" fill="rgb(213,28,5)"/><text x="94.9351%" y="190.50">de..</text></g><g><title>_deepcopy_list (copy.py:215) (57 samples, 2.55%)</title><rect x="94.8191%" y="196" width="2.5458%" height="15" fill="rgb(215,77,49)"/><text x="95.0691%" y="206.50">_d..</text></g><g><title>&lt;module&gt; (demystify/__main__.py:334) (75 samples, 3.35%)</title><rect x="94.2385%" y="100" width="3.3497%" height="15" fill="rgb(248,100,22)"/><text x="94.4885%" y="110.50">&lt;mo..</text></g><g><title>__init__ (demystify/MUSForqes.py:223) (66 samples, 2.95%)</title><rect x="94.6405%" y="116" width="2.9477%" height="15" fill="rgb(208,67,9)"/><text x="94.8905%" y="126.50">__..</text></g><g><title>__init__ (demystify/optuxext.py:44) (5 samples, 0.22%)</title><rect x="97.3649%" y="132" width="0.2233%" height="15" fill="rgb(219,133,21)"/><text x="97.6149%" y="142.50"></text></g><g><title>__init__ (pysat/solvers.py:329) (5 samples, 0.22%)</title><rect x="97.3649%" y="148" width="0.2233%" height="15" fill="rgb(246,46,29)"/><text x="97.6149%" y="158.50"></text></g><g><title>new (pysat/solvers.py:374) (5 samples, 0.22%)</title><rect x="97.3649%" y="164" width="0.2233%" height="15" fill="rgb(246,185,52)"/><text x="97.6149%" y="174.50"></text></g><g><title>__init__ (pysat/solvers.py:2393) (5 samples, 0.22%)</title><rect x="97.3649%" y="180" width="0.2233%" height="15" fill="rgb(252,136,11)"/><text x="97.6149%" y="190.50"></text></g><g><title>new (pysat/solvers.py:2426) (5 samples, 0.22%)</title><rect x="97.3649%" y="196" width="0.2233%" height="15" fill="rgb(219,138,53)"/><text x="97.6149%" y="206.50"></text></g><g><title>add_clause (pysat/solvers.py:2645) (4 samples, 0.18%)</title><rect x="97.4096%" y="212" width="0.1787%" height="15" fill="rgb(211,51,23)"/><text x="97.6596%" y="222.50"></text></g><g><title>deepcopy (copy.py:142) (4 samples, 0.18%)</title><rect x="97.8115%" y="292" width="0.1787%" height="15" fill="rgb(247,221,28)"/><text x="98.0615%" y="302.50"></text></g><g><title>_deepcopy_list (copy.py:214) (4 samples, 0.18%)</title><rect x="98.3028%" y="308" width="0.1787%" height="15" fill="rgb(251,222,45)"/><text x="98.5528%" y="318.50"></text></g><g><title>deepcopy (copy.py:141) (4 samples, 0.18%)</title><rect x="98.8388%" y="324" width="0.1787%" height="15" fill="rgb(217,162,53)"/><text x="99.0888%" y="334.50"></text></g><g><title>deepcopy (copy.py:142) (3 samples, 0.13%)</title><rect x="99.0174%" y="324" width="0.1340%" height="15" fill="rgb(229,93,14)"/><text x="99.2674%" y="334.50"></text></g><g><title>deepcopy (copy.py:150) (6 samples, 0.27%)</title><rect x="99.2854%" y="324" width="0.2680%" height="15" fill="rgb(209,67,49)"/><text x="99.5354%" y="334.50"></text></g><g><title>deepcopy (copy.py:150) (36 samples, 1.61%)</title><rect x="97.9902%" y="292" width="1.6079%" height="15" fill="rgb(213,87,29)"/><text x="98.2402%" y="302.50"></text></g><g><title>_deepcopy_list (copy.py:215) (25 samples, 1.12%)</title><rect x="98.4815%" y="308" width="1.1166%" height="15" fill="rgb(205,151,52)"/><text x="98.7315%" y="318.50"></text></g><g><title>&lt;module&gt; (demystify/__main__.py:342) (50 samples, 2.23%)</title><rect x="97.5882%" y="100" width="2.2331%" height="15" fill="rgb(253,215,39)"/><text x="97.8382%" y="110.50">&lt;..</text></g><g><title>html_solve (demystify/solve.py:175) (50 samples, 2.23%)</title><rect x="97.5882%" y="116" width="2.2331%" height="15" fill="rgb(221,220,41)"/><text x="97.8382%" y="126.50">h..</text></g><g><title>smallestMUS (demystify/MUSForqes.py:244) (50 samples, 2.23%)</title><rect x="97.5882%" y="132" width="2.2331%" height="15" fill="rgb(218,133,21)"/><text x="97.8382%" y="142.50">s..</text></g><g><title>forqesMUS (demystify/MUSForqes.py:193) (50 samples, 2.23%)</title><rect x="97.5882%" y="148" width="2.2331%" height="15" fill="rgb(221,193,43)"/><text x="97.8382%" y="158.50">f..</text></g><g><title>&lt;listcomp&gt; (demystify/MUSForqes.py:193) (50 samples, 2.23%)</title><rect x="97.5882%" y="164" width="2.2331%" height="15" fill="rgb(240,128,52)"/><text x="97.8382%" y="174.50">&lt;..</text></g><g><title>_findSmallestMUS_func (demystify/MUSForqes.py:176) (50 samples, 2.23%)</title><rect x="97.5882%" y="180" width="2.2331%" height="15" fill="rgb(253,114,12)"/><text x="97.8382%" y="190.50">_..</text></g><g><title>MUS (demystify/MUSForqes.py:81) (50 samples, 2.23%)</title><rect x="97.5882%" y="196" width="2.2331%" height="15" fill="rgb(215,223,47)"/><text x="97.8382%" y="206.50">M..</text></g><g><title>initialise (demystify/optuxext.py:52) (49 samples, 2.19%)</title><rect x="97.6329%" y="212" width="2.1885%" height="15" fill="rgb(248,225,23)"/><text x="97.8829%" y="222.50">i..</text></g><g><title>copy (pysat/formula.py:2387) (49 samples, 2.19%)</title><rect x="97.6329%" y="228" width="2.1885%" height="15" fill="rgb(250,108,0)"/><text x="97.8829%" y="238.50">c..</text></g><g><title>copy (pysat/formula.py:1206) (49 samples, 2.19%)</title><rect x="97.6329%" y="244" width="2.1885%" height="15" fill="rgb(228,208,7)"/><text x="97.8829%" y="254.50">c..</text></g><g><title>deepcopy (copy.py:150) (49 samples, 2.19%)</title><rect x="97.6329%" y="260" width="2.1885%" height="15" fill="rgb(244,45,10)"/><text x="97.8829%" y="270.50">d..</text></g><g><title>_deepcopy_list (copy.py:215) (48 samples, 2.14%)</title><rect x="97.6775%" y="276" width="2.1438%" height="15" fill="rgb(207,125,25)"/><text x="97.9275%" y="286.50">_..</text></g><g><title>deepcopy (copy.py:185) (3 samples, 0.13%)</title><rect x="99.6874%" y="292" width="0.1340%" height="15" fill="rgb(210,195,18)"/><text x="99.9374%" y="302.50"></text></g><g><title>all (2,239 samples, 100%)</title><rect x="0.0000%" y="52" width="100.0000%" height="15" fill="rgb(249,80,12)"/><text x="0.2500%" y="62.50"></text></g><g><title>_run_module_as_main (runpy.py:193) (2,239 samples, 100.00%)</title><rect x="0.0000%" y="68" width="100.0000%" height="15" fill="rgb(221,65,9)"/><text x="0.2500%" y="78.50">_run_module_as_main (runpy.py:193)</text></g><g><title>_run_code (runpy.py:85) (2,239 samples, 100.00%)</title><rect x="0.0000%" y="84" width="100.0000%" height="15" fill="rgb(235,49,36)"/><text x="0.2500%" y="94.50">_run_code (runpy.py:85)</text></g></svg></svg>

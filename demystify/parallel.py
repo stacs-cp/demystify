@@ -8,6 +8,7 @@ from .utils import randomFromSeed
 
 # Needs to be global so we can call it from a child process
 _global_solver_ref = None
+_global_forqes_ref = None
 
 def getChildSolver():
     return _global_solver_ref
@@ -15,6 +16,13 @@ def getChildSolver():
 def setChildSolver(c):
     global _global_solver_ref
     _global_solver_ref = c
+
+def getChildForqes():
+    return _global_forqes_ref
+
+def setChildForqes(c):
+    global _global_forqes_ref
+    _global_forqes_ref = c
 
 # Magic from https://stackoverflow.com/questions/2130016/splitting-a-list-into-n-parts-of-approximately-equal-length
 def split(a, n):

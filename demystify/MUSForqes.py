@@ -10,7 +10,7 @@ import numpy
 from time import time
 from sortedcontainers import *
 
-from .optux import OptUx
+from .optuxext import OptUxExt
 from pysat.formula import WCNF
 
 from .utils import flatten, chainlist, shuffledcopy, randomFromSeed
@@ -19,51 +19,78 @@ from .base import EqVal, NeqVal
 
 from .config import CONFIG
 
-from .parallel import getPool, setChildSolver, getChildSolver
+from .parallel import getPool, setChildSolver, getChildSolver, setChildForqes, getChildForqes 
 
+muscount = 0
+
+def tinyMUS(solver, assume, distance):
+    smtassume = [solver._varlit2smtmap[l] for l in assume]
+    
+    if distance == 1:
+        cons = flatten([solver._varlit2con[l] for l in assume])
+    elif distance == 2:
+        cons = flatten([solver._varlit2con2[l] for l in assume])
+    else:
+        sys.exit(1)
+
+    core = solver.basicCore(smtassume + cons)
+    if core is None:
+        return None
+
+    corecpy = list(core)
+    badcount = 1
+    for lit in corecpy:
+        if lit in core and len(core) > 2:
+            to_test = list(core)
+            to_test.remove(lit)
+            newcore = solver.basicCore(to_test)
+            if newcore is not None:
+                core = newcore
+            else:
+                badcount += 1
+                if badcount > 5:
+                    return None
+
+    return [solver._conmap[x] for x in core if x in solver._conmap]
+
+def _parfunc_dotinymus(args):
+    (p, distance) = args
+    return (p, tinyMUS(getChildSolver(), [p.neg()], distance))
+
+
+def getTinyMUSes(solver, puzlits, musdict, *, distance, repeats):
+    setChildSolver(solver)
+    logging.info(
+        "Getting tiny MUSes, distance %s, for %s puzlits, %s repeats",
+        distance,
+        len(puzlits),
+        repeats,
+    )
+    with getPool(CONFIG["cores"]) as pool:
+        res = pool.map(
+            _parfunc_dotinymus, [(p, distance) for r in range(repeats) for p in puzlits]
+        )
+        for (p, mus) in res:
+            update_musdict(musdict, p, mus)
 
 # This calculates Minimum Unsatisfiable Sets using the FORQES algorithm
-def MUS(solver, assume, config):
+def MUS(solver, forqes, assume, config, maxSize=float('inf')):
     # The negation of a literal we know to be in the solution
-    smtassume = [solver._varlit2smtmap[a] for a in assume]
-
-    # The 'switches' for the constraints
-    cons = list(solver._conlits)
-
-    # Literals the solver has already 
-    knownlits = solver._solver._knownlits
-
-    # The puzzle rules in CNF
-    puzzleCNF = solver._cnf
-
-    weightedCNF = WCNF()
-    
-    # Hard clauses
-    for assumption in smtassume:
-        weightedCNF.append([assumption])
-    
-    for knownlit in knownlits:
-        weightedCNF.append([knownlit])
-    
-    weightedCNF.extend(puzzleCNF.clauses)
-
-    # Soft clauses
-    for constraint in cons:
-        weightedCNF.append([constraint], weight=1)
+    assume = [solver._varlit2smtmap[a] for a in assume]
+    known = [k for k in solver._solver._knownlits]
 
     # Maybe FORQES will just work
-    smallestMUS = []
-    with OptUx(weightedCNF) as forqes:
-        """
-        for mus in forqes.enumerate():
-            print('mus {0} has cost {1}'.format(mus, forqes.cost))
-        """
-        # forqes.compute returns the best must in reference to the soft
-        # clauses of the WCNF.
+    if forqes.initialise(assume, known, solver='g4', maxSize=maxSize):
         softClauseIndices = forqes.compute()
+    else:
+        return False
+
+    # If we didn't find a small enough MUS, return false
+    if softClauseIndices == False:
+        return False
 
     # Indices appear to be out by 1 for some reason?
-    bestMUS = flatten([weightedCNF.soft[i - 1] for i in softClauseIndices])
+    bestMUS = flatten([forqes.formula.soft[i - 1] for i in softClauseIndices])
 
     result = [solver._conmap[x] for x in bestMUS if x in solver._conmap]
     return result
@@ -142,22 +169,46 @@ def checkWhichLitsAMUSProves(solver, puzlits, mus):
         return []
 
 def _findSmallestMUS_func(tup):
-    (p, config) = tup
-    return (
-        p,
-        MUS(
+    (p, config, maxSize) = tup
+    mus = MUS(
             getChildSolver(),
+            getChildForqes(),
             [p.neg()],
             config=config,
-        ),
-    )
+            maxSize=maxSize
+        )
+    
+    if mus == False:
+        return False
+    
+    print("MUS returned: " + str(mus))
+    global muscount 
+    muscount += 1
+    print("MUS count: " + str(muscount))
+    return (p,mus)
 
-def forqesMUS(solver, puzlits, repeats, musdict, config):
+def forqesMUS(solver, forqes, puzlits, musdict, config):
     # Removed parallelisation for now.
     # For future return though, we need the solver to be accessible by the pool
     setChildSolver(solver)
+    setChildForqes(forqes)
+    print("forqesMUS called")
+    maxSize = 1
+    while True:
+        with getPool(CONFIG["cores"]) as pool:
 
-    res = [_findSmallestMUS_func((p,config)) for p in puzlits]              
+            res = pool.map(
+                    _findSmallestMUS_func,
+                    [(p,config, maxSize)
+                    for p in puzlits])
+            print("made it?")
+            res = list(filter(None, res))
+
+            if len(res) != 0:
+                break
+
+        maxSize *= 2
+                 
     for (p, mus) in res:
         update_musdict(musdict, p, mus)
     
@@ -169,9 +220,24 @@ class ForqesMUSFinder:
         self._solver = solver
         self._bestcache = {}
 
+        # The 'switches' for the constraints
+        cons = list(solver._conlits)
+
+        # The puzzle rules in CNF
+        puzzleCNF = solver._cnf
+        weightedCNF = WCNF()
+        weightedCNF.extend(puzzleCNF.clauses)
+
+        # Soft clauses
+        for constraint in cons:
+            weightedCNF.append([constraint], weight=1)
+        
+        # FORQES optimal MUS extractor
+        self._forqes = OptUxExt(weightedCNF, solver='g4', verbose=4)
+
     def smallestMUS(self, puzlits):
         musdict = {}
 
-        forqesMUS(self._solver, puzlits, CONFIG["repeats"], musdict, CONFIG)
+        forqesMUS(self._solver, self._forqes, puzlits, musdict, CONFIG)
 
         return musdict

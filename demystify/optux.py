@@ -157,7 +157,6 @@ class OptUx(object):
         """
             Constructor.
         """
-
         # verbosity level
         self.verbose = verbose
 
@@ -354,7 +353,7 @@ class OptUx(object):
 
         return to_hit, units
 
-    def compute(self):
+    def compute(self, maxSize=float("inf")):
         """
             This method implements the main look of the implicit hitting set
             paradigm of Forqes to compute a best-cost MUS. The result MUS is
@@ -366,10 +365,12 @@ class OptUx(object):
         while True:
             # computing a new optimal hitting set
             hs = self.hitman.get()
-
+            print("hitting set: " + str(hs))
             if hs is None:
                 # no more hitting sets exist
                 break
+            if len(hs) > maxSize:
+                return False
 
             # setting all the selector polarities to true
             self.oracle.set_phases(self.sels)

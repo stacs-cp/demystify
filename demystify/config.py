@@ -44,7 +44,7 @@ CONFIG = {
     # instead look for cascadeMult*k, because it is not too much
     # more work and we might want it later
     "cascadeMult": 5,
-    "checkSmall1": False,
+    "checkSmall1": True,
     "checkSmall2": False,
     "checkCloseFirst": False,
 

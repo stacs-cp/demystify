@@ -9,6 +9,7 @@ import os
 import re
 import logging
 import subprocess
+import traceback    
 
 from pysat.formula import CNF
 from sortedcontainers import *
@@ -274,7 +275,8 @@ else:
             a = tuple(k)
             try:
                 constraintname = eval('f"' + cons[v] + '"', locals())
-            except:
+            except Exception as e:
+                traceback.print_exc()
                 print("Could not evaluate "+cons[v])
                 constraintname = cons[v]
             logging.debug(constraintname)

@@ -61,7 +61,7 @@ def tinyMUS(solver, assume, distance):
     return [solver._conmap[x] for x in core if x in solver._conmap]
 
 
-count = 0
+count = 0 # What's this?
 
 def MUS(r, solver, assume, minsize, *, config, initial_cons=None, just_check=False):
     #print("!!",assume)
