@@ -1,9 +1,17 @@
 from .optux import OptUx
+
 from pysat.examples.hitman import Hitman
 from pysat.examples.rc2 import RC2
-from pysat.formula import CNFPlus, WCNFPlus
+from pysat.formula import WCNFPlus
 from pysat.solvers import Solver
 
+import multiprocessing as mp
+
+"""
+    Reimplementing some of the methods of the OptUx optimal MUS extractor to 
+    adapt it for repeated uses. Further optimisation of this should be possible
+    (TODO).
+"""
 class OptUxExt(OptUx):
     def __init__(self, formula, verbose=0, solver='g3', adapt=False, exhaust=False,
         minz=False, trim=False, maxSize=float('inf')):
@@ -12,7 +20,7 @@ class OptUxExt(OptUx):
         """
         # verbosity level
         self.verbose = verbose
-
+        
         # constructing a local copy of the formula
         self.formula = WCNFPlus()
         self.formula.hard = formula.hard[:]
@@ -42,34 +50,49 @@ class OptUxExt(OptUx):
 
         # SAT oracle bootstrapped with the hard clauses
         self.oracle = Solver(name=solver, bootstrap_with=unweighted.hard)
+
+        # Also create the RC2 solver at this point.
         self.maxSATOracle = RC2(unweighted, solver=solver, adapt=adapt, 
-            exhaust=exhaust, minz=minz, trim=trim, verbose=0)
+                exhaust=exhaust, minz=minz, trim=trim, verbose=0)
 
-    def initialise(self, assume, known, solver='g3', adapt=False, exhaust=False,
-        minz=False, trim=False, maxSize=float('inf')):
-
+    def initialise(self, assume, known, maxSize=float('inf')):
+        """
+            Set up for the FORQES algorithm: some of which was original done in
+            __init__ but now needs to be re-done repeatedly.
+        """
         unweighted = self.formula.copy()
-        self.known = known
+        
+        self.known = known 
         self.assume = assume
         self.maxSize = maxSize
 
         for assumption in assume:
             unweighted.append([assumption])
-            self.maxSATOracle.add_clause([assumption])
     
         for knownlit in known:
             unweighted.append([knownlit])
-            self.maxSATOracle.add_clause([knownlit])
         
         unweighted.wght = [1 for w in unweighted.wght]
         
-        # enumerating disjoint MCSes (including unit-size MCSes)
-        res = self._disjoint(unweighted, solver, adapt, exhaust,
-            minz, trim)
-        if res == False:
-            return False
-        to_hit, self.units = res
+        # Pipe objects to get return values from forked processes.
+        parent_pipe, child_pipe = mp.Pipe()
+
+        # Fork a process for enumerating disjoint MCSes 
+        # (including unit-size MCSes), so that we don't need to recreate the
+        # RC2 solver.
+        disjoint = \
+            mp.Process(target=self._disjoint, args=(assume, known, child_pipe))
         
+        disjoint.start()
+        res = parent_pipe.recv()
+        disjoint.join()
+
+        to_hit = res[0]
+        self.units = res[1]
+        success = res[2]
+
+        if success == 1:
+            return False
         
         if self.verbose > 2:
             print('c mcses: {0} unit, {1} disj'.format(len(self.units),
@@ -78,11 +101,17 @@ class OptUxExt(OptUx):
         self.hitman.init(to_hit, weights=self.weights)
         return True
 
-    def _disjoint(self, formula, solver, adapt, exhaust, minz, trim):
+    def _disjoint(self, assume, known, pipe):
         # these will store disjoint MCSes
         # (unit-size MCSes are stored separately)
         to_hit, units = [], []
-        
+
+        for assumption in assume:
+            self.maxSATOracle.add_clause([assumption])
+    
+        for knownlit in known:
+            self.maxSATOracle.add_clause([knownlit])
+
         # iterating over MaxSAT solutions
         while True:
             # a new MaxSAT model
@@ -91,23 +120,25 @@ class OptUxExt(OptUx):
             if model is None:
                 # no model => no more disjoint MCSes
                 break
-                
+
             # extracting the MCS corresponding to the model
             falsified = list(filter(lambda l: model[abs(l) - 1] == -l, self.sels))
-                
+
             # unit size or not?
             if len(falsified) > 1:
                 to_hit.append(falsified)
-            else:                    
+            else:
                 units.append(falsified[0])
-                
+
             # blocking the MCS;
             # next time, all these clauses will be satisfied
             for l in falsified:
                 self.maxSATOracle.add_clause([l])
-                
+
             if len(to_hit) > self.maxSize:
-                return False
+                pipe.send(([], [], 1))
+                pipe.close()
+                return 
 
             # reporting the MCS
             if self.verbose > 3:
@@ -115,12 +146,19 @@ class OptUxExt(OptUx):
 
         # RC2 will be destroyed next; let's keep the oracle time
         self.disj_time = self.maxSATOracle.oracle_time()
-        self.maxSATOracle.filter_assumps()
 
-        return to_hit, units
+        pipe.send((to_hit, units, 0))
+        pipe.close()
+        return
 
     def compute(self):
-        
+        """
+            This method implements the main look of the implicit hitting set
+            paradigm of Forqes to compute a best-cost MUS. The result MUS is
+            returned as a list of integers, each representing a soft clause
+            index. This extended version takes additional assumptions for the
+            purposes of Demystify.
+        """
         while True:
             # computing a new optimal hitting set
             hs = self.hitman.get()
@@ -135,7 +173,8 @@ class OptUxExt(OptUx):
             self.oracle.set_phases(self.sels)
 
             # testing satisfiability of the {self.units + hs} subset
-            res = self.oracle.solve(assumptions=hs + self.assume + self.known + self.units)
+            res = self.oracle.solve(assumptions=
+                    hs + self.assume + self.known + self.units)
 
             if res == False:
                 # the candidate subset of clauses is unsatisfiable,
