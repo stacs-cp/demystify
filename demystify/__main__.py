@@ -30,6 +30,7 @@ import demystify.jsonsolve
 
 
 parser = argparse.ArgumentParser(description = "Demystify")
+
 parser.add_argument("--puzzle", type=str, help="File containing JSON description of puzzle")
 
 parser.add_argument("--eprimeparam", type=str, help="savilerow param file")
