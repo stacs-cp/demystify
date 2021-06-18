@@ -54,20 +54,17 @@ Where the English description describes the constraint. This can include Python 
 
 
 
-
-
 # Formalisms
-`Size` -> Final board size/dimensions
-`Clues`/`initial`/`values` -> Initial board with given clues
-`Grid` ->
-`Count` -> count on how many 'object' (tents/therms) there are on the whole board
-`Step` -> annotation help with objects
-`Therms`/`Trees` -> grid of thermometers
-`Rows` / `Cols` -> 
-`Board` -> matrix for the whole puzzle 
-`Cage` -> an identified shape of cells which does not necessarily havbe to be in a rectangular shape
-`TopBorder`/`BottomBorder`/`LeftBorder`/`RightBorder` -> numbers that are placed around the board in line with the rows or columns (rowsum/colsum)
-
+* `Size` -> Final board size/dimensions
+* `Clues`/`initial`/`values` -> Initial board with given clues
+* `Grid` ->
+* `Count` -> count on how many 'object' (tents/therms) there are on the whole board
+* `Step` -> annotation help with objects
+* `Therms`/`Trees` -> grid of thermometers
+* `Rows` / `Cols` -> 
+* `Board` -> matrix for the whole puzzle 
+* `Cage` -> an identified shape of cells which does not necessarily havbe to be in a rectangular shape
+* `TopBorder`/`BottomBorder`/`LeftBorder`/`RightBorder` -> numbers that are placed around the board in line with the rows or columns (rowsum/colsum)
 
 
 ## Implemented visualisations
