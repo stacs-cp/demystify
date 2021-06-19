@@ -337,7 +337,6 @@ def _parfunc_docheckmus(args):
         ),
     )
 
-
 # Check an existing dictionary. Reject any invalid MUS and squash any good MUS
 def checkMUS(solver, puzlits, oldmus, musdict):
     setChildSolver(solver)

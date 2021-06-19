@@ -344,7 +344,6 @@ else:
 
 print("Minitrace: ", [s for (s, _) in trace])
 
-
 logging.info("Finished")
 logging.info("Full Trace %s", trace)
 

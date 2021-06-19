@@ -17,7 +17,6 @@ from .config import CONFIG
 from .solvers.z3impl import Z3Solver
 from .solvers.pysatimpl import SATSolver
 
-
 class Solver:
     def __init__(self, puzzle,*,cnf=None,litmap=None,conmap=None):
         assert puzzle is not None

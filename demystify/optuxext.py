@@ -15,6 +15,7 @@ import multiprocessing as mp
 class OptUxExt(OptUx):
     def __init__(self, formula, verbose=0, solver='g3', adapt=False, exhaust=False,
         minz=False, trim=False, maxSize=float('inf')):
+        print("IS THIS HAPPENING?")
         """
             Constructor.
         """
@@ -52,7 +53,7 @@ class OptUxExt(OptUx):
         self.oracle = Solver(name=solver, bootstrap_with=unweighted.hard)
 
         # Also create the RC2 solver at this point.
-        self.maxSATOracle = RC2(unweighted, solver=solver, adapt=adapt, 
+        self.maxSATOracle = RC2(unweighted, incr=True, solver=solver, adapt=adapt, 
                 exhaust=exhaust, minz=minz, trim=trim, verbose=0)
 
     def initialise(self, assume, known, maxSize=float('inf')):
