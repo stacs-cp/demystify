@@ -15,7 +15,6 @@ import multiprocessing as mp
 class OptUxExt(OptUx):
     def __init__(self, formula, verbose=0, solver='g3', adapt=False, exhaust=False,
         minz=False, trim=False, maxSize=float('inf')):
-        print("IS THIS HAPPENING?")
         """
             Constructor.
         """

@@ -4,7 +4,7 @@ import math
 from .parse import parse_json, parse_essence
 from .MUS import checkWhichLitsAMUSProves, CascadeMUSFinder
 from .MUSForqes import ForqesMUSFinder
-from .mus import MusDict
+from .musdict import MusDict
 from .utils import flatten, intsqrt, lowsqrt
 from .base import EqVal, NeqVal
 
@@ -17,13 +17,23 @@ class ExplainError(Exception):
     pass
 
 class Explainer(object):
-    def __init__(self, mus_finder, merge=1, skip=-1):
+    def __init__(self, mus_finder=None, merge=1, skip=-1, debug=False):
         self.steps_explained = 0
         self.mus_finder_name = mus_finder
         self.merge = merge
         self.skip = skip
+        
+        if debug:
+            logging.basicConfig(
+                level=logging.DEBUG, 
+                format= \
+                    "%(levelname)s:%(pathname)s:%(lineno)d:%(name)s:%(message)s"
+            )
 
-        return
+        self.params = None
+        self.puzzle = None
+        self.solver = None
+        self.solution = None
 
     def init_from_json(self, puzzle_json):
         self.puzzle, self.solver = parse_json(puzzle_json)
@@ -47,7 +57,7 @@ class Explainer(object):
         steps = []
         if num_steps is not None:
             for i in range (1, num_steps + 1):
-                if len(self.unexplained <= 0):
+                if len(self.unexplained) <= 0:
                     break
                 if i == 1:
                     steps.append(self.explain_step(lit_choice=lit_choice, 
@@ -109,7 +119,7 @@ class Explainer(object):
                                 lambda lit: lit == str(lit_choice))
             
             best_lit, best_mus, best_proven_lits, proven_dict \
-                = self._choose_mus(lit_choices)
+                = self._choose_mus(lit_choices, mus_dict)
             
             if mus_choice is not None:
                 best_mus = tuple(SortedSet(mus_dict.get(mus_choice)))[0]

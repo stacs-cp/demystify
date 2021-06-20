@@ -13,6 +13,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 import demystify
 import demystify.base
 import demystify.internal
+import demystify.buildpuz
 
 class ParseError(Exception):
     pass

@@ -341,7 +341,7 @@ if args.json is not None:
     trace = demystify.jsonsolve.json_solve(os.path.basename(args.eprime), params, args.json[0], sys.stdout, solver, puzlits, MUS, skip=args.skip, merge=args.merge, steps=args.steps, force=args.force)
 else:
     trace = demystify.solve.html_solve(sys.stdout, solver, puzlits, MUS, skip=args.skip, merge=args.merge, steps=args.steps, force=args.force)
-
+    
 print("Minitrace: ", [s for (s, _) in trace])
 
 logging.info("Finished")

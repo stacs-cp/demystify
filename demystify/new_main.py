@@ -5,7 +5,8 @@ import argparse
 import os
 import logging
 import json
-  
+import time
+
 # Let me import demystify
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
@@ -79,7 +80,6 @@ if args.debuginfo:
 demystify.config.LoadConfigFromDict(
     {"repeats" : args.repeats, "cores": args.cores})
 
-
 if args.forqes:    
     mus_finder = "forqes"
 else:
@@ -88,14 +88,21 @@ else:
 explainer = demystify.explain.Explainer(mus_finder)
 
 if args.puzzle is not None:
+    name = os.path.basename(args.puzzle)
     explainer.init_from_json(args.puzzle)
 else:
+    name = os.path.basename(args.eprime)
     explainer.init_from_essence(args.eprime, args.eprimeparam)
 
-f = open("./" + args.json[0] + ".json", "w")
+if args.json is not None:
+    output_path = args.json[0]
+else:
+    output_path = "./output" + str(int(time.time())) + ".json"
+
+f = open(output_path, "w")
 
 output = {
-        "name": os.path.basename(args.eprime), 
+        "name": name, 
         "params": explainer.params, 
         "steps": explainer.explain_steps()}
 
