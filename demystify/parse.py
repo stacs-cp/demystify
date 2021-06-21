@@ -229,9 +229,9 @@ def parse_essence(eprime, eprimeparam):
 
     for v in SortedSet(varmap.keys()).intersection(SortedSet(cons.keys())):
         # Only want matching '1'
-        for k in SortedSet(varmap[v].keys()):
+        for k in set(varmap[v].keys()):
             # This should be a boolean -- if this fails, check with Chris
-            assert SortedSet(varmap[v][k].keys()).issubset(SortedSet([0, 1]))
+            assert set(varmap[v][k].keys()).issubset(SortedSet([0, 1]))
 
             # assert 0 in varmap[v][k].keys()
             # -- Removed in place of the error below
