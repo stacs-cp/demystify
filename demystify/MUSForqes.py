@@ -37,7 +37,7 @@ class ForqesMUSFinder:
             weightedCNF.append([constraint], weight=1)
         
         # FORQES optimal MUS extractor (extended)
-        self._forqes = OptUxExt(weightedCNF, solver='g4', verbose=4, adapt=True, 
+        self._forqes = OptUxExt(weightedCNF, solver='g4', verbose=0, adapt=True, 
                 exhaust=True, minz=True)
 
 
