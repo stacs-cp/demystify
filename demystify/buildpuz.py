@@ -105,7 +105,9 @@ def alldiffRowsCols(varmat):
 
     for col in range(y):
         constraints += buildCage(
-            "in column {}".format(col + 1), [varmat[i][col] for i in range(x)], dom
+            "in column {}".format(col + 1),
+            [varmat[i][col] for i in range(x)],
+            dom,
         )
 
     for row in range(x):
@@ -114,6 +116,7 @@ def alldiffRowsCols(varmat):
         )
 
     return constraints
+
 
 def diagonalConstraints(varmat):
     (x, y) = varmat.dim()
@@ -131,6 +134,7 @@ def diagonalConstraints(varmat):
     )
 
     return constraints
+
 
 # This requires a square matrix, of length n*n for some n
 def boxConstraints(varmat):
@@ -228,16 +232,21 @@ def adjDiffByMat(varmat, diff):
                     )
     return constraints
 
+
 def diffByDist(varmat, dist, difference):
     constraints = []
     (x, y) = varmat.dim()
 
     for i1 in range(x):
         for j1 in range(y):
-            for diffi in range(-dist, dist+1):
-                for diffj in range(-dist, dist+1):
+            for diffi in range(-dist, dist + 1):
+                for diffj in range(-dist, dist + 1):
                     other = (i1 + diffi, j1 + diffj)
-                    if (abs(diffi) + abs(diffj) == dist) and 0 <= other[0] < x and 0 <= other[1] < y:
+                    if (
+                        (abs(diffi) + abs(diffj) == dist)
+                        and 0 <= other[0] < x
+                        and 0 <= other[1] < y
+                    ):
                         constraints += buildDiffBy(
                             "dist {}".format(dist),
                             varmat[i1][j1],
@@ -258,11 +267,13 @@ def thermometer(varmat, l):
         )
     return constraints
 
+
 def thermometers(varmat, l):
     constraints = []
     for t in l:
         constraints += thermometer(varmat, t)
     return constraints
+
 
 def basicSudoku(varmat):
     constraints = []
@@ -281,6 +292,7 @@ def basicXSudoku(varmat):
     constraints += diagonalConstraints(varmat)
 
     return constraints
+
 
 def basicMiracle(varmat):
     constraints = []
@@ -306,13 +318,14 @@ def basicMiracle2(varmat, thermometers):
 
     return constraints
 
+
 def buildJigsaw(varmat, jigsaw):
     constraints = []
     constraints += alldiffRowsCols(varmat)
-    
+
     size = 9
 
-    jigsawrows = [jigsaw[i:i+size] for i in range(0,size*size,size)]
+    jigsawrows = [jigsaw[i : i + size] for i in range(0, size * size, size)]
 
     for val in SortedSet(jigsaw):
         cells = []
@@ -325,5 +338,5 @@ def buildJigsaw(varmat, jigsaw):
             cells,
             varmat.domain(),
         )
-    
+
     return constraints

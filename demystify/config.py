@@ -22,16 +22,13 @@ CONFIG = {
     # Limit search to searchLimitedBudget conflicts
     "solveLimited": True,
     "solveLimitedBudget": 100000,
-    
     # Dump out SAT instances, for other MUS solvers
     # WHen using this, set cores=0 and repeats=1
     "dumpSAT": False,
-
     # TO CHECK: Does this help?
     "setPhases": False,
     # Cache MUSes between steps
     "useCache": True,
-
     # Which solver to use (g4 = glucose), z3 = Use Z3
     "solver": "g4",
     # Use 'incremental' mode in solver
@@ -39,7 +36,6 @@ CONFIG = {
     "solverIncremental": False,
     # Exit when MUS is too big
     "earlyExit": True,
-
     # When "officially" looking for a mus of size k,
     # instead look for cascadeMult*k, because it is not too much
     # more work and we might want it later
@@ -47,7 +43,6 @@ CONFIG = {
     "checkSmall1": True,
     "checkSmall2": False,
     "checkCloseFirst": False,
-
     # Smallest size of MUS to look for
     "baseSizeMUS": 2,
     # Make use of unsat cores when shrinking MUSes
@@ -58,23 +53,16 @@ CONFIG = {
     "resetSolverFull": False,
     # Use same pool of solvers throughout
     "reusePool": False,
-
     # Change glucose's random seed at each solver reboot (requires chris' patched python-sat)
     "changeSolverSeed": False,
-
     # Alternative, safer, MUS-finding algorithm
     "gallopingMUSes": False,
-
     # Start by chopping big bits off MUSes, to encourage variety
     "prechopMUSes12": False,
-
     # Start Gallops with big steps
     "highGallop": False,
-
     "tryManyChopMUS": True,
-
     "minPrecheckMUS": False,
-
     "minPrecheckStepsMUS": False,
 }
 

@@ -6,12 +6,18 @@ import math
 from sortedcontainers import *
 from pysat.formula import WCNF
 
-from .MUS import getTinyMUSes, update_musdict, musdict_minimum
+from .mus import getTinyMUSes
 from .optuxext import OptUxExt
 from .utils import flatten
 from .config import CONFIG
-from .parallel import \
-    getPool, setChildSolver, getChildSolver, setChildForqes, getChildForqes 
+from .musdict import MusDict
+from .parallel import (
+    getPool,
+    setChildSolver,
+    getChildSolver,
+    setChildForqes,
+    getChildForqes,
+)
 
 """
     MUSForqes instruments the FORQES algorithm (see optux.py and optuxext.py) to
@@ -27,7 +33,7 @@ class ForqesMUSFinder:
 
         # The puzzle rules in CNF
         puzzleCNF = solver._cnf
-        
+
         # FORQES requires a weighted CNF formula
         weightedCNF = WCNF()
         weightedCNF.extend(puzzleCNF.clauses)
@@ -35,20 +41,25 @@ class ForqesMUSFinder:
         # Add the constraints as 'soft' clauses.
         for constraint in cons:
             weightedCNF.append([constraint], weight=1)
-        
-        # FORQES optimal MUS extractor (extended)
-        self._forqes = OptUxExt(weightedCNF, solver='g4', verbose=0, adapt=True, 
-                exhaust=True, minz=True)
 
+        # FORQES optimal MUS extractor (extended)
+        self._forqes = OptUxExt(
+            weightedCNF,
+            solver="g4",
+            verbose=0,
+            adapt=True,
+            exhaust=True,
+            minz=True,
+        )
 
     def smallestMUS(self, puzlits):
         """
-            This method should return the smallest MUSes among problems of the 
-            form P ∧ (l != a), where P is the problem constraints + already 
-            known literals, l is some literal and a is some value in the known
-            solution.
+        This method should return the smallest MUSes among problems of the
+        form P ∧ (l != a), where P is the problem constraints + already
+        known literals, l is some literal and a is some value in the known
+        solution.
         """
-        musdict = {}
+        musdict = MusDict({})
 
         # Heuristic check for MUSes of size 1.
         if CONFIG["checkSmall1"]:
@@ -62,7 +73,7 @@ class ForqesMUSFinder:
             )
 
         # Early exit for trivial case
-        if musdict_minimum(musdict) == 1:
+        if musdict.minimum() == 1:
             logging.info("Early exit from checkSmall1")
             return musdict
 
@@ -71,11 +82,12 @@ class ForqesMUSFinder:
 
         return musdict
 
+
 def forqesMUS(solver, forqes, puzlits, musdict, config):
     """
-        This function searches increasing MUSes sizes, using FORQES to check 
-        for each problem involving a negated solution literal, whether there is
-        a smallest MUS less than that size. It has optional parallesiation.
+    This function searches increasing MUSes sizes, using FORQES to check
+    for each problem involving a negated solution literal, whether there is
+    a smallest MUS less than that size. It has optional parallesiation.
     """
 
     # Make the solver and forqes objects accessible by child processes.
@@ -86,46 +98,46 @@ def forqesMUS(solver, forqes, puzlits, musdict, config):
     while True:
         with getPool(CONFIG["cores"]) as pool:
             res = pool.map(
-                    _findSmallestMUS_func,
-                    [(p,config, maxSize)
-                    for p in puzlits])
+                _findSmallestMUS_func, [(p, config, maxSize) for p in puzlits]
+            )
             res = list(filter(None, res))
 
             # If there are any MUSes less than this size, we are done.
             if len(res) != 0:
                 break
-        
+
         # Otherwise search for MUSes twice as large.
         maxSize *= 2
-                 
+
     for (p, mus) in res:
-        update_musdict(musdict, p, mus)
+        musdict.update(p, mus)
+
 
 def _findSmallestMUS_func(tup):
     """
-        Function to allow parallelisation.
+    Function to allow parallelisation.
     """
     (p, config, maxSize) = tup
     mus = MUS(
-            getChildSolver(),
-            getChildForqes(),
-            [p.neg()],
-            config=config,
-            maxSize=maxSize
-        )
-    
+        getChildSolver(),
+        getChildForqes(),
+        [p.neg()],
+        config=config,
+        maxSize=maxSize,
+    )
+
     if mus == False:
         return False
 
-    return (p,mus)
+    return (p, mus)
 
 
-def MUS(solver, forqes, assume, config, maxSize=float('inf')):
+def MUS(solver, forqes, assume, config, maxSize=float("inf")):
     """
-        Calculate the best MUS for a given assumption using FORQES, return false
-        if the best MUS is larger than the given maximum size.
+    Calculate the best MUS for a given assumption using FORQES, return false
+    if the best MUS is larger than the given maximum size.
     """
-    
+
     # The negation of a literal we know to be in the solution
     assume = [solver._varlit2smtmap[a] for a in assume]
 
@@ -148,11 +160,3 @@ def MUS(solver, forqes, assume, config, maxSize=float('inf')):
     result = [solver._conmap[x] for x in bestMUS if x in solver._conmap]
 
     return result
-
-
-
-
-
-
-
-

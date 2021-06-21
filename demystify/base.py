@@ -26,10 +26,18 @@ class Lit:
             return "{} is not {}".format(self.var, self.val)
 
     def __eq__(self, other) -> bool:
-        return (self.var, self.val, self.equal) == (other.var, other.val, other.equal)
+        return (self.var, self.val, self.equal) == (
+            other.var,
+            other.val,
+            other.equal,
+        )
 
     def __lt__(self, other) -> bool:
-        return (self.var, self.val, self.equal) < (other.var, other.val, other.equal)
+        return (self.var, self.val, self.equal) < (
+            other.var,
+            other.val,
+            other.equal,
+        )
 
     def __hash__(self):
         return (self.var, self.val, self.equal).__hash__()
@@ -44,6 +52,7 @@ def EqVal(var, val: int) -> Lit:
 
 def NeqVal(var, val: int) -> Lit:
     return Lit(var, val, False)
+
 
 class DummyClause:
     def __init__(self, name: str, clause: Sequence[str], clausenames=None):
@@ -128,7 +137,9 @@ class Clause:
 
 
 class ClauseList:
-    def __init__(self, name, clauses, usedlits=None, namelits=None, fromClauses=False):
+    def __init__(
+        self, name, clauses, usedlits=None, namelits=None, fromClauses=False
+    ):
         self._name = name
         if fromClauses:
             self._clauses = tuple(
@@ -151,7 +162,9 @@ class ClauseList:
             if self._usedlits[i].neg() not in knownvars:
                 remainingchoices.append(self._namelits[i])
 
-        return self._name + " (Choices are: " + ", ".join(remainingchoices) + ")"
+        return (
+            self._name + " (Choices are: " + ", ".join(remainingchoices) + ")"
+        )
 
     def clauseset(self):
         return self._clauses
@@ -250,7 +263,9 @@ class Var:
                 return EqVal(self, assignment)
             else:
                 assert SortedSet(assignment).issubset(SortedSet(self._dom))
-                lits = [NeqVal(self, d) for d in self._dom if not (d in assignment)]
+                lits = [
+                    NeqVal(self, d) for d in self._dom if not (d in assignment)
+                ]
                 if len(assignment) == 1:
                     lits.append([EqVal(self, assignment[0])])
                 return lits
@@ -275,11 +290,14 @@ class VarMatrix:
         self._domain = tuple(dom)
         if varmat is None:
             self._vars = [
-                [Var(varname((i, j)), dom, (i,j)) for j in range(dim[1])] for i in range(dim[0])
+                [Var(varname((i, j)), dom, (i, j)) for j in range(dim[1])]
+                for i in range(dim[0])
             ]
         else:
             self._vars = varmat
-        self._constraints = flatten([cellHasValue(v, dom) for v in flatten(self._vars)])
+        self._constraints = flatten(
+            [cellHasValue(v, dom) for v in flatten(self._vars)]
+        )
 
     def varmat(self):
         return self._vars
@@ -308,14 +326,19 @@ class VarMatrix:
 
     def modelToAssignment(self, model, partial=False):
         return [
-            [var.modelToAssignment(model, partial) for var in row] for row in self._vars
+            [var.modelToAssignment(model, partial) for var in row]
+            for row in self._vars
         ]
 
     def assignmentToModel(self, assignment, partial=False):
         return [
-            [var.assignmentToModel(avar, partial) for (var, avar) in zip(row, arow)]
+            [
+                var.assignmentToModel(avar, partial)
+                for (var, avar) in zip(row, arow)
+            ]
             for (row, arow) in zip(self._vars, assignment)
         ]
+
 
 class SavileRowVars:
     def __init__(self, vars):
@@ -323,17 +346,22 @@ class SavileRowVars:
 
     def varmat(self):
         return self._vars
-    
+
     def modelToAssignment(self, model, partial=False):
         return [
-            [var.modelToAssignment(model, partial) for var in row] for row in self._vars
+            [var.modelToAssignment(model, partial) for var in row]
+            for row in self._vars
         ]
 
     def assignmentToModel(self, assignment, partial=False):
         return [
-            [var.assignmentToModel(avar, partial) for (var, avar) in zip(row, arow)]
+            [
+                var.assignmentToModel(avar, partial)
+                for (var, avar) in zip(row, arow)
+            ]
             for (row, arow) in zip(self._vars, assignment)
         ]
+
 
 class Puzzle:
     def __init__(self, vars):
@@ -368,5 +396,8 @@ class Puzzle:
 
     def assignmentToModel(self, assignment, partial=False):
         return flatten(
-            [v.assignmentToModel(a, partial) for (v, a) in zip(self._vars, assignment)]
+            [
+                v.assignmentToModel(a, partial)
+                for (v, a) in zip(self._vars, assignment)
+            ]
         )
