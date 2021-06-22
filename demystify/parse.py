@@ -100,9 +100,9 @@ def parse_essence(eprime, eprimeparam):
         raise ParseError(
             "savilerow failed"
             + "\n"
-            + makedimacs.stdout
+            + makedimacs.stdout.decode("utf-8")
             + "\n"
-            + makedimacs.stderr
+            + makedimacs.stderr.decode("utf-8")
         )
 
     formula = CNF(from_file=eprimeparam + ".dimacs")
