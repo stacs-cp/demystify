@@ -70,9 +70,9 @@ def parse_essence(eprime, eprimeparam):
         raise ParseError(
             "Conjure pretty-printing of params failed"
             + "\n"
-            + paramjson.stdout
+            + paramjson.stdout.decode("utf-8")
             + "\n"
-            + paramjson.stderr
+            + paramjson.stderr.decode("utf-8")
         )
     params = json.loads(paramjson.stdout)
 

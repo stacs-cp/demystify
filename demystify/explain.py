@@ -17,7 +17,7 @@ class ExplainError(Exception):
 
 
 class Explainer(object):
-    def __init__(self, mus_finder=None, merge=1, skip=-1, debug=False):
+    def __init__(self, mus_finder=None, merge=1, skip=0, debug=False):
         self.steps_explained = 0
         self.mus_finder_name = mus_finder
         self.merge = merge
@@ -102,7 +102,7 @@ class Explainer(object):
 
                 self._add_known(skipped)
 
-                mus_dict = self.mus_finder.smallest_mus(self.unexplained)
+                mus_dict = self.mus_finder.smallestMUS(self.unexplained)
                 smallest = mus_dict.minimum()
 
             merged = mus_dict.filter_literals_by_mus(

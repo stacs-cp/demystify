@@ -114,7 +114,7 @@ if args.forqes:
 else:
     mus_finder = "cascade"
 
-explainer = demystify.explain.Explainer(mus_finder)
+explainer = demystify.explain.Explainer(mus_finder, skip=args.skip)
 
 if args.puzzle is not None:
     name = os.path.basename(args.puzzle)

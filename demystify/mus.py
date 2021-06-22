@@ -556,7 +556,7 @@ def cascadeMUS(solver, puzlits, repeats, musdict, config):
 class CascadeMUSFinder:
     def __init__(self, solver):
         self._solver = solver
-        self._bestcache = {}
+        self._bestcache = MusDict({})
 
     def smallestMUS(self, puzlits):
         musdict = MusDict({})
