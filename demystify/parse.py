@@ -235,11 +235,12 @@ def parse_essence(eprime, eprimeparam):
 
             # assert 0 in varmap[v][k].keys()
             # -- Removed in place of the error below
-
+            
             if 0 not in varmap[v][k].keys():
                 raise ParseError(
                     f"ERROR: Constraint {v}{k} cannot be made false.."
                 )
+        
             if 1 not in varmap[v][k].keys():
                 raise ParseError(
                     f"ERROR: Constraint {v}{k} cannot be satisfied.."
