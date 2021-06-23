@@ -16,16 +16,16 @@ find con_alldiff: matrix indexed by [D,D,D,D] of bool
 $#CON row_alldiff "cells ({a[0]},{a[1]}) and ({a[0]},{a[2]}) cannot both be {a[3]} as they are in the same row"
 find row_alldiff: matrix indexed by [D,D,D,D] of bool
 
-$#CON box_alldiff "cells ({3*a[0]+a[2]},{3*a[1]+a[3]}) and ({3*a[0]+a[4]},{3*a[1]+a[5]}) cannot both be {a[6]} as they are in the same box"
+$#CON box_alldiff "cells ({3*int(a[0])+int(a[2])},{3*int(a[1])+int(a[3])}) and ({3*int(a[0])+int(a[4])},{3*int(a[1])+int(a[5])}) cannot both be {a[6]} as they are in the same box"
 find box_alldiff: matrix indexed by [C,C,C,C,C,C,D] of bool
 
-$#CON orthogonally "cells ({a[0]},{a[1]}) and ({a[0]+a[2]},{a[1]+a[3]}) cannot be {a[4]} and {a[4]+a[5]} cannot contain consecutive digits as they are orthogonally adjacent"
+$#CON orthogonally "cells ({a[0]},{a[1]}) and ({int(a[0])+int(a[2])},{int(a[1])+int(a[3])}) cannot be {int(a[4])} and {int(a[4])+int(a[5])} cannot contain consecutive digits as they are orthogonally adjacent"
 find orthogonally: matrix indexed by [D,D,int(0..1),int(0..1),D,int(-1,1)] of bool
 
-$#CON king "cells ({a[0]},{a[1]}) and ({a[0]+a[2]},{a[1]+a[3]}) cannot both be {a[4]} as they are a king's move apart"
+$#CON king "cells ({a[0]},{a[1]}) and ({int(a[0])+int(a[2])},{int(a[1])+int(a[3])}) cannot both be {a[4]} as they are a king's move apart"
 find king: matrix indexed by [D,D,int(-1..1),int(-1..1),D] of bool
 
-$#CON knight "cells ({a[0]},{a[1]}) and ({a[0]+a[2]},{a[1]+a[3]}) cannot both be {a[4]} as they are a knight's move apart"
+$#CON knight "cells ({a[0]},{a[1]}) and ({int(a[0])+int(a[2])},{int(a[1])+int(a[3])}) cannot both be {a[4]} as they are a knight's move apart"
 find knight: matrix indexed by [D,D,int(-2..2),int(-2..2),D] of bool
 
 such that

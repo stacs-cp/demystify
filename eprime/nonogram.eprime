@@ -17,34 +17,34 @@ find grid : matrix indexed by [X,Y] of bool
 find rowstarts: matrix indexed by [X,M] of Y
 find colstarts: matrix indexed by [Y,M] of X
 
-$#CON sumrow "row {a[0]} has right number of black squares"
+$#CON sumrow "row {int(a[0])+1} has right number of black squares"
 find sumrow: matrix indexed by [X] of bool
 
-$#CON sumcol "col {a[0]} has right number of black squares"
+$#CON sumcol "col {int(a[0])+1} has right number of black squares"
 find sumcol: matrix indexed by [Y] of bool
 
-$#CON rowbefore "block {a[1]} comes before block{int(a[1])+1} in row {a[0]}"
+$#CON rowbefore "block {int(a[1])+1} comes before block{int(int(a[1])+1)+1} in row {int(a[0])+1}"
 find rowbefore: matrix indexed by [X,M] of bool
-$#CON colbefore "block {a[1]} comes before block{int(a[1])+1} in col {a[0]}"
+$#CON colbefore "block {int(a[1])+1} comes before block{int(int(a[1])+1)+1} in col {int(a[0])+1}"
 find colbefore: matrix indexed by [Y,M] of bool
 
-$#CON rowblack "cells in block {a[2]} of row {a[0]} are black ({a[0]},{a[1]})"
+$#CON rowblack "cells in block {a[2]} of row {int(a[0])+1} are black ({int(a[0])+1},{int(a[1])+1})"
 find rowblack: matrix indexed by [X,Y,M] of bool
-$#CON colblack "cells in block {a[2]} of col {a[1]} are black ({a[0]},{a[1]})"
+$#CON colblack "cells in block {a[2]} of col {int(a[1])+1} are black ({int(a[0])+1},{int(a[1])+1})"
 find colblack: matrix indexed by [X,Y,M] of bool
 
-$#CON rowwhite "cells between block {a[2]} and {int(a[2])+1} of row {a[0]} are white ({a[0]},{a[1]})"
+$#CON rowwhite "cells between block {a[2]} and {int(a[2])+1} of row {int(a[0])+1} are white ({int(a[0])+1},{int(a[1])+1})"
 find rowwhite: matrix indexed by [X,Y,M] of bool
-$#CON colwhite "cells between block {a[2]} and {int(a[2])+1} of col {a[1]} are white ({a[0]},{a[1]})"
+$#CON colwhite "cells between block {a[2]} and {int(a[2])+1} of col {int(a[1])+1} are white ({int(a[0])+1},{int(a[1])+1})"
 find colwhite: matrix indexed by [X,Y,M] of bool
 
-$#CON cellblackrow "({a[0]},{a[1]}) is black if it is in a row rule"
+$#CON cellblackrow "({int(a[0])+1},{int(a[1])+1}) is black if it is in a row rule"
 find cellblackrow: matrix indexed by [X,Y] of bool
-$#CON cellblackcol "({a[0]},{a[1]}) is black if it is in a col rule"
+$#CON cellblackcol "({int(a[0])+1},{int(a[1])+1}) is black if it is in a col rule"
 find cellblackcol: matrix indexed by [X,Y] of bool
-$#CON cellwhiterow "({a[0]},{a[1]}) is white if it is not in a row rule"
+$#CON cellwhiterow "({int(a[0])+1},{int(a[1])+1}) is white if it is not in a row rule"
 find cellwhiterow: matrix indexed by [X,Y] of bool
-$#CON cellwhitecol "({a[0]},{a[1]}) is white if it is not in a col rule"
+$#CON cellwhitecol "({int(a[0])+1},{int(a[1])+1}) is white if it is not in a col rule"
 find cellwhitecol: matrix indexed by [X,Y] of bool
 
 
