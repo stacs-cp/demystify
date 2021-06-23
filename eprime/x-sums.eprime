@@ -1,0 +1,133 @@
+language ESSENCE' 1.0
+
+
+$ Model for the X-Sums Sudoku type. Adapted for the demistify tool.
+
+$#DESC "The clues outside the grid show the sum of the first X digits from that direction, where X is the first of those digits."
+
+$Example See Cracking the Cryptic video:
+$ "The BEST X-Sums Sudoku I've Ever Seen"
+$ by Tom Collyer 
+$ https://cracking-the-cryptic.web.app/sudoku/PtjJbFhttP
+$ https://www.youtube.com/watch?v=fnCzYnsC4Ow
+
+
+$$ Input would be SIZE, which is dimension of square grid, but set to 9
+
+letting   SIZE be 9  $$ I.e. not generalised yet
+
+$ the numeric values specified in the puzzle
+
+letting   VALUES be domain int( 0..SIZE )
+letting   RANGE  be domain int( 1..SIZE )
+
+letting   MAXCLUES be (SIZE * (SIZE+1))/2
+
+$$ And CLUES, 4xSIZE array of clues
+$ CLUES[1,..] is clues along left of grid pointing right, 0 indicating no clue
+$ CLUES[2,..] is clues along top of grid pointing down
+$ CLUES[3,..] is clues along right of grid pointing left
+$ CLUES[4,..] is clues along bottom of grid pointing up.
+
+given     CLUES : matrix indexed by [int(1..4),RANGE] of int(0..MAXCLUES)
+
+$$ And GRID, any initial values provided for cells (or 0 for no value) 
+
+given     GRID : matrix indexed by [RANGE,RANGE] of VALUES
+
+$#VAR field
+find field : matrix indexed by [RANGE,RANGE] of RANGE
+
+$$ For all four dimensions I decided it would be too risky to try to change the 
+$$ starting point and deltas in each dimension, and annoying/buggy to type out the same 
+$$ constraints 4 times.  So instead I just form 4 copies of the original field, each one 
+$$ transposed/reversed as necessary to make the same set of constraints give the desired
+$$ direction in the original field.  This makes sense as I know that Savile Row is going to 
+$$ identify all these variables anyway so there will not be surplus variables in the solver
+
+$ four versions of field in different directions
+$ index 1 is original field 
+$ index 2 is transpose so left corresponds to top in original 
+$ index 3 is reversed original so left corresponds to right hand in original 
+$            listed top to bottom
+$ index 4 is transpose reversed so left corresponds to bottom in original
+$            listed left to right
+
+$#AUX variant_fields
+find variant_fields : matrix indexed by [int(1..4),RANGE,RANGE] of RANGE 
+
+
+$ all the reasoning
+$ -----------------
+
+$#CON alldiff_row "row {a[0]} must have all different elements"
+find alldiff_row : matrix indexed by [int(1..9)] of bool 
+$#CON alldiff_col "column {a[0]} must have all different elements"
+find alldiff_col : matrix indexed by [int(1..9)] of bool 
+$#CON alldiff_box "box {a[0]} must have all different elements"
+find alldiff_box : matrix indexed by [int(1..9)] of bool 
+
+$#CON clues_left_on "the sum of first X numbers on {['row','column','row','column'][a[0]-1]} {a[1]} {['from left','from top','from right','from bottom'][a[0]-1]} is {params['CLUES'][a[0]-1][a[1]-1]}"
+
+find clues_left_on : matrix indexed by [int(1..4),RANGE] of bool
+
+$#AUX max_left
+
+such that 
+
+$$ consistency constraints 
+
+$ variant fields setup
+
+forAll row, col: RANGE . 
+    variant_fields[1,row,col] = field[row,col] /\    
+    variant_fields[2,row,col] = field[col,row] /\
+    variant_fields[3,row,col] = field[row,SIZE+1-col] /\
+    variant_fields[4,row,col] = field[SIZE+1-col,row],
+
+$ port over hints grid to solution
+    forAll row : RANGE .
+        forAll col : RANGE .
+            ((GRID[row,col] > 0) -> (field[row,col] = GRID[row,col])),
+
+
+$$ X-sums constraints
+
+forAll i : int(1..4) . 
+    forAll row : RANGE .
+        clues_left_on[i,row] -> 
+            ( 
+             CLUES[i,row] > 0 -> 
+                 CLUES[i,row]  = 
+                     sum col : RANGE . 
+                         toInt( col <= variant_fields[i,row,1] ) * variant_fields[i,row,col] 
+            ),
+
+
+
+
+$$ Normal sudoku constraints
+$ rows
+forAll i: int(1..9)  .
+    alldiff_row[i] -> allDiff(field[..,i]),
+
+$ columns
+forAll i: int(1..9)  .
+    alldiff_col[i] -> allDiff(field[i,..]),
+
+$ 3x3 boxes
+forAll i,j: int(0..2) .
+    alldiff_box[(i*3)+j+1] -> allDiff([field[r,c] | r: int(i*3+1..i*3+3), c: int(j*3+1..j*3+3)] ),
+
+
+$ port over hints grid to solution
+    forAll row : RANGE .
+        forAll col : RANGE .
+	 		((GRID[row,col] > 0) -> (field[row,col] = GRID[row,col])),
+
+
+$ get a solution please :)
+and([and(alldiff_row),and(alldiff_col),and(alldiff_box), 
+    and(flatten(clues_left_on))]),
+
+true
