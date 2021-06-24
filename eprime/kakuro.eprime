@@ -33,21 +33,21 @@ forAll x : X. forAll y : Y. blanks[x,y] = 0 <-> grid[x,y] = 0,
 forAll x: X. forAll y : Y.
 vertalldiff[x,y] ->
 (vertsums[x,y] != 0 ->
-( allDiff([ grid[i,y] | i : int(x+2..x_max), forAll q:int(x+2..i). blanks[q,y]=1]) )),
+( allDiff([ grid[i,y] | i : int(x+1..x_max), forAll q:int(x+1..i). blanks[q,y]=1]) )),
 
 forAll x: X. forAll y : Y.
 vertsum[x,y] -> (
 vertsums[x,y] != 0 ->
-( vertsums[x,y] = sum([ grid[i,y] | i : int(x+2..x_max), forAll q:int(x+2..i). blanks[q,y]=1]) )),
+( vertsums[x,y] = sum([ grid[i,y] | i : int(x+1..x_max), forAll q:int(x+1..i). blanks[q,y]=1]) )),
 
 
 forAll x: X. forAll y : Y.
 horzalldiff[x,y] -> 
 (horzsums[x,y] != 0 ->
-( allDiff([ grid[x,j] | j : int(y+2..y_max), forAll q:int(y+2..j). blanks[x,q]=1]) )),
+( allDiff([ grid[x,j] | j : int(y+1..y_max), forAll q:int(y+1..j). blanks[x,q]=1]) )),
 
 
 forAll x: X. forAll y : Y.
 horzsum[x,y] -> (
 horzsums[x,y] != 0 ->
-( horzsums[x,y] = sum([ grid[x,j] | j : int(y+2..y_max), forAll q:int(y+2..j). blanks[x,q]=1]) ))
+( horzsums[x,y] = sum([ grid[x,j] | j : int(y+1..y_max), forAll q:int(y+1..j). blanks[x,q]=1]) ))

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euxo pipefail
+set -uxo pipefail
 
 rm outputs/*
 
@@ -15,5 +15,7 @@ done < tests.txt) | parallel
 (while read instance; do
     echo ./go-forqes-json.sh $instance
 done < tests.txt) | parallel
+
+git status .
 
 git diff --exit-code .
