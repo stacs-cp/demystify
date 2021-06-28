@@ -3,8 +3,8 @@ language ESSENCE' 1.0
 $ Grid size
 given x,y, treecount: int
 
-letting X be int(0..x-1)
-letting Y be int(0..y-1)
+letting X be int(1..x)
+letting Y be int(1..y)
 
 $ -1 means 'no constraint'
 given rowsums: matrix indexed by [X] of int
@@ -17,7 +17,7 @@ $ Tree is negative number, tent is positive, -i is connected to i
 $#VAR grid
 find grid : matrix indexed by [X,Y] of int(-treecount..treecount)
 
-$#CON adj "({a[0]}, {a[1]}) and ({a[0]+a[2]}, {a[1]+a[3]}) cannot both contain tents"
+$#CON adj "({a[0]}, {a[1]}) and ({int(a[0])+int(a[2])}, {int(a[1])+int(a[3])}) cannot both contain tents"
 $ Check adjacent constraint
 find adj: matrix indexed by [X,Y, int(-1..1), int(-1..1)] of bool
 

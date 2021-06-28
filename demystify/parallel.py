@@ -8,21 +8,36 @@ from .utils import randomFromSeed
 
 # Needs to be global so we can call it from a child process
 _global_solver_ref = None
+_global_forqes_ref = None
+
 
 def getChildSolver():
     return _global_solver_ref
 
+
 def setChildSolver(c):
     global _global_solver_ref
     _global_solver_ref = c
+
+
+def getChildForqes():
+    return _global_forqes_ref
+
+
+def setChildForqes(c):
+    global _global_forqes_ref
+    _global_forqes_ref = c
+
 
 # Magic from https://stackoverflow.com/questions/2130016/splitting-a-list-into-n-parts-of-approximately-equal-length
 def split(a, n):
     k, m = divmod(len(a), n)
     # Listify this so we check the lengths here
     return list(
-        list(a[i * k + min(i, m) : (i + 1) * k + min(i + 1, m)]) for i in range(n)
+        list(a[i * k + min(i, m) : (i + 1) * k + min(i + 1, m)])
+        for i in range(n)
     )
+
 
 # Fake Pool for profiling with py-spy
 class FakePool:
@@ -40,6 +55,8 @@ class FakePool:
 
 
 _reuse_process_pool = None
+
+
 def getPool(cores):
     if cores <= 1:
         return FakePool()
@@ -53,6 +70,7 @@ def getPool(cores):
             return ProcessPool(processes=cores)
     #    return Pool(processes=cores)
 
+
 global_process_counter = 0
 
 
@@ -64,16 +82,16 @@ def getGlobalProcessCounter():
 
 def doprocess(id, inqueue, outqueue):
     count = 0
-    #logging.info("start child stats: %s", _global_solver_ref.get_stats())
+    # logging.info("start child stats: %s", _global_solver_ref.get_stats())
     _global_solver_ref.reset_stats()
-    #logging.info("reset child stats: %s", _global_solver_ref.get_stats())
+    # logging.info("reset child stats: %s", _global_solver_ref.get_stats())
     while True:
-        #print("! {} Waiting for task".format(id))
+        # print("! {} Waiting for task".format(id))
         (func, msg) = inqueue.get()
-        #print("! {} Got task {} {}".format(id,count, (func,msg)))
+        # print("! {} Got task {} {}".format(id,count, (func,msg)))
         if func is None:
             if msg == "stats":
-                #logging.info("get child stats: %s", _global_solver_ref.get_stats())
+                # logging.info("get child stats: %s", _global_solver_ref.get_stats())
                 outqueue.put({"stats": _global_solver_ref.get_stats()})
                 _global_solver_ref.reset_stats()
             elif msg is None:
@@ -83,11 +101,12 @@ def doprocess(id, inqueue, outqueue):
                 sys.exit(1)
         else:
             outqueue.put(func(msg))
-        #print("! {} Done task {}".format(id,count))
+        # print("! {} Done task {}".format(id,count))
         count += 1
 
+
 class ProcessPool:
-    def __init__(self, processes, *, reuse = False):
+    def __init__(self, processes, *, reuse=False):
         assert processes > 1
         self._processcount = processes
         self._reuse = reuse
@@ -140,7 +159,14 @@ class ProcessPool:
             self._inqueues = [Queue() for i in range(self._processcount)]
             self._outqueues = [Queue() for i in range(self._processcount)]
             self._processes = [
-                Process(target=doprocess, args=(getGlobalProcessCounter(), self._inqueues[i], self._outqueues[i]))
+                Process(
+                    target=doprocess,
+                    args=(
+                        getGlobalProcessCounter(),
+                        self._inqueues[i],
+                        self._outqueues[i],
+                    ),
+                )
                 for i in range(self._processcount)
             ]
             for p in self._processes:
@@ -150,12 +176,12 @@ class ProcessPool:
 
     # Clean up
     def __exit__(self, a, b, c):
-        #print("!! exiting")
+        # print("!! exiting")
         for q in self._inqueues:
             q.put((None, "stats"))
         for q in self._outqueues:
             s = q.get()
-            #logging.info("child stats: %s", s)
+            # logging.info("child stats: %s", s)
             _global_solver_ref.add_stats(s["stats"])
         if not self._reuse:
             self.cleanup()
@@ -166,4 +192,3 @@ class ProcessPool:
             q.put((None, None))
         for p in self._processes:
             p.join()
-    

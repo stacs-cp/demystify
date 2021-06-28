@@ -19,7 +19,7 @@ from .solvers.pysatimpl import SATSolver
 
 
 class Solver:
-    def __init__(self, puzzle,*,cnf=None,litmap=None,conmap=None):
+    def __init__(self, puzzle, *, cnf=None, litmap=None, conmap=None):
         assert puzzle is not None
 
         self._puzzle = puzzle
@@ -61,8 +61,10 @@ class Solver:
         # For benchmarking
         self._corecount = 0
 
+        self._cnf = []
+
         if cnf is not None:
-            self.init_fromCNF(cnf,litmap,conmap)
+            self.init_fromCNF(cnf, litmap, conmap)
 
             self.init_litmappings()
             return
@@ -76,8 +78,10 @@ class Solver:
 
                     self._varlit2smtmap[lit] = b
                     self._varlit2smtmap[neglit] = self._solver.negate(b)
-                    self._varsmt2litmap.setdefault(b,SortedSet()).add(lit)
-                    self._varsmt2neglitmap.setdefault(b,SortedSet()).add(neglit)
+                    self._varsmt2litmap.setdefault(b, SortedSet()).add(lit)
+                    self._varsmt2neglitmap.setdefault(b, SortedSet()).add(
+                        neglit
+                    )
                     self._varsmt.add(b)
 
         # Unique identifier for each introduced variable
@@ -110,27 +114,26 @@ class Solver:
 
         self.init_litmappings()
 
-    def init_fromCNF(self,cnf,litmap,conmap):
-        assert(CONFIG["solver"] != "z3")
+    def init_fromCNF(self, cnf, litmap, conmap):
+        assert CONFIG["solver"] != "z3"
         self._solver = SATSolver(cnf)
+        self._cnf = cnf
         for (lit, b) in litmap.items():
             neglit = lit.neg()
             if b < 0:
-                neglit,lit=lit,neglit
+                neglit, lit = lit, neglit
                 b = b * -1
             self._varlit2smtmap[lit] = b
             self._varlit2smtmap[neglit] = self._solver.negate(b)
-            
-            self._varsmt2litmap.setdefault(b,SortedSet()).add(lit)
-            self._varsmt2neglitmap.setdefault(b,SortedSet()).add(neglit)
+
+            self._varsmt2litmap.setdefault(b, SortedSet()).add(lit)
+            self._varsmt2neglitmap.setdefault(b, SortedSet()).add(neglit)
             self._varsmt.add(b)
-        
+
         for (con, var) in conmap.items():
             self._conmap[var] = con
             self._conlit2conmap[con] = var
             self._conlits.add(var)
-
-
 
     def init_litmappings(self):
         # Set up some mappings for efficient finding of tiny MUSes
@@ -139,7 +142,9 @@ class Solver:
 
         # Map from a var lit to the negation of all lits it is in a constraint with
         # (to later make distance 2 mappings)
-        self._varlit2negconnectedlits = {l: SortedSet() for l in self._varlit2smtmap.keys()}
+        self._varlit2negconnectedlits = {
+            l: SortedSet() for l in self._varlit2smtmap.keys()
+        }
 
         for (cvar, con) in self._conmap.items():
             lits = con.lits()
@@ -150,11 +155,13 @@ class Solver:
                 self._varlit2negconnectedlits[l].update(neglits)
 
         # Map from a var lit to all constraints it is distance 2 from
-        self._varlit2con2 = {}  # {l : SortedSet() for l in self._varlit2smtmap.keys() }
+        self._varlit2con2 = (
+            {}
+        )  # {l : SortedSet() for l in self._varlit2smtmap.keys() }
         for (lit, connected) in self._varlit2negconnectedlits.items():
-            allcon = SortedSet.union(*[self._varlit2con[x] for x in connected],SortedSet()).union(
-                self._varlit2con[lit]
-            )
+            allcon = SortedSet.union(
+                *[self._varlit2con[x] for x in connected], SortedSet()
+            ).union(self._varlit2con[lit])
             self._varlit2con2[lit] = allcon
 
     def puzzle(self):
@@ -162,15 +169,20 @@ class Solver:
 
     def _buildConstraint(self, constraint):
         cs = constraint.clauseset()
-        clauses = [self._solver.Or([self._varlit2smtmap[lit] for lit in c]) for c in cs]
+        clauses = [
+            self._solver.Or([self._varlit2smtmap[lit] for lit in c]) for c in cs
+        ]
         return clauses
 
     # Check if there is a single solution, or return 'None'
     def _solve(self, smtassume=tuple(), *, getsol):
-        #print("conlits:", self._conlits)
-        return self._solver.solve(chainlist(self._conlits, smtassume), getsol=getsol)
+        # print("conlits:", self._conlits)
+        return self._solver.solve(
+            chainlist(self._conlits, smtassume), getsol=getsol
+        )
 
-    # Check if there is a single solution and return True/False, or return 'None' if timeout
+    # Check if there is a single solution and return True/False, or return 
+    # 'None' if timeout
     def _solveLimited(self, smtassume=tuple()):
         return self._solver.solveLimited(chainlist(self._conlits, smtassume))
 
@@ -179,7 +191,7 @@ class Solver:
         return self._solver.solveSingle(
             self._varsmt, chainlist(self._conlits, smtassume)
         )
-    
+
     def _solveAll(self, smtassume=tuple()):
         return self._solver.solveAll(
             self._varsmt, chainlist(self._conlits, smtassume)
@@ -202,7 +214,7 @@ class Solver:
 
     def solve(self, assume=tuple(), *, getsol):
         smtassume = [self._varlit2smtmap[l] for l in assume]
-        #print("smtassume: ", smtassume)
+        # print("smtassume: ", smtassume)
         sol = self._solve(smtassume, getsol=getsol)
         if getsol == False:
             return sol
@@ -270,9 +282,9 @@ class Solver:
 
     def reset_stats(self):
         self._solver.reset_stats()
-    
+
     def get_stats(self):
         return copy.deepcopy(self._solver.get_stats())
-    
+
     def add_stats(self, d):
         self._solver.add_stats(d)

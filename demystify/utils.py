@@ -8,7 +8,17 @@ from sortedcontainers import *
 
 from typing import Iterable, List
 from multiprocessing import current_process
+
 # Some boring utility functions
+
+# Deal with y being too large, or x being a fraction
+def safepow(x, y):
+    p = math.pow(float(x), float(y))
+    if p < 1000000:
+        return int(p)
+    else:
+        return math.inf
+
 
 # Flatten a (possibly even more nested) list of lists
 def flatten_internal(arr):
@@ -30,8 +40,10 @@ def intsqrt(i: int) -> int:
     else:
         return root
 
+
 def lowsqrt(i: int) -> int:
     return int(math.sqrt(i))
+
 
 def chainlist(*lists):
     return list(itertools.chain(*lists))
@@ -43,18 +55,24 @@ def shuffledcopy(r, l):
     return cpy
 
 
-
 def get_cpu_time_with_children():
     time_self = resource.getrusage(resource.RUSAGE_SELF)
     time_children = resource.getrusage(resource.RUSAGE_CHILDREN)
-    return time_self.ru_utime + time_self.ru_stime + time_children.ru_utime + time_children.ru_stime
+    return (
+        time_self.ru_utime
+        + time_self.ru_stime
+        + time_children.ru_utime
+        + time_children.ru_stime
+    )
 
 
 def get_cpu_time():
     time_self = resource.getrusage(resource.RUSAGE_SELF)
     return time_self.ru_utime + time_self.ru_stime
 
+
 import numpy
+
 
 def randomFromSeed(seed):
     if isinstance(seed, str):
@@ -62,20 +80,28 @@ def randomFromSeed(seed):
     return numpy.random.RandomState(seed)
     # return random.Random(seed)
 
+
 def parseSavileRowName(vars, auxvars, n):
     varmatch = [v for v in vars if n.startswith(v)]
     if len(varmatch) == 0:
         if not any(v for v in auxvars if n.startswith(v)):
-            print("Cannot find {} in the VAR list {} -- should it be AUX?".format(n, vars))
+            print(
+                "Cannot find {} in the VAR list {} -- should it be AUX?".format(
+                    n, vars
+                )
+            )
         return None
     if len(varmatch) > 1:
-        print("Variables cannot have a common prefix: Can't tell if {} is {}".format(n, varmatch))
+        print(
+            "Variables cannot have a common prefix: Can't tell if {} is {}".format(
+                n, varmatch
+            )
+        )
         sys.exit(1)
-    
+
     varmatch = varmatch[0]
 
-    
-    n = n[len(varmatch) + 1:]
+    n = n[len(varmatch) + 1 :]
 
     splits = n.split("_")
     args = []
@@ -83,9 +109,10 @@ def parseSavileRowName(vars, auxvars, n):
         if arg.startswith("n"):
             c = -1 * int(arg[1:])
         else:
-            c = int(arg)
+            c = str(int(arg))
         args.append(c)
     return (varmatch, tuple(args))
+
 
 def build_lit2conmap(clauses):
     lit2conmap = dict()
@@ -101,6 +128,7 @@ def build_lit2conmap(clauses):
             lit2conmap[c[0]] = SortedSet()
             lit2conmap[-c[0]] = SortedSet()
     return lit2conmap
+
 
 def getConnectedVars(formula, con, varlits_in):
     varlits = SortedSet(varlits_in.union([-v for v in varlits_in]))
@@ -126,4 +154,3 @@ def getConnectedVars(formula, con, varlits_in):
                 if v not in varlits:
                     todo.add(v)
     return found.intersection(varlits)
-            
