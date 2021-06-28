@@ -67,7 +67,7 @@ find alldiff_col : matrix indexed by [int(1..9)] of bool
 $#CON alldiff_box "box {a[0]} must have all different elements"
 find alldiff_box : matrix indexed by [int(1..9)] of bool 
 
-$#CON clues_left_on "the sum of first X numbers on {['row','column','row','column'][int(a[0])-1]} {a[1]} {['from left','from top','from right','from bottom'][int(a[0])-1]} is {params['CLUES'][str(int(a[0])-1)][str(int(a[1])-1)]}"
+$#CON clues_left_on "the sum of first X numbers on {['row','column','row','column'][int(a[0])-1]} {a[1]} {['from left','from top','from right','from bottom'][int(a[0])-1]} is {params['CLUES'][a[0]][a[1]]}"
 
 find clues_left_on : matrix indexed by [int(1..4),RANGE] of bool
 
@@ -126,8 +126,8 @@ $ port over hints grid to solution
 	 		((GRID[row,col] > 0) -> (field[row,col] = GRID[row,col])),
 
 
-$ get a solution please :)
-and([and(alldiff_row),and(alldiff_col),and(alldiff_box), 
-    and(flatten(clues_left_on))]),
+$$ $ get a solution please :)
+$$ and([and(alldiff_row),and(alldiff_col),and(alldiff_box), 
+    $$ and(flatten(clues_left_on))]),
 
 true
