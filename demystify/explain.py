@@ -9,6 +9,8 @@ from .base import EqVal, NeqVal
 
 from sortedcontainers import SortedSet
 
+from demystify import mus
+
 
 class SolveError(Exception):
     pass
@@ -139,12 +141,21 @@ class Explainer(object):
                 proven_dict,
             ) = self._choose_mus(lit_choices, mus_dict)
 
+            choices, proven_lit_choices = self._choices_list(mus_dict)
+
             if mus_choice is not None:
-                best_mus = tuple(SortedSet(mus_dict.get(mus_choice)))[0]
-                best_proven_lits = proven_dict[mus_choice][best_mus]
+                best_proven_lits = proven_lit_choices[mus_choice]
+                best_mus = mus_dict.get(lit_choices[mus_choice])
+            else:
+                (
+                    best_lit,
+                    best_mus,
+                    best_proven_lits,
+                    proven_dict,
+                ) = self._choose_mus(lit_choices, mus_dict)
 
             step_dict = self._get_step_dict(best_proven_lits, best_mus)
-
+            step_dict["otherChoices"] = choices
             self._add_known(best_proven_lits)
 
         self.steps_explained += 1
@@ -153,8 +164,13 @@ class Explainer(object):
 
     def get_choices(self):
         mus_dict = self.mus_finder.smallestMUS(self.unexplained)
+        choices_explanations, _ = self._choices_list(mus_dict)
+        return choices_explanations
+
+    def _choices_list(self, mus_dict):
         smallest = mus_dict.minimum()
         choices = []
+        proven_lit_choices = []
 
         if smallest <= self.merge:
             return []
@@ -173,8 +189,9 @@ class Explainer(object):
             for p in lit_choices:
                 muses = tuple(SortedSet(mus_dict.get(p)))
                 choices.append(self._get_step_dict(proven_dict[p][muses[0]], muses[0]))
-
-        return choices
+                proven_lit_choices.append(proven_dict[p][muses[0]])
+        
+        return choices, proven_lit_choices
 
     def _add_known(self, lits):
         for p in lits:
