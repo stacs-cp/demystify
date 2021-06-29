@@ -9,8 +9,10 @@ from .base import EqVal, NeqVal
 
 from sortedcontainers import SortedSet
 
+
 class SolveError(Exception):
     pass
+
 
 class ExplainError(Exception):
     pass
@@ -81,7 +83,7 @@ class Explainer(object):
 
         return steps
 
-    def explain_step(self, lit_choice=None, mus_choice=None):
+    def explain_step(self, lit_choice=None, mus_choice=None, update=True):
         step_dict = {}
         step_dict["stepNumber"] = self.steps_explained + 1
 
@@ -149,9 +151,30 @@ class Explainer(object):
 
         return step_dict
 
-    def get_choices():
-        # TODO
-        return
+    def get_choices(self):
+        mus_dict = self.mus_finder.smallestMUS(self.unexplained)
+        smallest = mus_dict.minimum()
+        choices = []
+
+        if smallest <= self.merge:
+            return []
+        else:
+            lit_choices = mus_dict.filter_literals_by_mus(
+                lambda mus: len(mus) == smallest
+            )
+
+            (
+                _,
+                _,
+                _,
+                proven_dict,
+            ) = self._choose_mus(lit_choices, mus_dict)
+
+            for p in lit_choices:
+                muses = tuple(SortedSet(mus_dict.get(p)))
+                choices.append(self._get_step_dict(proven_dict[p][muses[0]], muses[0]))
+
+        return choices
 
     def _add_known(self, lits):
         for p in lits:
@@ -234,7 +257,7 @@ class Explainer(object):
             splitsize = lowsqrt(domsize)
 
         for dsublist in [
-            dom[i : i + splitsize] for i in range(0, len(dom), splitsize)
+            dom[i: i + splitsize] for i in range(0, len(dom), splitsize)
         ]:
 
             cell_values = []
