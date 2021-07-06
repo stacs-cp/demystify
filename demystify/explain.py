@@ -1,5 +1,6 @@
 import logging
 import math
+import os
 
 from .parse import parse_json, parse_essence
 from .mus import CascadeMUSFinder, checkWhichLitsAMUSProves
@@ -48,7 +49,7 @@ class Explainer(object):
         self.puzzle, self.solver, self.params = parse_essence(
             eprime, eprimeparam
         )
-
+        self.name = os.path.basename(eprime)
         self.solution = self._get_puzzle_solution()
         self.unexplained = self.solution
         self._set_mus_finder()
@@ -83,7 +84,7 @@ class Explainer(object):
                 else:
                     steps.append(self.explain_step(self))
 
-        return steps
+        return {"name": self.name, "params": self.params, "steps": steps}
 
     def explain_step(self, lit_choice=None, mus_choice=None, update=True):
         step_dict = {}
