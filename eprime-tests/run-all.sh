@@ -4,10 +4,7 @@ set -uxo pipefail
 
 rm outputs/*
 
-(while read instance; do
-    echo ./go.sh $instance
-done < tests.txt) | parallel
-
+time (
 (while read instance; do
     echo ./go-json.sh $instance
 done < tests.txt) | parallel
@@ -15,6 +12,9 @@ done < tests.txt) | parallel
 (while read instance; do
     echo ./go-forqes-json.sh $instance
 done < tests.txt) | parallel
+)
+
+echo "TIME TAKEN"
 
 git status .
 
