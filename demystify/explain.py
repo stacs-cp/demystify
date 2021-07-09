@@ -5,7 +5,7 @@ import os
 from .parse import parse_json, parse_essence
 from .mus import CascadeMUSFinder, checkWhichLitsAMUSProves
 from .musforqes import ForqesMUSFinder
-from .utils import flatten, intsqrt, lowsqrt
+from .utils import flatten, in_flattened, intsqrt, lowsqrt
 from .base import EqVal, NeqVal
 
 from sortedcontainers import SortedSet
@@ -308,9 +308,7 @@ class Explainer(object):
 
                 for i, clause in enumerate(involved):
 
-                    if (poslit in flatten(clause)) or (
-                        neglit in flatten(clause)
-                    ):
+                    if in_flattened(clause, poslit) or in_flattened(clause, neglit):
 
                         explanations.append(str(i))
                         # We want this to be "the" explanation that makes d
@@ -376,11 +374,14 @@ class Explainer(object):
 
                 # Explictly add 'b', for the case where the MUS is size 0 in
                 # particular
-                proven_lits = SortedSet(
-                    checkWhichLitsAMUSProves(
-                        self.solver, unexplained_in_mus, mus
-                    )
-                ).union(SortedSet([b]))
+                if (len(mus), len(unexplained_in_mus)) < best_mus_stat:
+                    proven_lits = SortedSet(
+                        checkWhichLitsAMUSProves(
+                            self.solver, unexplained_in_mus, mus
+                        )
+                    ).union(SortedSet([b]))
+                else:
+                    proven_lits = SortedSet([b])
 
                 proven_dict[b][mus] = proven_lits
 
