@@ -254,7 +254,6 @@ def parse_essence(eprime, eprimeparam):
                 logging.debug("Could not evaluate " + cons[v])
                 constraintname = cons[v]
 
-            logging.debug(constraintname)
 
             connected = SortedSet(
                 lit
@@ -270,9 +269,15 @@ def parse_essence(eprime, eprimeparam):
                 SortedSet(lit.neg() for lit in connected)
             )
 
-            constraintmap[
-                demystify.base.DummyClause(constraintname, connected)
-            ] = varmap[v][k][1]
+            # Skip constraints which do not include any variables
+            if len(connected) > 0:
+                logging.debug("Adding: " + constraintname)
+                constraintmap[
+                    demystify.base.DummyClause(constraintname, connected)
+                ] = varmap[v][k][1]
+            else:
+                logging.debug("Skipping: " + constraintname)
+                formula.append([varmap[v][k][1]])
 
     printvarlist = []
 
