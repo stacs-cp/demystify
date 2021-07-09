@@ -14,14 +14,14 @@ CONFIG = {
     "cores": 8,
     # How many times to look for very tiny cores
     # Incrasing this past 2 doesn't (seem) to be useful
-    "smallRepeats": 2,
+    "smallRepeats": 1,
     # How many times to try looking for each size of core
     "repeats": 5,
     # Encode "at most one thing is true" as a single clause
     "OneClauseAtMost": False,
     # Limit search to searchLimitedBudget conflicts
     "solveLimited": True,
-    "solveLimitedBudget": 100000,
+    "solveLimitedBudget": 10000,
     # Dump out SAT instances, for other MUS solvers
     # WHen using this, set cores=0 and repeats=1
     "dumpSAT": False,
@@ -39,7 +39,7 @@ CONFIG = {
     # When "officially" looking for a mus of size k,
     # instead look for cascadeMult*k, because it is not too much
     # more work and we might want it later
-    "cascadeMult": 3,
+    "cascadeMult": 5,
     "checkSmall1": True,
     "checkSmall2": False,
     "checkCloseFirst": False,
