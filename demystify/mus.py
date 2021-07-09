@@ -22,7 +22,7 @@ def tinyMUS(solver, assume, distance):
     elif distance == 2:
         cons = flatten([solver._varlit2con2[l] for l in assume])
     else:
-        sys.exit(1)
+        cons = list(solver._conlits)
 
     core = solver.basicCore(smtassume + cons)
     if core is None:
@@ -40,6 +40,7 @@ def tinyMUS(solver, assume, distance):
             else:
                 badcount += 1
                 if badcount > 5:
+                    logging.info("ZZ %s %s", lit, len(core))
                     return None
 
     return [solver._conmap[x] for x in core if x in solver._conmap]
@@ -330,7 +331,7 @@ def MUS(
                     cutcore = core[:minsize]
                     # Check if the core is already minimal first
                     if cutcore != core and (
-                        solver._solver.solve(smtassume + to_test, getsol=False)
+                        solver._solver.solve(smtassume + cutcore, getsol=False)
                         != False
                     ):
                         logging.debug(
@@ -342,20 +343,21 @@ def MUS(
                         )
                         return None
                     else:
-                        logging.debug(
-                            "Core found: %s %s %s %s",
+                        logging.info(
+                            "Core found by badcount: %s %s %s %s %s",
                             assume,
                             minsize,
                             badcount,
                             stepcount,
+                            len(cutcore)
                         )
                         return [
                             solver._conmap[x]
-                            for x in to_test
+                            for x in cutcore
                             if x in solver._conmap
                         ]
 
-    logging.debug(
+    logging.info(
         "Core for %s : %s to %s, with %s steps, %s bad (minsize %s)",
         assume,
         lens,
@@ -449,12 +451,14 @@ def checkWhichLitsAMUSProves(solver, puzlits, mus):
 MUSSizeFound = None
 MUSSizeRequired = None
 
+MAX_MUS = 999999999
+
 def _findSmallestMUS_func(tup):
     (p, randstr, minsize, config) = tup
 
-    logging.info("YY %s %s", MUSSizeFound.value, MUSSizeRequired.value)
+    logging.info("YY %s %s %s %s", MUSSizeFound.value, MUSSizeRequired.value, minsize, p)
 
-    if CONFIG["earlyExit"] and MUSSizeFound.value != -1 and MUSSizeFound.value <= MUSSizeRequired.value:
+    if CONFIG["earlyExit"] and MUSSizeFound.value <= MUSSizeRequired.value:
         logging.info("Early Exit!")
         return (p, None)
 
@@ -470,7 +474,8 @@ def _findSmallestMUS_func(tup):
         ),
     )
     if mus is not None:
-        if MUSSizeFound.value == -1 or len(mus) < MUSSizeFound.value:
+        if len(mus) < MUSSizeFound.value:
+            logging.info("Found new best MUS size: %s -> %s", MUSSizeFound.value, len(mus))
             MUSSizeFound.value = len(mus)
     return (ret, mus)
 
@@ -480,7 +485,11 @@ def cascadeMUS(solver, puzlits, repeats, musdict, config):
     # We need this to be accessible by the pool
     setChildSolver(solver)
     global MUSSizeFound, MUSSizeRequired
-    MUSSizeFound = multiprocessing.Value('l', -1)
+    if musdict.minimum() < math.inf:
+        MUSSizeFound = multiprocessing.Value('l', musdict.minimum())
+    else:
+        MUSSizeFound = multiprocessing.Value('l', MAX_MUS)
+ 
     MUSSizeRequired = multiprocessing.Value('l', 111)
 
     # Have to duplicate code, to swap loops around
@@ -488,7 +497,12 @@ def cascadeMUS(solver, puzlits, repeats, musdict, config):
         for minsize in range(
             config["baseSizeMUS"], max(config["baseSizeMUS"] + 1, 10000), 1
         ):
+            logging.info("Looking for %s (know %s)", minsize, MUSSizeFound.value)
             MUSSizeRequired.value = minsize
+            if CONFIG["earlyExit"] and MUSSizeFound.value <= minsize:
+                logging.info("Early exit because MUS already known")
+                return
+
             with getPool(CONFIG["cores"]) as pool:
                 # Do 'range(repeats)' first, so when we distribute we get an
                 # even spread of literals on different cores minsize+1 for MUS
@@ -591,11 +605,28 @@ class CascadeMUSFinder:
                 distance=1,
             )
 
-        logging.info("Smallest MUS: %s ", musdict.minimum())
+        logging.info("Smallest MUS A: %s ", musdict.minimum())
 
         # Early exit for trivial case
         if musdict.minimum() <= 1:
             logging.info("Early exit from checkSmall1")
+            return musdict
+
+        # Try looking for general tiny MUSes, to prime search
+        logging.info("Looking for small")
+        getTinyMUSes(
+                self._solver,
+                puzlits,
+                musdict,
+                repeats=CONFIG["smallRepeats"],
+                distance=999,
+        )
+
+        logging.info("Smallest MUS B: %s ", musdict.minimum())
+
+        # Early exit for trivial case
+        if musdict.minimum() <= 1:
+            logging.info("Early exit from checkSmall general")
             return musdict
 
         logging.info("Checking cache")
