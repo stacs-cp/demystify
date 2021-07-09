@@ -32,6 +32,20 @@ def flatten_internal(arr):
 def flatten(arr: List) -> List:
     return list(flatten_internal(arr))
 
+def in_flattened_internal(arr, x):
+    for i in arr:
+        if isinstance(i, Iterable):
+            if in_flattened_internal(i, x):
+                return True
+        else:
+            if i == x:
+                return True
+    return False
+
+
+def in_flattened(arr: List, x) -> bool:
+    return in_flattened_internal(arr, x)
+
 
 def intsqrt(i: int) -> int:
     root = int(math.sqrt(i) + 0.5)
