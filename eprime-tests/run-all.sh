@@ -8,13 +8,17 @@ time (
 (while read instance; do
     echo ./go-json.sh $instance
 done < tests.txt) | parallel
+)
 
+echo "CASCADE TIME TAKEN"
+
+time (
 (while read instance; do
     echo ./go-forqes-json.sh $instance
 done < tests.txt) | parallel
 )
 
-echo "TIME TAKEN"
+echo "FORQES TIME TAKEN"
 
 git status .
 
