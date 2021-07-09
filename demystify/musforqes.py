@@ -73,7 +73,7 @@ class ForqesMUSFinder:
             )
 
         # Early exit for trivial case
-        if musdict.minimum() == 1:
+        if musdict.minimum() <= 1:
             logging.info("Early exit from checkSmall1")
             return musdict
 

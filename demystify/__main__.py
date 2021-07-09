@@ -28,10 +28,20 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "--info", action="store_true", help="Print (some) debugging info"
+)
+
+parser.add_argument(
     "--repeats",
     type=int,
     default=5,
     help="Number of times to try generating each MUS",
+)
+
+parser.add_argument(
+    "--multiple",
+    action="store_true",
+    help="Look (harder) for multiple choices at each step -- this biases the algorithm, but is not absolute"
 )
 
 parser.add_argument(
@@ -99,6 +109,12 @@ if args.eprime is not None and args.eprimeparam is None:
     print("--eprime requires --eprimeparam")
     sys.exit(1)
 
+if args.info:
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(levelname)s:%(pathname)s:%(lineno)d:%(name)s:%(message)s",
+    )
+
 if args.debuginfo:
     logging.basicConfig(
         level=logging.DEBUG,
@@ -106,7 +122,7 @@ if args.debuginfo:
     )
 
 demystify.config.LoadConfigFromDict(
-    {"repeats": args.repeats, "cores": args.cores}
+    {"repeats": args.repeats, "cores": args.cores, "earlyExit": not args.multiple}
 )
 
 if args.forqes:

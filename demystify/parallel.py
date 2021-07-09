@@ -1,6 +1,8 @@
 import itertools
 import random
 import logging
+import sys
+
 from multiprocessing import Pool, Process, get_start_method, Queue
 
 from .config import CONFIG

@@ -3,6 +3,7 @@ import math
 import logging
 import sys
 import math
+import multiprocessing
 
 from sortedcontainers import *
 
@@ -123,8 +124,8 @@ def MUS(
                 break
 
         logging.debug(
-            "tryManyChop: %s %s %s %s %s",
-            squash,
+            "tryManyChop: %s %s %s %s %s %s",
+            assume, squash,
             step,
             loopsize,
             len(core),
@@ -133,7 +134,7 @@ def MUS(
 
         if loopsize <= 10:
             done = False
-            for tries in range(loopsize * 2):
+            for tries in range(loopsize):
                 r.shuffle(core)
                 newcore = solver.basicCore(smtassume + core[:-step])
                 if newcore is not None:
@@ -322,7 +323,7 @@ def MUS(
                 core = newcore
                 lens.append((lit, len(core)))
             else:
-                logging.debug("Failed to remove: %s", lit)
+                logging.debug("Failed to remove: %s (%d of %d)", lit, badcount, minsize)
                 badcount += 1
 
                 if badcount == minsize:
@@ -445,10 +446,20 @@ def checkWhichLitsAMUSProves(solver, puzlits, mus):
         return []
 
 
+MUSSizeFound = None
+MUSSizeRequired = None
+
 def _findSmallestMUS_func(tup):
     (p, randstr, minsize, config) = tup
+
+    logging.info("YY %s %s", MUSSizeFound.value, MUSSizeRequired.value)
+
+    if CONFIG["earlyExit"] and MUSSizeFound.value != -1 and MUSSizeFound.value <= MUSSizeRequired.value:
+        logging.info("Early Exit!")
+        return (p, None)
+
     # logging.info("Random str: '%s'", randstr)
-    return (
+    (ret, mus) = (
         p,
         MUS(
             randomFromSeed(randstr),
@@ -458,17 +469,26 @@ def _findSmallestMUS_func(tup):
             config=config,
         ),
     )
+    if mus is not None:
+        if MUSSizeFound.value == -1 or len(mus) < MUSSizeFound.value:
+            MUSSizeFound.value = len(mus)
+    return (ret, mus)
+
 
 
 def cascadeMUS(solver, puzlits, repeats, musdict, config):
     # We need this to be accessible by the pool
     setChildSolver(solver)
+    global MUSSizeFound, MUSSizeRequired
+    MUSSizeFound = multiprocessing.Value('l', -1)
+    MUSSizeRequired = multiprocessing.Value('l', 111)
 
     # Have to duplicate code, to swap loops around
     if CONFIG["resetSolverMUS"]:
         for minsize in range(
             config["baseSizeMUS"], max(config["baseSizeMUS"] + 1, 10000), 1
         ):
+            MUSSizeRequired.value = minsize
             with getPool(CONFIG["cores"]) as pool:
                 # Do 'range(repeats)' first, so when we distribute we get an
                 # even spread of literals on different cores minsize+1 for MUS
@@ -513,6 +533,7 @@ def cascadeMUS(solver, puzlits, repeats, musdict, config):
             for minsize in range(
                 config["baseSizeMUS"], max(config["baseSizeMUS"] + 1, 10000), 1
             ):
+                MUSSizeRequired.value = minsize
                 # Do 'range(repeats)' first, so when we distribute we get an 
                 # even spread of literals on different cores minsize+1 for MUS 
                 # size, as the MUS will include 'p'.
@@ -570,10 +591,14 @@ class CascadeMUSFinder:
                 distance=1,
             )
 
+        logging.info("Smallest MUS: %s ", musdict.minimum())
+
         # Early exit for trivial case
-        if musdict.minimum() == 1:
+        if musdict.minimum() <= 1:
             logging.info("Early exit from checkSmall1")
             return musdict
+
+        logging.info("Checking cache")
 
         if CONFIG["useCache"]:
             checkMUS(self._solver, puzlits, self._bestcache, musdict)
@@ -589,6 +614,7 @@ class CascadeMUSFinder:
             )
 
         if not CONFIG["checkSmall2"]:
+            logging.info("Running cascade algorithm")        
             cascadeMUS(
                 self._solver, puzlits, CONFIG["repeats"], musdict, CONFIG
             )
