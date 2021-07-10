@@ -70,6 +70,7 @@ class ForqesMUSFinder:
                 musdict,
                 repeats=CONFIG["smallRepeats"],
                 distance=1,
+                badlimit=3
             )
 
         # Early exit for trivial case

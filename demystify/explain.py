@@ -358,6 +358,8 @@ class Explainer(object):
         best_mus_stat = (math.inf, math.inf, math.inf)
         proven_dict = {}
 
+        checked = set([])
+
         for b in candidates:
             proven_dict[b] = {}
             for mus in mus_dict.get(b):
@@ -365,6 +367,11 @@ class Explainer(object):
                 mus_lits = SortedSet.union(
                     SortedSet(), *(SortedSet(m.lits()) for m in mus)
                 )
+
+                # TODO: Filter out duplicated MUSes
+                #if mus in checked:
+                #    continue
+                #checked.add(mus)
 
                 unexplained_in_mus = SortedSet(
                     p

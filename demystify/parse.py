@@ -254,30 +254,36 @@ def parse_essence(eprime, eprimeparam):
                 logging.debug("Could not evaluate " + cons[v])
                 constraintname = cons[v]
 
+            alreadyparsed = demystify.utils.checkConstraintAlreadyParsed(formula, varmap[v][k][1], constraintname)
 
-            connected = SortedSet(
-                lit
-                for s in demystify.utils.getConnectedVars(
-                    formula, varmap[v][k][1], varlits
-                )
-                for lit in invlitmap[s]
-            )
-
-            # Savilerow is too clever, so just put both negative + positive
-            # version of all literals in.
-            connected = connected.union(
-                SortedSet(lit.neg() for lit in connected)
-            )
-
-            # Skip constraints which do not include any variables
-            if len(connected) > 0:
-                logging.debug("Adding: " + constraintname)
-                constraintmap[
-                    demystify.base.DummyClause(constraintname, connected)
-                ] = varmap[v][k][1]
+            if alreadyparsed:
+                formula.append([-varmap[v][k][1]])
             else:
-                logging.debug("Skipping: " + constraintname)
-                formula.append([varmap[v][k][1]])
+                connected = SortedSet(
+                    lit
+                    for s in demystify.utils.getConnectedVars(
+                        formula, varmap[v][k][1], varlits
+                    )
+                    for lit in invlitmap[s]
+                )
+
+                # Savilerow is too clever, so just put both negative + positive
+                # version of all literals in.
+                connected = connected.union(
+                    SortedSet(lit.neg() for lit in connected)
+                )
+
+                assert len(connected) > 0
+
+                # Skip constraints which do not include any variables
+                if len(connected) > 0:
+                    logging.debug("Adding: " + constraintname)
+                    constraintmap[
+                        demystify.base.DummyClause(constraintname, connected)
+                    ] = varmap[v][k][1]
+                else:
+                    logging.debug("Skipping: " + constraintname)
+                    formula.append([varmap[v][k][1]])
 
     printvarlist = []
 
