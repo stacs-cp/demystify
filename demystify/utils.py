@@ -3,6 +3,7 @@ import itertools
 import resource
 import logging
 import sys
+import copy
 
 from sortedcontainers import *
 
@@ -142,6 +143,53 @@ def build_lit2conmap(clauses):
             lit2conmap[c[0]] = SortedSet()
             lit2conmap[-c[0]] = SortedSet()
     return lit2conmap
+
+def build_lit2clausemap(clauses):
+    litmap = dict()
+    for c in clauses:
+        for l in c:
+            if -l not in litmap:
+                litmap[-l] = []
+            litmap[-l].append(c)
+
+    return litmap
+
+# Check if this constraint is already known
+# We classify a constraint as 'known' if the clauses
+# it appears in are all the same as a pre-existing clause
+def checkConstraintAlreadyParsed(formula, con, name):
+    if not hasattr(formula, "lit2conmap"):
+        formula.lit2clausemap = build_lit2clausemap(formula.clauses)
+
+    lit2clausemap = formula.lit2clausemap
+
+    if not hasattr(formula, "concollection"):
+        formula.concollection = {}
+
+    if con not in lit2clausemap:
+        logging.debug("Constraint never mentioned: %s", name)
+        return True
+
+    # Generate clauses, normalising the 'constraint' variable
+    logging.debug("Check: %s", lit2clausemap[con])
+
+    # x*2 just to make sure we can use 1/-1 to normalise the constraint
+    concpy = tuple(SortedSet([tuple(SortedSet([1 if x == con else -1 if x == -con else x*2 for x in c])) for c in lit2clausemap[con]]))
+
+
+    logging.debug("Check2: %s", concpy)
+
+    if concpy == () or concpy==((-1,1),):
+        logging.debug("Constraint never used: %s", name)
+        return True
+
+    if concpy in formula.concollection:
+        logging.info("duplicate found: %s = %s", name, formula.concollection[concpy])
+        return True
+    else:
+        formula.concollection[concpy] = name
+        return False
+
 
 
 def getConnectedVars(formula, con, varlits_in):

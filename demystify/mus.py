@@ -15,7 +15,7 @@ from .musdict import MusDict
 # This calculates Minimum Unsatisfiable Sets
 # It uses internals from solver, but is put in another file just for "neatness"
 
-def tinyMUS(solver, assume, distance):
+def tinyMUS(solver, assume, distance, badlimit):
     smtassume = [solver._varlit2smtmap[l] for l in assume]
     if distance == 1:
         cons = flatten([solver._varlit2con[l] for l in assume])
@@ -39,10 +39,11 @@ def tinyMUS(solver, assume, distance):
                 core = newcore
             else:
                 badcount += 1
-                if badcount > 5:
-                    logging.info("ZZ %s %s", lit, len(core))
+                if badcount > badlimit:
+                    logging.info("ZZFail %s %s %s", lit, len(core), badcount)
                     return None
 
+    logging.info("ZZPass %s %s %s", lit, len(core), badcount)
     return [solver._conmap[x] for x in core if x in solver._conmap]
 
 
@@ -370,11 +371,11 @@ def MUS(
 
 
 def _parfunc_dotinymus(args):
-    (p, distance) = args
-    return (p, tinyMUS(getChildSolver(), [p.neg()], distance))
+    (p, distance, badlimit) = args
+    return (p, tinyMUS(getChildSolver(), [p.neg()], distance, badlimit))
 
 
-def getTinyMUSes(solver, puzlits, musdict, *, distance, repeats):
+def getTinyMUSes(solver, puzlits, musdict, *, distance, repeats, badlimit):
     setChildSolver(solver)
     logging.info(
         "Getting tiny MUSes, distance %s, for %s puzlits, %s repeats",
@@ -385,7 +386,7 @@ def getTinyMUSes(solver, puzlits, musdict, *, distance, repeats):
     with getPool(CONFIG["cores"]) as pool:
         res = pool.map(
             _parfunc_dotinymus,
-            [(p, distance) for r in range(repeats) for p in puzlits],
+            [(p, distance, badlimit) for r in range(repeats) for p in puzlits],
         )
         for (p, mus) in res:
             musdict.update(p, mus)
@@ -603,6 +604,7 @@ class CascadeMUSFinder:
                 musdict,
                 repeats=CONFIG["smallRepeats"],
                 distance=1,
+                badlimit=3
             )
 
         logging.info("Smallest MUS A: %s ", musdict.minimum())
@@ -620,6 +622,7 @@ class CascadeMUSFinder:
                 musdict,
                 repeats=CONFIG["smallRepeats"],
                 distance=999,
+                badlimit=CONFIG["baseSizeMUS"]*2
         )
 
         logging.info("Smallest MUS B: %s ", musdict.minimum())
@@ -642,6 +645,7 @@ class CascadeMUSFinder:
                 musdict,
                 repeats=CONFIG["smallRepeats"],
                 distance=2,
+                badlimit=5
             )
 
         if not CONFIG["checkSmall2"]:
