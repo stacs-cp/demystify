@@ -69,13 +69,16 @@ class MusDict(object):
             self.mus_dict[p] = [tuple(sorted(mus))]
 
         elif p in self.mus_dict and len(self.mus_dict[p][0]) == len(mus):
-            logging.info(
-                "XX add new best {} {} {}".format(
-                    p, len(self.mus_dict[p][0]), len(mus)
+            newmus = tuple(sorted(mus))
+            if not (newmus in self.mus_dict[p]):
+                logging.info(
+                    "XX add another new best {} {} {}".format(
+                        p, len(self.mus_dict[p][0]), len(self.mus_dict[p])
+                    )
                 )
-            )
-
-            self.mus_dict[p].append(tuple(sorted(mus)))
+                self.mus_dict[p].append(tuple(sorted(mus)))
+            else:
+                logging.info("XX find duplicate {}".format(p))
 
         else:
             assert len(self.mus_dict[p][0]) < len(mus)
