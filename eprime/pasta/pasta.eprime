@@ -1,0 +1,106 @@
+language ESSENCE' 1.0
+
+$ From the original pasta problem https://bartbog.github.io/zebra/pasta/
+
+letting angie be 1
+letting damon be 2
+letting claudia be 3
+letting elisa be 4
+
+letting other be 5
+letting arrabiata be 6
+letting marinara be 7
+letting puttanesca be 8
+
+letting capellini be 9
+letting farfalle be 10
+letting tagliolini be 11
+letting rotini be 12
+
+letting sauce be 0
+letting pasta be 1
+letting price be 2
+
+letting peeps be domain int(angie..elisa)
+letting sauces be domain int(other..puttanesca)
+letting pastas be domain int(capellini..rotini)
+letting prices be domain int(4,8,12,16)
+
+$peeps[sauces, pastas, prices]
+$#VAR grid
+find grid: matrix indexed by [peeps,int(0..2)] of int(4..16)
+
+$#CON con1 "The person who ordered capellini paid less than the person who chose arrabiata sauce"
+find con1 : bool
+$#CON con2 "The person who ordered tagliolini paid more than Angie"
+find con2 : bool
+$#CON con3 "The person who ordered tagliolini paid less than the person who chose marinara sauce"
+find con3 : bool
+$#CON con4 "Claudia did not choose puttanesca sauce"
+find con4 : bool
+$#CON con5 "The person who ordered rotini is either the person who paid $8 more than Damon or the person who paid $8 less than Damon"
+find con5 : bool
+$#CON con6 "The person who ordered capellini is either Damon or Claudia"
+find con6 : bool
+$#CON con7 "The person who chose arrabiata sauce is either Angie or Elisa"
+find con7 : bool
+$#CON con8 "The person who chose arrabiata sauce ordered farfalle"
+find con8 : bool
+
+$| 5..8 | 9..12 | 4,8,12,16 |
+$| 5..8 | 9..12 | 4,8,12,16 |
+$| 5..8 | 9..12 | 4,8,12,16 |
+$| 5..8 | 9..12 | 4,8,12,16 |
+such that
+
+$ everyone had something different
+alldifferent(grid[..,sauce]),
+alldifferent(grid[..,pasta]),
+alldifferent(grid[..,price]),
+
+$ this is beautiful <3
+forall row : peeps.
+    grid[row,sauce] in sauces /\
+    grid[row,pasta] in pastas /\
+    grid[row,price] in prices,
+
+$ The person who chose arrabiata sauce ordered farfalle
+con8 -> 
+(exists p: peeps.
+    grid[p,sauce] = arrabiata /\ grid[p,pasta] = farfalle),
+
+$ The person who chose arrabiata sauce is either Angie or Elisa
+con7 -> (grid[angie,sauce] = arrabiata \/ grid[elisa,sauce] = arrabiata),
+
+$ The person who ordered capellini is either Damon or Claudia
+con6 -> (grid[damon,pasta] = capellini \/ grid[claudia,pasta] = capellini),
+
+$ Claudia did not choose puttanesca sauce
+con4 -> (grid[claudia,sauce] != puttanesca),
+
+$The person who ordered rotini is either the person who paid $8 more than Damon or the person who paid $8 less than Damon
+con5 -> (exists p: peeps.
+    grid[p,pasta] = rotini /\ 
+    (grid[p,price] = grid[damon,price] + 8  \/ grid[p,price] = grid[damon,price] - 8)),
+
+$ The person who ordered tagliolini paid less than the person who chose marinara sauce
+con3 -> (exists p, q: peeps.
+    grid[q,sauce] = marinara /\
+    grid[p,pasta] = tagliolini /\ 
+    grid[p,price] < grid[q,price]),
+
+$ The person who ordered capellini paid less than the person who chose arrabiata sauce
+con1 -> (exists p, q: peeps.
+    grid[q,sauce] = arrabiata /\
+    grid[p,pasta] = capellini /\ 
+    grid[p,price] < grid[q,price]),
+
+$ The person who ordered tagliolini paid more than Angie
+con2 -> (exists p: peeps.
+    grid[p,pasta] = tagliolini /\
+    grid[p,price] > grid[angie,price]),
+
+$ make sure the problem is correct
+$con1 /\ con2 /\ con3 /\ con4 /\ con5 /\ con6 /\ con7 /\ con8,
+
+true
