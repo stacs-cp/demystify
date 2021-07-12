@@ -146,11 +146,7 @@ else:
 
 f = open(output_path, "w")
 
-output = {
-    "name": name,
-    "params": explainer.params,
-    "steps": explainer.explain_steps(),
-}
+output = explainer.explain_steps()
 
 f.write(json.dumps(output))
 
