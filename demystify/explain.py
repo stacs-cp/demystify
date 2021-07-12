@@ -22,8 +22,8 @@ class ExplainError(Exception):
 
 
 class Explainer(object):
-    def __init__(self, mus_finder=None, merge=1, skip=0, debug=False):
-        self.steps_explained = 0
+    def __init__(self, mus_finder=None, merge=1, skip=0, debug=False, steps_explained=0):
+        self.steps_explained = steps_explained
         self.mus_finder_name = mus_finder
         self.merge = merge
         self.skip = skip
@@ -38,6 +38,7 @@ class Explainer(object):
         self.puzzle = None
         self.solver = None
         self.solution = None
+        self.explained = []
 
     def init_from_json(self, puzzle_json):
         self.puzzle, self.solver = parse_json(puzzle_json)
@@ -199,6 +200,7 @@ class Explainer(object):
             # Tell we solver we know this
             self.solver.addLit(p)
             # Remove from the things we have to calculate
+            self.explained.append(p)
             self.unexplained.remove(p)
 
     def _get_step_dict(self, proven_lits, mus):
