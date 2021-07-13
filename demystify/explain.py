@@ -166,6 +166,11 @@ class Explainer(object):
 
     def get_choices(self):
         mus_dict = self.mus_finder.smallestMUS(self.unexplained)
+        smallest = mus_dict.minimum()
+
+        if smallest <= self.merge:
+            return {"name": self.name, "params": self.params, "steps": []}
+            
         choices_explanations, _ = self._choices_list(mus_dict)
         return {"name": self.name, "params": self.params, "steps": [choices_explanations]}
     
