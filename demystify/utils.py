@@ -121,11 +121,12 @@ def parseSavileRowName(vars, auxvars, n):
     splits = n.split("_")
     args = []
     for arg in splits:
-        if arg.startswith("n"):
-            c = -1 * int(arg[1:])
-        else:
-            c = str(int(arg))
-        args.append(c)
+        if arg != "":
+            if arg.startswith("n"):
+                c = -1 * int(arg[1:])
+            else:
+                c = str(int(arg))
+            args.append(c)
     return (varmatch, tuple(args))
 
 
