@@ -147,7 +147,7 @@ class Explainer(object):
 
             if mus_choice is not None:
                 best_proven_lits = proven_lit_choices[mus_choice]
-                best_mus = mus_dict.get(lit_choices[mus_choice])
+                best_mus = mus_dict.get(lit_choices[mus_choice])[0]
             else:
                 (
                     best_lit,
