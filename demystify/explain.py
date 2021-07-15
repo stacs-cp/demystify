@@ -147,7 +147,7 @@ class Explainer(object):
 
             if mus_choice is not None:
                 best_proven_lits = proven_lit_choices[mus_choice]
-                best_mus = mus_dict.get(lit_choices[mus_choice])
+                best_mus = mus_dict.get(lit_choices[mus_choice])[0]
             else:
                 (
                     best_lit,
@@ -166,6 +166,11 @@ class Explainer(object):
 
     def get_choices(self):
         mus_dict = self.mus_finder.smallestMUS(self.unexplained)
+        smallest = mus_dict.minimum()
+
+        if smallest <= self.merge:
+            return {"name": self.name, "params": self.params, "steps": []}
+            
         choices_explanations, _ = self._choices_list(mus_dict)
         return {"name": self.name, "params": self.params, "steps": [choices_explanations]}
     
