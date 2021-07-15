@@ -1,0 +1,80 @@
+language ESSENCE' 1.0
+
+$ From the original origin problem https://bartbog.github.io/zebra/origin/
+
+letting other_name be 1
+letting mattie be 2
+letting ernesto be 3
+letting roxanne be 4
+letting zachary be 5
+
+letting other_place be 6
+letting oregon be 7
+letting kansas be 8
+letting washington be 9
+letting alaska be 10
+
+letting other_city be 11
+letting shaver_lake be 12
+letting plymouth be 13
+letting zearing be 14
+letting tehama be 15
+
+letting place be 0
+letting city be 1
+letting age be 2
+
+letting peeps be domain int(other_name..zachary)
+letting places be domain int(other_place..alaska)
+letting cities be domain int(other_city..tehama)
+letting ages be domain int(109..113)
+
+find grid: matrix indexed by [peeps, int(0..2)] of int(6..113)
+
+such that 
+    allDiff(grid[..,place]),
+    allDiff(grid[..,city]),
+    allDiff(grid[..,age]),
+forall row : peeps.
+    grid[row, place] in places /\ grid[row,city] in cities /\ grid[row,age] in ages,
+
+$ Mattie is 113 years old
+    grid[mattie,age] = 113,
+
+$ The person who is 111 years old doesn't live in Plymouth
+    exists p : peeps.
+        grid[p,age] = 111 /\ grid[p,city] != plymouth,
+
+$ The person who lives in Shaver Lake is 1 year younger than Roxanne
+    exists p : peeps.
+        grid[p,city] = shaver_lake /\ grid[p,age] = grid[roxanne,age] - 1,
+
+$ The person who lives in Zearing isn't a native of Alaska
+    exists p : peeps.
+        grid[p,city] = zearing /\ grid[p,place] != alaska,
+ 
+$ Roxanne is 2 years younger than the Kansas native
+    exists p : peeps.
+        grid[p,place] = kansas /\ grid[p,age] = grid[roxanne,age] + 2,
+
+$ Of the person who lives in Tehama and Mattie, one is a native of Alaska and the other is from Kansas
+    exists p : peeps.
+        grid[p,city] = tehama /\ ((grid[mattie,place] = alaska /\ grid[p,place] = kansas) \/ (grid[mattie,place] = kansas /\ grid[p,place] = alaska)),
+
+$ The centenarian who lives in Plymouth isn't a native of Alaska
+    exists p : peeps.
+        grid[p,city] = plymouth /\ grid[p,place] != alaska,
+
+$ The Washington native is 1 year older than Ernesto
+    exists p : peeps.
+        grid[p,place] = washington /\ grid[p,age] = grid[ernesto,age] + 1,
+
+$ The person who lives in Tehama is a native of either Kansas or Oregon
+    exists p : peeps.
+        grid[p,city] = tehama /\ ((grid[p,place] = kansas) \/ (grid[p,place] = oregon)),
+
+$ The Oregon native is either Zachary or the person who lives in Tehama
+    exists p : peeps.
+        grid[p,place] = oregon /\ ((p = zachary) \/ (grid[p,city] = tehama)),
+
+true
