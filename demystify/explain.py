@@ -85,6 +85,9 @@ class Explainer(object):
                 else:
                     steps.append(self.explain_step(self))
 
+        if len(self.unexplained) == 0:
+            steps.append(self.get_solved_step())
+
         return {"name": self.name, "params": self.params, "steps": steps}
 
     def explain_step(self, lit_choice=None, mus_choice=None, update=True):
@@ -174,6 +177,15 @@ class Explainer(object):
         choices_explanations, _ = self._choices_list(mus_dict)
         return {"name": self.name, "params": self.params, "steps": [choices_explanations]}
     
+    def get_solved_step(self):
+        step_dict = {}
+        step_dict["stepNumber"] = self.steps_explained + 1
+        step_dict["puzzleState"] = self._get_puzzle_state([], [])
+        step_dict["deduction"] = {"decision": "Puzzle solved!", "reason": []}
+        step_dict["smallestMUSSize"] = 0
+        self.steps_explained += 1
+        return step_dict
+
     def _choices_list(self, mus_dict):
         smallest = mus_dict.minimum()
         choices = []
