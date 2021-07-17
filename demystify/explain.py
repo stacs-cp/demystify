@@ -5,6 +5,7 @@ import os
 from .parse import parse_json, parse_essence
 from .mus import CascadeMUSFinder, checkWhichLitsAMUSProves
 from .musforqes import ForqesMUSFinder
+# from .musocus2 import OcusMUSFinder
 from .utils import flatten, in_flattened, intsqrt, lowsqrt
 from .base import EqVal, NeqVal
 
@@ -424,5 +425,7 @@ class Explainer(object):
     def _set_mus_finder(self):
         if self.mus_finder_name == "forqes":
             self.mus_finder = ForqesMUSFinder(self.solver)
+        # elif self.mus_finder_name == "ocus":
+        #     self.mus_finder = OcusMUSFinder(self.solver)
         else:
             self.mus_finder = CascadeMUSFinder(self.solver)

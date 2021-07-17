@@ -126,7 +126,7 @@ demystify.config.LoadConfigFromDict(
 )
 
 if args.forqes:
-    mus_finder = "forqes"
+    mus_finder = "ocus"
 else:
     mus_finder = "cascade"
 
