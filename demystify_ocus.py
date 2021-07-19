@@ -21,12 +21,18 @@ from pysat.formula import CNF
 
 import signal
 
-def fromEprime(eprime, eprimeparam):
+def from_eprime(eprime, eprimeparam):
+    """
+        fromEprime: Takes a .eprime puzzle description and a .param puzzle instance
+        and parses it using the Demystify tool. The relevant internals from the Demystify
+        solver are then extracted for use by pyexplain. 
+    """
     exp = explain.Explainer()
     exp.init_from_essence(eprime, eprimeparam)
+    
     p_clauses = exp.solver._cnf.clauses
     p_ass = [[c] for c in exp.solver._conlits]
-    p_weights = {c:20 for c in exp.solver._conlits}
+    p_weights = {c:20 for c in exp.solver._conlits} # Demystify has no weighting so weight everything equally.
     p_user_vars = exp.solver._varsmt
 
     return p_clauses, p_ass, p_weights, p_user_vars, None, exp
@@ -53,8 +59,9 @@ def timeoutHandler(signum, frame):
 def runpuzzle(params, eprime=None, eprimeparam=None):
     assert isinstance(params, (COusParams, COusNonIncrParams, OusIncrNaiveParams, OusIncrSharedParams, OusParams, MUSParams)), f"Wrong type of parameters= {type(params)}"
 
+    # Convert from demystify input
     if eprime is not None and eprimeparam is not None:
-        p_clauses, p_ass, p_weights, p_user_vars, matching_table, demystify_explainer = fromEprime(eprime, eprimeparam)
+        p_clauses, p_ass, p_weights, p_user_vars, matching_table, demystify_explainer = from_eprime(eprime, eprimeparam)
     else:
         # puzzle instance to test
         puzzleFun = puzzle_funs[params.instance]
@@ -109,9 +116,15 @@ def runpuzzle(params, eprime=None, eprimeparam=None):
 
         expl_computer.export_statistics(params=params, fname=params.output)
 
+    # Allow the pyexplain explanations to be viewable in the Demystify Visualiser
     convert_to_demystify_output(expl_computer.E, demystify_explainer, params.output)
 
 def convert_to_demystify_output(p_output, exp, outputfile):
+    """
+        convert_to_demystify_output: Takes the Demystify solver (exp) and the 
+        dict produced by pyexplain (p_output) and creates a JSON file readable by the
+        Demystify Visualiser.
+    """
     output_dict = {"name": exp.name, "params": exp.params, "steps": []}
     
     for p_step in p_output:
@@ -122,9 +135,6 @@ def convert_to_demystify_output(p_output, exp, outputfile):
             else:
                 proven_lits.append(exp.solver._varsmt2neglitmap[-l][0])
         
-        # proven_pos_lits = [exp.solver._varsmt2litmap[l][0] for l in p_step["derived"] if l in exp.solver._varsmt2litmap]
-        # proven_neg_lits = [exp.solver._varsmt2neglitmap[-l][0] for l in p_step["derived"] if -l in exp.solver._varsmt2neglitmap]
-        # proven_lits = proven_pos_lits + proven_neg_lits
         mus = [exp.solver._conmap[x] for x in p_step["constraints"] if x in exp.solver._conmap]
         output_dict["steps"].append(exp._get_step_dict(proven_lits, mus))
         exp._add_known(proven_lits)
