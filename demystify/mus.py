@@ -8,7 +8,7 @@ import multiprocessing
 from sortedcontainers import *
 
 from .utils import flatten, randomFromSeed, safepow
-from .config import CONFIG
+from .config import CONFIG, EXPCONFIG
 from .parallel import getPool, setChildSolver, getChildSolver
 from .musdict import MusDict
 
@@ -55,7 +55,7 @@ def MUS(
 ):
     smtassume = [solver._varlit2smtmap[a] for a in assume]
 
-    if config["dumpSAT"]:
+    if EXPCONFIG["dumpSAT"]:
         global count
         count += 1
         solver._solver.dumpSAT(
@@ -494,7 +494,7 @@ def cascadeMUS(solver, puzlits, repeats, musdict, config):
     MUSSizeRequired = multiprocessing.Value('l', 111)
 
     # Have to duplicate code, to swap loops around
-    if CONFIG["resetSolverMUS"]:
+    if EXPCONFIG["resetSolverMUS"]:
         for minsize in range(
             config["baseSizeMUS"], max(config["baseSizeMUS"] + 1, 10000), 1
         ):
@@ -634,7 +634,7 @@ class CascadeMUSFinder:
 
         logging.info("Checking cache")
 
-        if CONFIG["useCache"]:
+        if EXPCONFIG["useCache"]:
             checkMUS(self._solver, puzlits, self._bestcache, musdict)
 
         if CONFIG["checkSmall2"]:
@@ -656,7 +656,7 @@ class CascadeMUSFinder:
         else:
             logging.info("Early exit: skipping cascade")
 
-        if CONFIG["useCache"]:
+        if EXPCONFIG["useCache"]:
             # Only store first element, to stop excessive growth
             self._bestcache = copy.deepcopy(musdict)
 

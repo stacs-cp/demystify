@@ -5,7 +5,7 @@ import sys
 
 from multiprocessing import Pool, Process, get_start_method, Queue
 
-from .config import CONFIG
+from .config import EXPCONFIG
 from .utils import randomFromSeed
 
 # Needs to be global so we can call it from a child process
@@ -63,7 +63,7 @@ def getPool(cores):
     if cores <= 1:
         return FakePool()
     else:
-        if CONFIG["reusePool"]:
+        if EXPCONFIG["reusePool"]:
             global _reuse_process_pool
             if _reuse_process_pool is None:
                 _reuse_process_pool = ProcessPool(processes=cores, reuse=True)

@@ -10,7 +10,7 @@ from .utils import flatten, chainlist, randomFromSeed
 
 from .base import EqVal, NeqVal
 
-from .config import CONFIG
+from .config import CONFIG, EXPCONFIG
 
 # A variable is a dictionary mapping values to their SAT variable
 
@@ -23,7 +23,7 @@ class Solver:
         assert puzzle is not None
 
         self._puzzle = puzzle
-        if CONFIG["solver"] == "z3":
+        if EXPCONFIG["solver"] == "z3":
             self._solver = Z3Solver()
         else:
             self._solver = SATSolver()
@@ -115,7 +115,7 @@ class Solver:
         self.init_litmappings()
 
     def init_fromCNF(self, cnf, litmap, conmap):
-        assert CONFIG["solver"] != "z3"
+        assert EXPCONFIG["solver"] != "z3"
         self._solver = SATSolver(cnf)
         self._cnf = cnf
         for (lit, b) in litmap.items():
@@ -250,7 +250,7 @@ class Solver:
         solve = self._solver.solveLimited(lits)
         if solve is True or solve is None:
             return None
-        if CONFIG["useUnsatCores"]:
+        if EXPCONFIG["useUnsatCores"]:
             core = self._solver.unsat_core()
             assert SortedSet(core).issubset(SortedSet(lits))
         else:

@@ -4,7 +4,7 @@ from sortedcontainers import *
 
 from pysat.solvers import Solver
 from ..utils import chainlist, get_cpu_time, randomFromSeed
-from ..config import CONFIG
+from ..config import EXPCONFIG
 
 import pysat
 import inspect
@@ -18,19 +18,19 @@ import random
 class SATSolver:
     def __init__(self, cnf=None):
         if cnf is None:
-            self._solver = Solver(name=CONFIG["solver"], incr=CONFIG["solverIncremental"])
+            self._solver = Solver(name=EXPCONFIG["solver"], incr=EXPCONFIG["solverIncremental"])
             self._boolcount = 1
             self._clauses = []
         else:
             self._boolcount = cnf.nv
-            self._solver = Solver(name=CONFIG["solver"], incr=CONFIG["solverIncremental"],bootstrap_with=cnf.clauses)
+            self._solver = Solver(name=EXPCONFIG["solver"], incr=EXPCONFIG["solverIncremental"],bootstrap_with=cnf.clauses)
             self._clauses = cnf.clauses
                     
 
         self._stack = []
         self._boolnames = {}
         self._knownlits = SortedSet()
-        if CONFIG["dumpSAT"]:
+        if EXPCONFIG["dumpSAT"]:
             assert(cnf is None)
             self._rawclauses = []
         self._lasttime = -1
@@ -51,7 +51,7 @@ class SATSolver:
 
     def addConstraint(self, clause):
         self._clauses.append(clause)
-        if CONFIG["dumpSAT"]:
+        if EXPCONFIG["dumpSAT"]:
             self._rawclauses.append(clause)
         self._solver.add_clause(clause)
 
@@ -59,19 +59,19 @@ class SATSolver:
         for c in clauses:
             self._clauses.append(c + [-var])
             self._solver.add_clause(c + [-var])
-            if CONFIG["dumpSAT"]:
+            if EXPCONFIG["dumpSAT"]:
                 assert len(clauses) == 1
                 self._rawclauses.append(c)
 
     # Recreate solver, throwing away all learned clauses
     def reboot(self, seed):
         self._solver.delete()
-        if CONFIG["changeSolverSeed"]:
+        if EXPCONFIG["changeSolverSeed"]:
             import pysolvers
             assert pysolvers.glucose41_set_argc(["-rnd-seed="+ str(seed)])
         self._solver = Solver(
-            name=CONFIG["solver"],
-            incr=CONFIG["solverIncremental"],
+            name=EXPCONFIG["solver"],
+            incr=EXPCONFIG["solverIncremental"],
             bootstrap_with=randomFromSeed(seed).sample(self._clauses, len(self._clauses))
         )
     
@@ -99,7 +99,7 @@ class SATSolver:
         # if multiprocessing.current_process().name == "MainProcess":
         #    print("!! solving in the main thread")
         #    traceback.print_stack()
-        if CONFIG["resetSolverFull"]:
+        if EXPCONFIG["resetSolverFull"]:
             self.reboot()
 
         start_time = get_cpu_time()
@@ -121,13 +121,13 @@ class SATSolver:
         # if multiprocessing.current_process().name == "MainProcess":
         #    print("!! solveLimited in the main thread")
         #    traceback.print_stack()
-        if CONFIG["resetSolverFull"]:
+        if EXPCONFIG["resetSolverFull"]:
             self.reboot()
 
         start_time = get_cpu_time()
         start_stats = self._solver.accum_stats()
-        if CONFIG["solveLimited"]:
-            self._solver.prop_budget(CONFIG["solveLimitedBudget"])
+        if EXPCONFIG["solveLimited"]:
+            self._solver.prop_budget(EXPCONFIG["solveLimitedBudget"])
             x = self._solver.solve_limited(assumptions=chainlist(lits, self._knownlits))
         else:
             x = self._solver.solve(assumptions=chainlist(lits, self._knownlits))
@@ -192,7 +192,7 @@ class SATSolver:
 
     def set_phases(self, positive, negative):
         # TODO: Ignore the positive ones seems to be best
-        if CONFIG["setPhases"]:
+        if EXPCONFIG["setPhases"]:
             l = [-x for x in negative]
             self._solver.set_phases(l)
 

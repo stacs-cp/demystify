@@ -6,8 +6,6 @@ from typing import Sequence
 
 from .utils import flatten
 
-from .config import CONFIG
-
 from sortedcontainers import *
 
 
