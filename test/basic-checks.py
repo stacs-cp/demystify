@@ -61,9 +61,7 @@ def doSingleStep(delvals, target):
     logging.info("Full Trace %s", trace)
 
 
-for oneclause in [False]: # TODO: Fix oneclause = true
-    print("<hr><h1>Setting 'OneClauseAtMost' to", oneclause, "</h1>")
-    demystify.config.LoadConfigFromDict({"OneClauseAtMost": oneclause})
+for oneclause in [False]: 
 
     print("<hr><h2>Hidden Single</h2>")
     doSingleStep([((0, i), [1]) for i in range(8)], ((0, 8), 1))

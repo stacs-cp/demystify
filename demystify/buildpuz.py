@@ -68,22 +68,8 @@ def buildDiffBy(name, c1, c2, diff, dom):
 
 def buildCage(name, cells, dom):
     constraints = []
-    if CONFIG["OneClauseAtMost"]:
-        for v in dom:
-            constraints.append(
-                ClauseList(
-                    "At most one cell in {} can be {}".format(name, v),
-                    [
-                        [NeqVal(c1, v), NeqVal(c2, v)]
-                        for (c1, c2) in itertools.combinations(cells, 2)
-                    ],
-                    [EqVal(c, v) for c in cells],
-                    [str(c) for c in cells],
-                )
-            )
-    else:
-        for (c1, c2) in itertools.combinations(cells, 2):
-            constraints += buildNeq(name, c1, c2, dom)
+    for (c1, c2) in itertools.combinations(cells, 2):
+        constraints += buildNeq(name, c1, c2, dom)
 
     for v in dom:
         constraints.append(

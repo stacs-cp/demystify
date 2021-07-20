@@ -17,8 +17,6 @@ CONFIG = {
     "smallRepeats": 1,
     # How many times to try looking for each size of core
     "repeats": 2,
-    # Encode "at most one thing is true" as a single clause
-    "OneClauseAtMost": False,
     # Limit search to searchLimitedBudget conflicts
     "solveLimited": True,
     "solveLimitedBudget": 10000,
