@@ -9,7 +9,6 @@ from pysat.formula import WCNF
 from .mus import getTinyMUSes
 from .optuxext import OptUxExt
 from .utils import flatten
-from .config import CONFIG
 from .musdict import MusDict
 from .parallel import (
     getPool,
@@ -24,7 +23,8 @@ from .parallel import (
     find the smallest MUSs (as an alternative to CascadeMUSFinder).
 """
 class ForqesMUSFinder:
-    def __init__(self, solver):
+    def __init__(self, solver, *, config):
+        self.config = config
         self._solver = solver
         self._bestcache = {}
 
@@ -62,15 +62,16 @@ class ForqesMUSFinder:
         musdict = MusDict({})
 
         # Heuristic check for MUSes of size 1.
-        if CONFIG["checkSmall1"]:
+        if self.config["checkSmall1"]:
             logging.info("Doing checkSmall1")
             getTinyMUSes(
                 self._solver,
                 puzlits,
                 musdict,
-                repeats=CONFIG["smallRepeats"],
+                repeats=self.config["smallRepeats"],
                 distance=1,
-                badlimit=3
+                badlimit=3,
+                config=self.config
             )
 
         # Early exit for trivial case
@@ -79,7 +80,7 @@ class ForqesMUSFinder:
             return musdict
 
         # Otherwise, main FORQES loop.
-        forqesMUS(self._solver, self._forqes, puzlits, musdict, CONFIG)
+        forqesMUS(self._solver, self._forqes, puzlits, musdict, self.config)
 
         return musdict
 
@@ -97,7 +98,7 @@ def forqesMUS(solver, forqes, puzlits, musdict, config):
 
     maxSize = 1
     while True:
-        with getPool(CONFIG["cores"]) as pool:
+        with getPool(config["cores"]) as pool:
             res = pool.map(
                 _findSmallestMUS_func, [(p, config, maxSize) for p in puzlits]
             )

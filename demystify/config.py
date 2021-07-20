@@ -65,6 +65,9 @@ CONFIG = {
     "minPrecheckStepsMUS": False,
 }
 
+def getDefaultConfig():
+    global CONFIG
+    return CONFIG
 
 def LoadConfigFromDict(dict):
     global CONFIG

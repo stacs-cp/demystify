@@ -8,6 +8,8 @@ from .musforqes import ForqesMUSFinder
 from .utils import flatten, in_flattened, intsqrt, lowsqrt
 from .base import EqVal, NeqVal
 
+from .config import getDefaultConfig
+
 from sortedcontainers import SortedSet
 
 from demystify import mus
@@ -403,7 +405,7 @@ class Explainer(object):
                 if (len(mus), len(unexplained_in_mus)) < best_mus_stat:
                     proven_lits = SortedSet(
                         checkWhichLitsAMUSProves(
-                            self.solver, unexplained_in_mus, mus
+                            self.solver, unexplained_in_mus, mus, getDefaultConfig()
                         )
                     ).union(SortedSet([b]))
                 else:
@@ -422,7 +424,8 @@ class Explainer(object):
         return best_lit, best_mus, best_proven_lits, proven_dict
 
     def _set_mus_finder(self):
+        config = getDefaultConfig()
         if self.mus_finder_name == "forqes":
-            self.mus_finder = ForqesMUSFinder(self.solver)
+            self.mus_finder = ForqesMUSFinder(self.solver, config=config)
         else:
-            self.mus_finder = CascadeMUSFinder(self.solver)
+            self.mus_finder = CascadeMUSFinder(self.solver, config=config)

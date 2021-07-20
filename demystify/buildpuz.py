@@ -4,7 +4,6 @@ from sortedcontainers import *
 from itertools import combinations
 from demystify.base import *
 from demystify.utils import intsqrt
-from demystify.config import CONFIG
 
 
 def buildNeq(name, c1, c2, dom):

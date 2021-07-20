@@ -43,7 +43,6 @@ for solvername in ["cd", "g3", "g4", "lgl", "mcb", "mcm", "mpl", "mc", "m22", "m
         {
             "solver": solvername,
             "solverIncremental": False,
-            "setPhases": False,
             "solveLimited": False,
             "cores": 4, "repeats": 5
         }

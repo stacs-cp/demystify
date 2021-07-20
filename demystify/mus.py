@@ -8,14 +8,14 @@ import multiprocessing
 from sortedcontainers import *
 
 from .utils import flatten, randomFromSeed, safepow
-from .config import CONFIG, EXPCONFIG
+from .config import EXPCONFIG
 from .parallel import getPool, setChildSolver, getChildSolver
 from .musdict import MusDict
 
 # This calculates Minimum Unsatisfiable Sets
 # It uses internals from solver, but is put in another file just for "neatness"
 
-def tinyMUS(solver, assume, distance, badlimit):
+def tinyMUS(solver, assume, distance, badlimit, config):
     smtassume = [solver._varlit2smtmap[l] for l in assume]
     if distance == 1:
         cons = flatten([solver._varlit2con[l] for l in assume])
@@ -371,11 +371,11 @@ def MUS(
 
 
 def _parfunc_dotinymus(args):
-    (p, distance, badlimit) = args
-    return (p, tinyMUS(getChildSolver(), [p.neg()], distance, badlimit))
+    (p, distance, badlimit, config) = args
+    return (p, tinyMUS(getChildSolver(), [p.neg()], distance, badlimit, config))
 
 
-def getTinyMUSes(solver, puzlits, musdict, *, distance, repeats, badlimit):
+def getTinyMUSes(solver, puzlits, musdict, *, distance, repeats, badlimit, config):
     setChildSolver(solver)
     logging.info(
         "Getting tiny MUSes, distance %s, for %s puzlits, %s repeats",
@@ -383,17 +383,17 @@ def getTinyMUSes(solver, puzlits, musdict, *, distance, repeats, badlimit):
         len(puzlits),
         repeats,
     )
-    with getPool(CONFIG["cores"]) as pool:
+    with getPool(config["cores"]) as pool:
         res = pool.map(
             _parfunc_dotinymus,
-            [(p, distance, badlimit) for r in range(repeats) for p in puzlits],
+            [(p, distance, badlimit, config) for r in range(repeats) for p in puzlits],
         )
         for (p, mus) in res:
             musdict.update(p, mus)
 
 
 def _parfunc_docheckmus(args):
-    (p, oldmus) = args
+    (p, oldmus, config) = args
     return (
         p,
         MUS(
@@ -402,19 +402,19 @@ def _parfunc_docheckmus(args):
             [p.neg()],
             math.inf,
             initial_cons=oldmus,
-            config=CONFIG,
+            config=config,
         ),
     )
 
 
 # Check an existing dictionary. Reject any invalid MUS and squash any good MUS
-def checkMUS(solver, puzlits, oldmus, musdict):
+def checkMUS(solver, puzlits, oldmus, musdict, config):
     setChildSolver(solver)
     if len(oldmus) > 0:
-        with getPool(CONFIG["cores"]) as pool:
+        with getPool(config["cores"]) as pool:
             res = pool.map(
                 _parfunc_docheckmus,
-                [(p, mus) for p in puzlits if oldmus.contains(p) for mus in oldmus.get(p)],
+                [(p, mus, config) for p in puzlits if oldmus.contains(p) for mus in oldmus.get(p)],
             )
             for (p, newmus) in res:
                 # print("!!! {} :: {}".format(oldmus[p], newmus))
@@ -423,7 +423,7 @@ def checkMUS(solver, puzlits, oldmus, musdict):
 
 
 def _parfunc_dochecklitsmus(args):
-    (p, oldmus) = args
+    (p, oldmus, config) = args
     return (
         p,
         MUS(
@@ -433,17 +433,17 @@ def _parfunc_dochecklitsmus(args):
             math.inf,
             initial_cons=oldmus,
             just_check=True,
-            config=CONFIG,
+            config=config,
         ),
     )
 
 
 # Check which literals are filtered by a particular MUS
-def checkWhichLitsAMUSProves(solver, puzlits, mus):
+def checkWhichLitsAMUSProves(solver, puzlits, mus, config):
     setChildSolver(solver)
     if len(puzlits) > 0:
-        with getPool(CONFIG["cores"]) as pool:
-            res = pool.map(_parfunc_dochecklitsmus, [(p, mus) for p in puzlits])
+        with getPool(config["cores"]) as pool:
+            res = pool.map(_parfunc_dochecklitsmus, [(p, mus, config) for p in puzlits])
             return list(p for (p, musvalid) in res if musvalid)
     else:
         return []
@@ -459,7 +459,7 @@ def _findSmallestMUS_func(tup):
 
     logging.info("YY %s %s %s %s", MUSSizeFound.value, MUSSizeRequired.value, minsize, p)
 
-    if CONFIG["earlyExit"] and MUSSizeFound.value <= MUSSizeRequired.value:
+    if config["earlyExit"] and MUSSizeFound.value <= MUSSizeRequired.value:
         logging.info("Early Exit!")
         return (p, None)
 
@@ -500,11 +500,11 @@ def cascadeMUS(solver, puzlits, repeats, musdict, config):
         ):
             logging.info("Looking for %s (know %s)", minsize, MUSSizeFound.value)
             MUSSizeRequired.value = minsize
-            if CONFIG["earlyExit"] and MUSSizeFound.value <= minsize:
+            if config["earlyExit"] and MUSSizeFound.value <= minsize:
                 logging.info("Early exit because MUS already known")
                 return
 
-            with getPool(CONFIG["cores"]) as pool:
+            with getPool(config["cores"]) as pool:
                 # Do 'range(repeats)' first, so when we distribute we get an
                 # even spread of literals on different cores minsize+1 for MUS
                 # size, as the MUS will include 'p'
@@ -520,7 +520,7 @@ def cascadeMUS(solver, puzlits, repeats, musdict, config):
                         (
                             p,
                             "{}:{}:{}".format(r, p, minsize),
-                            minsize * CONFIG["cascadeMult"],
+                            minsize * config["cascadeMult"],
                             config,
                         )
                         for r in range(repeats)
@@ -544,7 +544,7 @@ def cascadeMUS(solver, puzlits, repeats, musdict, config):
                 if musdict.minimum() <= minsize:
                     return
     else:
-        with getPool(CONFIG["cores"]) as pool:
+        with getPool(config["cores"]) as pool:
             for minsize in range(
                 config["baseSizeMUS"], max(config["baseSizeMUS"] + 1, 10000), 1
             ):
@@ -564,7 +564,7 @@ def cascadeMUS(solver, puzlits, repeats, musdict, config):
                         (
                             p,
                             "{}:{}:{}".format(r, p, minsize),
-                            minsize * CONFIG["cascadeMult"],
+                            minsize * config["cascadeMult"],
                             config,
                         )
                         for r in range(repeats)
@@ -590,21 +590,23 @@ def cascadeMUS(solver, puzlits, repeats, musdict, config):
 
 
 class CascadeMUSFinder:
-    def __init__(self, solver):
+    def __init__(self, solver, *, config):
+        self.config = config
         self._solver = solver
         self._bestcache = MusDict({})
 
     def smallestMUS(self, puzlits):
         musdict = MusDict({})
-        if CONFIG["checkSmall1"]:
+        if self.config["checkSmall1"]:
             logging.info("Doing checkSmall1")
             getTinyMUSes(
                 self._solver,
                 puzlits,
                 musdict,
-                repeats=CONFIG["smallRepeats"],
+                repeats=self.config["smallRepeats"],
                 distance=1,
-                badlimit=3
+                badlimit=3,
+                config=self.config
             )
 
         logging.info("Smallest MUS A: %s ", musdict.minimum())
@@ -620,9 +622,10 @@ class CascadeMUSFinder:
                 self._solver,
                 puzlits,
                 musdict,
-                repeats=CONFIG["smallRepeats"],
+                repeats=self.config["smallRepeats"],
                 distance=999,
-                badlimit=CONFIG["baseSizeMUS"]*2
+                badlimit=self.config["baseSizeMUS"]*2,
+                config=self.config
         )
 
         logging.info("Smallest MUS B: %s ", musdict.minimum())
@@ -635,23 +638,24 @@ class CascadeMUSFinder:
         logging.info("Checking cache")
 
         if EXPCONFIG["useCache"]:
-            checkMUS(self._solver, puzlits, self._bestcache, musdict)
+            checkMUS(self._solver, puzlits, self._bestcache, musdict, self.config)
 
-        if CONFIG["checkSmall2"]:
+        if self.config["checkSmall2"]:
             logging.info("Doing checkSmall2")
             getTinyMUSes(
                 self._solver,
                 puzlits,
                 musdict,
-                repeats=CONFIG["smallRepeats"],
+                repeats=self.config["smallRepeats"],
                 distance=2,
-                badlimit=5
+                badlimit=5,
+                config=self.config
             )
 
-        if not CONFIG["checkSmall2"]:
+        if not self.config["checkSmall2"]:
             logging.info("Running cascade algorithm")        
             cascadeMUS(
-                self._solver, puzlits, CONFIG["repeats"], musdict, CONFIG
+                self._solver, puzlits, self.config["repeats"], musdict, self.config
             )
         else:
             logging.info("Early exit: skipping cascade")

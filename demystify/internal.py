@@ -10,7 +10,7 @@ from .utils import flatten, chainlist, randomFromSeed
 
 from .base import EqVal, NeqVal
 
-from .config import CONFIG, EXPCONFIG
+from .config import EXPCONFIG
 
 # A variable is a dictionary mapping values to their SAT variable
 
