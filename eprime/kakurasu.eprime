@@ -4,13 +4,22 @@ given dims : int
 given row_sums : matrix indexed by [int(1..dims)] of int(1..sum( [i | i : int(1..dims)] ))
 given col_sums : matrix indexed by [int(1..dims)] of int(1..sum( [i | i : int(1..dims)] ))
 
+
+$#VAR res
 find res : matrix indexed by [int(1..dims), int(1..dims)] of int(0,1)
+
+$#CON rowcon "The sum of row {a[0]} is {params['row_sums'][a[0]]}"
+find rowcon : matrix indexed by [int(1..dims)] of bool
+
+$#CON colcon "The sum of column {a[0]} is {params['col_sums'][a[0]]}"
+find colcon : matrix indexed by [int(1..dims)] of bool
+
 
 such that
     forAll r : int(1..dims) .
-        sum( [ res[r,i]*i | i : int(1..dims)] ) = row_sums[r],
+        rowcon[r] -> (sum( [ res[r,i]*i | i : int(1..dims)] ) = row_sums[r]),
 
     forAll c : int(1..dims) .
-        sum( [ res[i,c]*i | i : int(1..dims)] ) = col_sums[c],
+        colcon[c] -> (sum( [ res[i,c]*i | i : int(1..dims)] ) = col_sums[c]),
 
 true
