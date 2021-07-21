@@ -96,7 +96,14 @@ class Explainer(object):
         step_dict = {}
         step_dict["stepNumber"] = self.steps_explained + 1
 
-        mus_dict = self.mus_finder.smallestMUS(self.unexplained)
+        if lit_choice is not None:
+            l = self.find_lit(lit_choice["row"], lit_choice["column"], lit_choice["value"])
+            if l is not None:
+                mus_dict = self.mus_finder.smallestMUS([l])
+            else:
+                mus_dict = self.mus_finder.smallestMUS(self.unexplained)
+        else:
+            mus_dict = self.mus_finder.smallestMUS(self.unexplained)
 
         smallest = mus_dict.minimum()
 
@@ -135,12 +142,6 @@ class Explainer(object):
                 lambda mus: len(mus) == smallest
             )
 
-            if lit_choice is not None:
-                if mus_dict.has_literal(lit_choice):
-                    lit_choices = mus_dict.filter_literals(
-                        lambda lit: lit == str(lit_choice)
-                    )
-
             (
                 best_lit,
                 best_mus,
@@ -168,6 +169,12 @@ class Explainer(object):
         self.steps_explained += 1
 
         return step_dict
+
+    def find_lit(self, row, column, value):
+        for l in self.unexplained:
+            if l.var._location[0] == row and l.var._location[1] == column and l.val == value:
+                return l
+        return None
 
     def get_choices(self):
         mus_dict = self.mus_finder.smallestMUS(self.unexplained)
