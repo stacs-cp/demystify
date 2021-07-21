@@ -172,7 +172,7 @@ class Explainer(object):
 
     def find_lit(self, row, column, value):
         for l in self.unexplained:
-            if l.var._location[0] == row and l.var._location[1] == column and l.val == value:
+            if str(l.var._location[0]) == str(row) and l.var._location[1] == str(column) and str(l.val) == str(value):
                 return l
         return None
 

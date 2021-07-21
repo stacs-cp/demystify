@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="demystify",
-    version="0.0.14",
+    version="0.0.16",
     description="Demystify is a tool which allows puzzles to be expressed in a high-level constraint programming language and uses MUSes to automatically produce descriptions of steps in the puzzle solving.",
     packages = ['demystify', 'demystify.solvers'],
     url="https://github.com/stacs-cp/demystify",
