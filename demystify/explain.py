@@ -179,6 +179,14 @@ class Explainer(object):
         choices_explanations, _ = self._choices_list(mus_dict)
         return {"name": self.name, "params": self.params, "steps": [choices_explanations]}
     
+    def get_current_state(self):
+        step_dict = {}
+        step_dict["stepNumber"] = 0
+        step_dict["puzzleState"] = self._get_puzzle_state([], [])
+        step_dict["simpleDeductions"] = []
+        step_dict["smallestMUSSize"] = 0
+        return {"name": self.name, "params": self.params, "steps": [step_dict]}
+
     def get_solved_step(self):
         step_dict = {}
         step_dict["stepNumber"] = self.steps_explained + 1
