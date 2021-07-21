@@ -208,9 +208,9 @@ class Explainer(object):
             ) = self._choose_mus(lit_choices, mus_dict)
 
             for p in lit_choices:
-                muses = tuple(SortedSet(mus_dict.get(p)))
-                choices.append(self._get_step_dict(proven_dict[p][muses[0]], muses[0]))
-                proven_lit_choices.append(proven_dict[p][muses[0]])
+                for mus in tuple(SortedSet(mus_dict.get(p))):
+                    choices.append(self._get_step_dict(proven_dict[p][mus], mus))
+                    proven_lit_choices.append(proven_dict[p][mus])
         
         return choices, proven_lit_choices
 
