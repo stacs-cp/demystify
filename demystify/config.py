@@ -1,6 +1,6 @@
 import json
 import sys
-
+import copy
 
 # This config contains variables whose values we never expect to change,
 # they are used in some experiments.
@@ -33,7 +33,7 @@ EXPCONFIG = {
 
 }
 
-CONFIG = {
+CONFIG_FAST = {
     # How many cores to use when running in parallel
     # Set to 1 (or 0) to disable parallelisation
     "cores": 8,
@@ -65,17 +65,24 @@ CONFIG = {
     "minPrecheckStepsMUS": False,
 }
 
+CONFIG_MORE_MUS = copy.deepcopy(CONFIG_FAST)
+
+CONFIG_MORE_MUS["earlyExit"] = False
+CONFIG_MORE_MUS["cascadeMult"] = 4
+CONFIG_MORE_MUS["baseSizeMUS"] = 6
+CONFIG_MORE_MUS["repeats"] = 4
+
 def getDefaultConfig():
-    global CONFIG
-    return CONFIG
+    global CONFIG_FAST
+    return copy.deepcopy(CONFIG_FAST)
 
 def LoadConfigFromDict(dict):
-    global CONFIG
+    global CONFIG_FAST
     for (k, v) in dict.items():
-        if k not in CONFIG:
+        if k not in CONFIG_FAST:
             print("Invalid CONFIG option: " + k)
             sys.exit(1)
-        CONFIG[k] = v
+        CONFIG_FAST[k] = v
 
 
 def LoadConfigFromFile(file):
