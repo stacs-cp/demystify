@@ -95,12 +95,13 @@ def MUS(
     lens = [len(core)]
 
     if config["prechopMUSes12"]:
-        step = len(core) // 2
+        step = int(len(core) * (0.8))
         while step > 1 and len(core) > minsize:
             to_test = core[:-step]
             newcore = solver.basicCore(smtassume + to_test)
             if newcore is not None:
                 assert len(newcore) < len(core)
+                logging.info("prechop %s -> %s -> %s", len(core), len(core)-step, len(newcore))
                 core = newcore
                 break
             step = min(step // 2, len(core) // 2)
