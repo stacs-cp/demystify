@@ -48,12 +48,12 @@ class Explainer(object):
         self.unexplained = self.solution
         self._set_mus_finder()
 
-    def init_from_essence(self, eprime, eprimeparam):
+    def init_from_essence(self, eprime, eprimeparam, *, allow_incomplete=False):
         self.puzzle, self.solver, self.params = parse_essence(
             eprime, eprimeparam
         )
         self.name = os.path.basename(eprime)
-        self.solution = self._get_puzzle_solution()
+        self.solution = self._get_puzzle_solution(allow_incomplete=allow_incomplete)
         self.unexplained = self.solution
         self._set_mus_finder()
 

@@ -137,7 +137,7 @@ if args.puzzle is not None:
     explainer.init_from_json(args.puzzle)
 else:
     name = os.path.basename(args.eprime)
-    explainer.init_from_essence(args.eprime, args.eprimeparam)
+    explainer.init_from_essence(args.eprime, args.eprimeparam, allow_incomplete=args.incomplete)
 
 if args.json is not None:
     output_path = args.json[0]
