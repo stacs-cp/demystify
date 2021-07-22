@@ -63,7 +63,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--steps", type=int, default=float("inf"), help="How many steps to perform"
+    "--steps", type=int, default=None, help="How many steps to perform"
 )
 
 parser.add_argument(
@@ -87,6 +87,7 @@ parser.add_argument(
     default=None,
     help="optional JSON file output",
 )
+
 
 parser.add_argument(
     "--forqes",
@@ -146,7 +147,7 @@ else:
 
 f = open(output_path, "w")
 
-output = explainer.explain_steps()
+output = explainer.explain_steps(num_steps=args.steps)
 
 f.write(json.dumps(output))
 
