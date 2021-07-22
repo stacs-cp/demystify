@@ -40,10 +40,10 @@ def tinyMUS(solver, assume, distance, badlimit, config):
             else:
                 badcount += 1
                 if badcount > badlimit:
-                    logging.info("ZZFail %s %s %s", lit, len(core), badcount)
+                    logging.debug("ZZFail %s %s %s", lit, len(core), badcount)
                     return None
 
-    logging.info("ZZPass %s %s %s", lit, len(core), badcount)
+    logging.debug("ZZPass %s %s %s", lit, len(core), badcount)
     return [solver._conmap[x] for x in core if x in solver._conmap]
 
 
@@ -457,7 +457,7 @@ MAX_MUS = 999999999
 def _findSmallestMUS_func(tup):
     (p, randstr, minsize, config) = tup
 
-    logging.info("YY %s %s %s %s", MUSSizeFound.value, MUSSizeRequired.value, minsize, p)
+    logging.debug("YY %s %s %s %s", MUSSizeFound.value, MUSSizeRequired.value, minsize, p)
 
     if config["earlyExit"] and MUSSizeFound.value <= MUSSizeRequired.value:
         logging.info("Early Exit!")
