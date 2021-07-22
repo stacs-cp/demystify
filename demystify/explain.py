@@ -73,7 +73,7 @@ class Explainer(object):
                         )
                     )
                 else:
-                    steps.append(self.explain_step(self))
+                    steps.append(self.explain_step())
         else:
             first_step = True
             while len(self.unexplained) > 0:
@@ -85,7 +85,7 @@ class Explainer(object):
                     )
                     first_step = False
                 else:
-                    steps.append(self.explain_step(self))
+                    steps.append(self.explain_step())
 
         if len(self.unexplained) == 0:
             steps.append(self.get_solved_step())
@@ -378,6 +378,7 @@ class Explainer(object):
             raise SolveError("Your problem has no solution!")
 
         if solution == "Multiple" and not allow_incomplete:
+
             raise SolveError("Your problem has multiple solutions!")
 
         if no_domains:
