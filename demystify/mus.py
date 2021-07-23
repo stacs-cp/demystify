@@ -365,8 +365,9 @@ def MUS(
         lens,
         len(core),
         stepcount,
-        minsize,
         badcount,
+        minsize,
+
     )
     return [solver._conmap[x] for x in core if x in solver._conmap]
 
