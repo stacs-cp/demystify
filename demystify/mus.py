@@ -605,7 +605,7 @@ class CascadeMUSFinder:
         logging.info("Smallest MUS B: %s ", musdict.minimum())
 
         # Early exit for trivial case
-        if musdict.minimum() <= 1:
+        if musdict.minimum() <= self.config["baseSizeMUS"]:
             logging.info("Early exit from checkSmall general")
             return musdict
 
@@ -633,6 +633,8 @@ class CascadeMUSFinder:
             )
         else:
             logging.info("Early exit: skipping cascade")
+
+        logging.info("Finished CascadeMUS: Found %s", musdict.minimum())
 
         if EXPCONFIG["useCache"]:
             # Only store first element, to stop excessive growth
