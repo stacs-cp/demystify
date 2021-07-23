@@ -442,5 +442,7 @@ class Explainer(object):
         config = getDefaultConfig()
         if self.mus_finder_name == "forqes":
             self.mus_finder = ForqesMUSFinder(self.solver, config=config)
+        elif self.mus_finder_name == "cascade-fast":
+            self.mus_finder = CascadeMUSFinder(self.solver, config=config)
         else:
             self.mus_finder = CascadeMUSFinder(self.solver, config=config)
