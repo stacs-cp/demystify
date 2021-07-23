@@ -64,7 +64,10 @@ CONFIG_FAST = {
     "minPrecheckStepsMUS": False,
 
     # Include larger MUSes in choices
-    "findLarger": False
+    "findLarger": False,
+
+    "MUSaddStep": 4,
+    "MUSmultStep": 2,
 }
 
 CONFIG_MORE_MUS = copy.deepcopy(CONFIG_FAST)
@@ -72,7 +75,7 @@ CONFIG_MORE_MUS = copy.deepcopy(CONFIG_FAST)
 CONFIG_MORE_MUS["earlyExit"] = False
 CONFIG_MORE_MUS["cascadeMult"] = 3
 CONFIG_MORE_MUS["baseSizeMUS"] = 2
-CONFIG_MORE_MUS["repeats"] = 2
+CONFIG_MORE_MUS["repeats"] = 1
 CONFIG_MORE_MUS["prechopMUSes12"] = True
 CONFIG_MORE_MUS["tryManyChopMUS"] = False
 CONFIG_MORE_MUS["findLarger"] = True

@@ -101,7 +101,7 @@ def MUS(
             newcore = solver.basicCore(smtassume + to_test)
             if newcore is not None:
                 assert len(newcore) < len(core)
-                logging.info("prechop %s -> %s -> %s", len(core), len(core)-step, len(newcore))
+                logging.debug("prechop %s -> %s -> %s", len(core), len(core)-step, len(newcore))
                 core = newcore
                 break
             step = min(step // 2, len(core) // 2)
@@ -544,23 +544,25 @@ def cascadeMUS(solver, puzlits, repeats, musdict, config):
             return True
         return False
 
+    loop = config["baseSizeMUS"]
+    loopend = max(loop + 1, 100000)
+
     # Have to duplicate code, to swap loops around
     if EXPCONFIG["resetSolverMUS"]:
-        for my_minsize in range(
-            config["baseSizeMUS"], max(config["baseSizeMUS"] + 1, 10000), 1
-        ):
+        while loop <= loopend:
             with getPool(config["cores"]) as my_pool:
-                ret = inner_loop(my_minsize, my_pool)
+                ret = inner_loop(loop, my_pool)
                 if ret:
                     return
+            loop = max(loop + config["MUSaddStep"], int(loop * config["MUSmultStep"]))
     else:
         with getPool(config["cores"]) as my_pool:
-            for my_minsize in range(
-                config["baseSizeMUS"], max(config["baseSizeMUS"] + 1, 10000), 1
-            ):
-                ret = inner_loop(my_minsize, my_pool)
+            while loop <= loopend:
+                ret = inner_loop(loop, my_pool)
                 if ret:
                     return
+                loop = max(loop + config["MUSaddStep"], int(loop * config["MUSmultStep"]))
+    
 
 
 class CascadeMUSFinder:
@@ -590,6 +592,8 @@ class CascadeMUSFinder:
             logging.info("Early exit from checkSmall1")
             return musdict
 
+        logging.info("Checking cache")
+
         # Try looking for general tiny MUSes, to prime search
         logging.info("Looking for small")
         getTinyMUSes(
@@ -607,9 +611,8 @@ class CascadeMUSFinder:
         # Early exit for trivial case
         if musdict.minimum() <= self.config["baseSizeMUS"]:
             logging.info("Early exit from checkSmall general")
+            self._bestcache = copy.deepcopy(musdict)
             return musdict
-
-        logging.info("Checking cache")
 
         if EXPCONFIG["useCache"]:
             checkMUS(self._solver, puzlits, self._bestcache, musdict, self.config)
@@ -626,18 +629,18 @@ class CascadeMUSFinder:
                 config=self.config
             )
 
-        if not self.config["checkSmall2"]:
-            logging.info("Running cascade algorithm")        
-            cascadeMUS(
-                self._solver, puzlits, self.config["repeats"], musdict, self.config
-            )
-        else:
-            logging.info("Early exit: skipping cascade")
+        # Early exit for trivial case
+        if musdict.minimum() <= self.config["baseSizeMUS"]:
+            logging.info("Early exit from checkSmall2 general")
+            self._bestcache = copy.deepcopy(musdict)
+            return musdict
+
+
+        logging.info("Running cascade algorithm")        
+        cascadeMUS(self._solver, puzlits, self.config["repeats"], musdict, self.config)
 
         logging.info("Finished CascadeMUS: Found %s", musdict.minimum())
 
-        if EXPCONFIG["useCache"]:
-            # Only store first element, to stop excessive growth
-            self._bestcache = copy.deepcopy(musdict)
+        self._bestcache = copy.deepcopy(musdict)
 
         return musdict
