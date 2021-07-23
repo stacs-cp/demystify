@@ -40,10 +40,10 @@ def tinyMUS(solver, assume, distance, badlimit, config):
             else:
                 badcount += 1
                 if badcount > badlimit:
-                    logging.info("ZZFail %s %s %s", lit, len(core), badcount)
+                    logging.debug("ZZFail %s %s %s", lit, len(core), badcount)
                     return None
 
-    logging.info("ZZPass %s %s %s", lit, len(core), badcount)
+    logging.debug("ZZPass %s %s %s", lit, len(core), badcount)
     return [solver._conmap[x] for x in core if x in solver._conmap]
 
 
@@ -95,12 +95,13 @@ def MUS(
     lens = [len(core)]
 
     if config["prechopMUSes12"]:
-        step = len(core) // 2
+        step = int(len(core) * (0.8))
         while step > 1 and len(core) > minsize:
             to_test = core[:-step]
             newcore = solver.basicCore(smtassume + to_test)
             if newcore is not None:
                 assert len(newcore) < len(core)
+                logging.info("prechop %s -> %s -> %s", len(core), len(core)-step, len(newcore))
                 core = newcore
                 break
             step = min(step // 2, len(core) // 2)
@@ -457,7 +458,7 @@ MAX_MUS = 999999999
 def _findSmallestMUS_func(tup):
     (p, randstr, minsize, config) = tup
 
-    logging.info("YY %s %s %s %s", MUSSizeFound.value, MUSSizeRequired.value, minsize, p)
+    logging.debug("YY %s %s %s %s", MUSSizeFound.value, MUSSizeRequired.value, minsize, p)
 
     if config["earlyExit"] and MUSSizeFound.value <= MUSSizeRequired.value:
         logging.info("Early Exit!")

@@ -42,7 +42,6 @@ CONFIG_FAST = {
     "smallRepeats": 1,
     # How many times to try looking for each size of core
     "repeats": 2,
-
     # Exit when a MUS of required size has been found
     "earlyExit": True,
     # When "officially" looking for a mus of size k,
@@ -68,9 +67,11 @@ CONFIG_FAST = {
 CONFIG_MORE_MUS = copy.deepcopy(CONFIG_FAST)
 
 CONFIG_MORE_MUS["earlyExit"] = False
-CONFIG_MORE_MUS["cascadeMult"] = 4
-CONFIG_MORE_MUS["baseSizeMUS"] = 6
-CONFIG_MORE_MUS["repeats"] = 4
+CONFIG_MORE_MUS["cascadeMult"] = 3
+CONFIG_MORE_MUS["baseSizeMUS"] = 2
+CONFIG_MORE_MUS["repeats"] = 2
+CONFIG_MORE_MUS["prechopMUSes12"] = True
+CONFIG_MORE_MUS["tryManyChopMUS"] = False
 
 def getDefaultConfig():
     global CONFIG_FAST
