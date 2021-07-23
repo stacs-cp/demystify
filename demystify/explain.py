@@ -8,7 +8,7 @@ from .musforqes import ForqesMUSFinder
 from .utils import flatten, in_flattened, intsqrt, lowsqrt
 from .base import EqVal, NeqVal
 
-from .config import getDefaultConfig
+from .config import getDefaultConfig, getMoreMusConfig
 
 from sortedcontainers import SortedSet
 
@@ -41,6 +41,12 @@ class Explainer(object):
         self.solver = None
         self.solution = None
         self.explained = []
+
+    def get_current_config(self):
+        if self.mus_finder_name == "cascade-more":
+            return getMoreMusConfig()
+        else:
+            return getDefaultConfig()
 
     def init_from_json(self, puzzle_json):
         self.puzzle, self.solver = parse_json(puzzle_json)
@@ -421,7 +427,7 @@ class Explainer(object):
                 if (len(mus), len(unexplained_in_mus)) < best_mus_stat:
                     proven_lits = SortedSet(
                         checkWhichLitsAMUSProves(
-                            self.solver, unexplained_in_mus, mus, getDefaultConfig()
+                            self.solver, unexplained_in_mus, mus, self.get_current_config()
                         )
                     ).union(SortedSet([b]))
                 else:
@@ -440,10 +446,11 @@ class Explainer(object):
         return best_lit, best_mus, best_proven_lits, proven_dict
 
     def _set_mus_finder(self):
-        config = getDefaultConfig()
+        config = self.get_current_config()
+
         if self.mus_finder_name == "forqes":
             self.mus_finder = ForqesMUSFinder(self.solver, config=config)
-        elif self.mus_finder_name == "cascade-fast":
+        elif self.mus_finder_name == "cascade-more":
             self.mus_finder = CascadeMUSFinder(self.solver, config=config)
         else:
             self.mus_finder = CascadeMUSFinder(self.solver, config=config)

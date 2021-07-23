@@ -77,6 +77,10 @@ def getDefaultConfig():
     global CONFIG_FAST
     return copy.deepcopy(CONFIG_FAST)
 
+def getMoreMusConfig():
+    global CONFIG_MORE_MUS
+    return copy.deepcopy(CONFIG_MORE_MUS)
+
 def LoadConfigFromDict(dict):
     global CONFIG_FAST
     for (k, v) in dict.items():
@@ -84,7 +88,6 @@ def LoadConfigFromDict(dict):
             print("Invalid CONFIG option: " + k)
             sys.exit(1)
         CONFIG_FAST[k] = v
-
 
 def LoadConfigFromFile(file):
     with open(file) as f:
