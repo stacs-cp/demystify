@@ -494,99 +494,71 @@ def cascadeMUS(solver, puzlits, repeats, musdict, config):
  
     MUSSizeRequired = multiprocessing.Value('l', 111)
 
+    def inner_loop(minsize, pool):
+        logging.info("Looking for %s (know %s)", minsize, MUSSizeFound.value)
+        MUSSizeRequired.value = minsize
+        if config["earlyExit"] and MUSSizeFound.value <= minsize:
+            logging.info("Early exit because MUS already known")
+            return True
+
+        # Do 'range(repeats)' first, so when we distribute we get an
+        # even spread of literals on different cores minsize+1 for MUS
+        # size, as the MUS will include 'p'
+        logging.info(
+            "Considering %s * %s jobs for minsize=%s",
+            repeats,
+            len(puzlits),
+            minsize,
+        )
+        res = pool.map(
+            _findSmallestMUS_func,
+            [
+                (
+                    p,
+                    "{}:{}:{}".format(r, p, minsize),
+                    minsize * config["cascadeMult"],
+                    config,
+                )
+                for r in range(repeats)
+                for p in puzlits
+            ],
+        )
+        for (p, mus) in res:
+            if mus is not None and len(mus) < minsize:
+                logging.info(
+                    "!! Found smaller !!!! {} {}".format(
+                        len(mus), minsize
+                    )
+                )
+            if mus is not None and len(mus) > minsize:
+                logging.info(
+                    "!! Found bigger !!!! {} {}".format(
+                        len(mus), minsize
+                    )
+                )
+            musdict.update(p, mus)
+        
+        logging.info("Current best %s, looking for %s", musdict.minimum(), minsize)
+        if musdict.minimum() <= minsize:
+            return True
+        return False
+
     # Have to duplicate code, to swap loops around
     if EXPCONFIG["resetSolverMUS"]:
-        for minsize in range(
+        for my_minsize in range(
             config["baseSizeMUS"], max(config["baseSizeMUS"] + 1, 10000), 1
         ):
-            logging.info("Looking for %s (know %s)", minsize, MUSSizeFound.value)
-            MUSSizeRequired.value = minsize
-            if config["earlyExit"] and MUSSizeFound.value <= minsize:
-                logging.info("Early exit because MUS already known")
-                return
-
-            with getPool(config["cores"]) as pool:
-                # Do 'range(repeats)' first, so when we distribute we get an
-                # even spread of literals on different cores minsize+1 for MUS
-                # size, as the MUS will include 'p'
-                logging.info(
-                    "Considering %s * %s jobs for minsize=%s",
-                    repeats,
-                    len(puzlits),
-                    minsize,
-                )
-                res = pool.map(
-                    _findSmallestMUS_func,
-                    [
-                        (
-                            p,
-                            "{}:{}:{}".format(r, p, minsize),
-                            minsize * config["cascadeMult"],
-                            config,
-                        )
-                        for r in range(repeats)
-                        for p in puzlits
-                    ],
-                )
-                for (p, mus) in res:
-                    if mus is not None and len(mus) < minsize:
-                        logging.info(
-                            "!! Found smaller !!!! {} {}".format(
-                                len(mus), minsize
-                            )
-                        )
-                    if mus is not None and len(mus) > minsize:
-                        logging.info(
-                            "!! Found bigger !!!! {} {}".format(
-                                len(mus), minsize
-                            )
-                        )
-                    musdict.update(p, mus)
-                if musdict.minimum() <= minsize:
+            with getPool(config["cores"]) as my_pool:
+                ret = inner_loop(my_minsize, my_pool)
+                if ret:
                     return
     else:
-        with getPool(config["cores"]) as pool:
-            for minsize in range(
+        with getPool(config["cores"]) as my_pool:
+            for my_minsize in range(
                 config["baseSizeMUS"], max(config["baseSizeMUS"] + 1, 10000), 1
             ):
-                MUSSizeRequired.value = minsize
-                # Do 'range(repeats)' first, so when we distribute we get an 
-                # even spread of literals on different cores minsize+1 for MUS 
-                # size, as the MUS will include 'p'.
-                logging.info(
-                    "Considering %s * %s jobs for minsize=%s",
-                    repeats,
-                    len(puzlits),
-                    minsize,
-                )
-                res = pool.map(
-                    _findSmallestMUS_func,
-                    [
-                        (
-                            p,
-                            "{}:{}:{}".format(r, p, minsize),
-                            minsize * config["cascadeMult"],
-                            config,
-                        )
-                        for r in range(repeats)
-                        for p in puzlits
-                    ],
-                )
-                for (p, mus) in res:
-                    if mus is not None and len(mus) < minsize:
-                        logging.info(
-                            "!! Found smaller !!!! {} {}".format(
-                                len(mus), minsize
-                            )
-                        )
-                    if mus is not None and len(mus) > minsize:
-                        logging.info(
-                            "!! Found bigger !!!! {} {}".format(
-                                len(mus), minsize
-                            )
-                        )
-                    musdict.update(p, mus)
-                if musdict.minimum() <= minsize:
+                ret = inner_loop(my_minsize, my_pool)
+                if ret:
                     return
 
 
