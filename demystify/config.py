@@ -62,6 +62,9 @@ CONFIG_FAST = {
     "tryManyChopMUS": True,
     "minPrecheckMUS": False,
     "minPrecheckStepsMUS": False,
+
+    # Include larger MUSes in choices
+    "findLarger": False
 }
 
 CONFIG_MORE_MUS = copy.deepcopy(CONFIG_FAST)
@@ -72,6 +75,7 @@ CONFIG_MORE_MUS["baseSizeMUS"] = 2
 CONFIG_MORE_MUS["repeats"] = 2
 CONFIG_MORE_MUS["prechopMUSes12"] = True
 CONFIG_MORE_MUS["tryManyChopMUS"] = False
+CONFIG_MORE_MUS["findLarger"] = True
 
 def getDefaultConfig():
     global CONFIG_FAST
