@@ -75,7 +75,6 @@ parser.add_argument(
 parser.add_argument(
     "--force",
     type=str,
-    action="append",
     default=None,
     help="choose first non-trivial variable to be assigned",
 )
@@ -123,8 +122,11 @@ if args.debuginfo:
     )
 
 demystify.config.LoadConfigFromDict(
-    {"repeats": args.repeats, "cores": args.cores, "earlyExit": not args.multiple}
+    {"repeats": args.repeats, "cores": args.cores}
 )
+
+if args.multiple:
+    demystify.config.LoadConfigFromDict(demystify.config.CONFIG_MORE_MUS)
 
 if args.forqes:
     mus_finder = "forqes"
@@ -147,7 +149,14 @@ else:
 
 f = open(output_path, "w")
 
-output = explainer.explain_steps(num_steps=args.steps)
+if args.force is None:
+    forced_args = None
+else:
+    parse_args = [int(i) for i in args.force.split(",")]
+    forced_args = { "row": parse_args[0], "column": parse_args[1], "value": parse_args[2] }
+
+
+output = explainer.explain_steps(num_steps=args.steps, lit_choice=forced_args)
 
 f.write(json.dumps(output))
 

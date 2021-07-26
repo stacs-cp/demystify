@@ -95,12 +95,13 @@ def MUS(
     lens = [len(core)]
 
     if config["prechopMUSes12"]:
-        step = len(core) // 2
+        step = int(len(core) * (0.8))
         while step > 1 and len(core) > minsize:
             to_test = core[:-step]
             newcore = solver.basicCore(smtassume + to_test)
             if newcore is not None:
                 assert len(newcore) < len(core)
+                logging.debug("prechop %s -> %s -> %s", len(core), len(core)-step, len(newcore))
                 core = newcore
                 break
             step = min(step // 2, len(core) // 2)
@@ -364,8 +365,9 @@ def MUS(
         lens,
         len(core),
         stepcount,
-        minsize,
         badcount,
+        minsize,
+
     )
     return [solver._conmap[x] for x in core if x in solver._conmap]
 
@@ -493,100 +495,74 @@ def cascadeMUS(solver, puzlits, repeats, musdict, config):
  
     MUSSizeRequired = multiprocessing.Value('l', 111)
 
+    def inner_loop(minsize, pool):
+        logging.info("Looking for %s (know %s)", minsize, MUSSizeFound.value)
+        MUSSizeRequired.value = minsize
+        if config["earlyExit"] and MUSSizeFound.value <= minsize:
+            logging.info("Early exit because MUS already known")
+            return True
+
+        # Do 'range(repeats)' first, so when we distribute we get an
+        # even spread of literals on different cores minsize+1 for MUS
+        # size, as the MUS will include 'p'
+        logging.info(
+            "Considering %s * %s jobs for minsize=%s",
+            repeats,
+            len(puzlits),
+            minsize,
+        )
+        res = pool.map(
+            _findSmallestMUS_func,
+            [
+                (
+                    p,
+                    "{}:{}:{}".format(r, p, minsize),
+                    minsize * config["cascadeMult"],
+                    config,
+                )
+                for r in range(repeats)
+                for p in puzlits
+            ],
+        )
+        for (p, mus) in res:
+            if mus is not None and len(mus) < minsize:
+                logging.info(
+                    "!! Found smaller !!!! {} {}".format(
+                        len(mus), minsize
+                    )
+                )
+            if mus is not None and len(mus) > minsize:
+                logging.info(
+                    "!! Found bigger !!!! {} {}".format(
+                        len(mus), minsize
+                    )
+                )
+            musdict.update(p, mus)
+        
+        logging.info("Current best %s, looking for %s", musdict.minimum(), minsize)
+        if musdict.minimum() <= minsize:
+            return True
+        return False
+
+    loop = config["baseSizeMUS"]
+    loopend = max(loop + 1, 100000)
+
     # Have to duplicate code, to swap loops around
     if EXPCONFIG["resetSolverMUS"]:
-        for minsize in range(
-            config["baseSizeMUS"], max(config["baseSizeMUS"] + 1, 10000), 1
-        ):
-            logging.info("Looking for %s (know %s)", minsize, MUSSizeFound.value)
-            MUSSizeRequired.value = minsize
-            if config["earlyExit"] and MUSSizeFound.value <= minsize:
-                logging.info("Early exit because MUS already known")
-                return
-
-            with getPool(config["cores"]) as pool:
-                # Do 'range(repeats)' first, so when we distribute we get an
-                # even spread of literals on different cores minsize+1 for MUS
-                # size, as the MUS will include 'p'
-                logging.info(
-                    "Considering %s * %s jobs for minsize=%s",
-                    repeats,
-                    len(puzlits),
-                    minsize,
-                )
-                res = pool.map(
-                    _findSmallestMUS_func,
-                    [
-                        (
-                            p,
-                            "{}:{}:{}".format(r, p, minsize),
-                            minsize * config["cascadeMult"],
-                            config,
-                        )
-                        for r in range(repeats)
-                        for p in puzlits
-                    ],
-                )
-                for (p, mus) in res:
-                    if mus is not None and len(mus) < minsize:
-                        logging.info(
-                            "!! Found smaller !!!! {} {}".format(
-                                len(mus), minsize
-                            )
-                        )
-                    if mus is not None and len(mus) > minsize:
-                        logging.info(
-                            "!! Found bigger !!!! {} {}".format(
-                                len(mus), minsize
-                            )
-                        )
-                    musdict.update(p, mus)
-                if musdict.minimum() <= minsize:
+        while loop <= loopend:
+            with getPool(config["cores"]) as my_pool:
+                ret = inner_loop(loop, my_pool)
+                if ret:
                     return
+            loop = max(loop + config["MUSaddStep"], int(loop * config["MUSmultStep"]))
     else:
-        with getPool(config["cores"]) as pool:
-            for minsize in range(
-                config["baseSizeMUS"], max(config["baseSizeMUS"] + 1, 10000), 1
-            ):
-                MUSSizeRequired.value = minsize
-                # Do 'range(repeats)' first, so when we distribute we get an 
-                # even spread of literals on different cores minsize+1 for MUS 
-                # size, as the MUS will include 'p'.
-                logging.info(
-                    "Considering %s * %s jobs for minsize=%s",
-                    repeats,
-                    len(puzlits),
-                    minsize,
-                )
-                res = pool.map(
-                    _findSmallestMUS_func,
-                    [
-                        (
-                            p,
-                            "{}:{}:{}".format(r, p, minsize),
-                            minsize * config["cascadeMult"],
-                            config,
-                        )
-                        for r in range(repeats)
-                        for p in puzlits
-                    ],
-                )
-                for (p, mus) in res:
-                    if mus is not None and len(mus) < minsize:
-                        logging.info(
-                            "!! Found smaller !!!! {} {}".format(
-                                len(mus), minsize
-                            )
-                        )
-                    if mus is not None and len(mus) > minsize:
-                        logging.info(
-                            "!! Found bigger !!!! {} {}".format(
-                                len(mus), minsize
-                            )
-                        )
-                    musdict.update(p, mus)
-                if musdict.minimum() <= minsize:
+        with getPool(config["cores"]) as my_pool:
+            while loop <= loopend:
+                ret = inner_loop(loop, my_pool)
+                if ret:
                     return
+                loop = max(loop + config["MUSaddStep"], int(loop * config["MUSmultStep"]))
+    
 
 
 class CascadeMUSFinder:
@@ -616,6 +592,8 @@ class CascadeMUSFinder:
             logging.info("Early exit from checkSmall1")
             return musdict
 
+        logging.info("Checking cache")
+
         # Try looking for general tiny MUSes, to prime search
         logging.info("Looking for small")
         getTinyMUSes(
@@ -631,11 +609,10 @@ class CascadeMUSFinder:
         logging.info("Smallest MUS B: %s ", musdict.minimum())
 
         # Early exit for trivial case
-        if musdict.minimum() <= 1:
+        if musdict.minimum() <= self.config["baseSizeMUS"]:
             logging.info("Early exit from checkSmall general")
+            self._bestcache = copy.deepcopy(musdict)
             return musdict
-
-        logging.info("Checking cache")
 
         if EXPCONFIG["useCache"]:
             checkMUS(self._solver, puzlits, self._bestcache, musdict, self.config)
@@ -652,16 +629,18 @@ class CascadeMUSFinder:
                 config=self.config
             )
 
-        if not self.config["checkSmall2"]:
-            logging.info("Running cascade algorithm")        
-            cascadeMUS(
-                self._solver, puzlits, self.config["repeats"], musdict, self.config
-            )
-        else:
-            logging.info("Early exit: skipping cascade")
-
-        if EXPCONFIG["useCache"]:
-            # Only store first element, to stop excessive growth
+        # Early exit for trivial case
+        if musdict.minimum() <= self.config["baseSizeMUS"]:
+            logging.info("Early exit from checkSmall2 general")
             self._bestcache = copy.deepcopy(musdict)
+            return musdict
+
+
+        logging.info("Running cascade algorithm")        
+        cascadeMUS(self._solver, puzlits, self.config["repeats"], musdict, self.config)
+
+        logging.info("Finished CascadeMUS: Found %s", musdict.minimum())
+
+        self._bestcache = copy.deepcopy(musdict)
 
         return musdict

@@ -42,7 +42,6 @@ CONFIG_FAST = {
     "smallRepeats": 1,
     # How many times to try looking for each size of core
     "repeats": 2,
-
     # Exit when a MUS of required size has been found
     "earlyExit": True,
     # When "officially" looking for a mus of size k,
@@ -63,18 +62,31 @@ CONFIG_FAST = {
     "tryManyChopMUS": True,
     "minPrecheckMUS": False,
     "minPrecheckStepsMUS": False,
+
+    # Include larger MUSes in choices
+    "findLarger": False,
+
+    "MUSaddStep": 4,
+    "MUSmultStep": 2,
 }
 
 CONFIG_MORE_MUS = copy.deepcopy(CONFIG_FAST)
 
 CONFIG_MORE_MUS["earlyExit"] = False
-CONFIG_MORE_MUS["cascadeMult"] = 4
-CONFIG_MORE_MUS["baseSizeMUS"] = 6
-CONFIG_MORE_MUS["repeats"] = 4
+CONFIG_MORE_MUS["cascadeMult"] = 3
+CONFIG_MORE_MUS["baseSizeMUS"] = 2
+CONFIG_MORE_MUS["repeats"] = 1
+CONFIG_MORE_MUS["prechopMUSes12"] = True
+CONFIG_MORE_MUS["tryManyChopMUS"] = False
+CONFIG_MORE_MUS["findLarger"] = True
 
 def getDefaultConfig():
     global CONFIG_FAST
     return copy.deepcopy(CONFIG_FAST)
+
+def getMoreMusConfig():
+    global CONFIG_MORE_MUS
+    return copy.deepcopy(CONFIG_MORE_MUS)
 
 def LoadConfigFromDict(dict):
     global CONFIG_FAST
@@ -83,7 +95,6 @@ def LoadConfigFromDict(dict):
             print("Invalid CONFIG option: " + k)
             sys.exit(1)
         CONFIG_FAST[k] = v
-
 
 def LoadConfigFromFile(file):
     with open(file) as f:
