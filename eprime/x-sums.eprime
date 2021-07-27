@@ -60,12 +60,22 @@ find variant_fields : matrix indexed by [int(1..4),RANGE,RANGE] of RANGE
 $ all the reasoning
 $ -----------------
 
-$#CON alldiff_row "row {a[0]} must have all different elements"
-find alldiff_row : matrix indexed by [int(1..9)] of bool 
-$#CON alldiff_col "column {a[0]} must have all different elements"
-find alldiff_col : matrix indexed by [int(1..9)] of bool 
-$#CON alldiff_box "box {a[0]} must have all different elements"
-find alldiff_box : matrix indexed by [int(1..9)] of bool 
+$#CON col_alldiff "cells ({a[0]},{a[1]}) and ({a[0]},{a[2]}) cannot both be {a[3]} as they are in the same column"
+find col_alldiff: matrix indexed by [RANGE,RANGE,RANGE,RANGE] of bool
+
+$#CON row_alldiff "cells ({a[0]},{a[1]}) and ({a[0]},{a[2]}) cannot both be {a[3]} as they are in the same row"
+find row_alldiff: matrix indexed by [RANGE,RANGE,RANGE,RANGE] of bool
+
+$#CON box_alldiff "cells ({3*int(a[0])+int(a[2])},{3*int(a[1])+int(a[3])}) and ({3*int(a[0])+int(a[4])},{3*int(a[1])+int(a[5])}) cannot both be {a[6]} as they are in the same box"
+find box_alldiff: matrix indexed by [int(0..2),int(0..2),int(0..2),int(0..2),int(0..2),int(0..2),RANGE] of bool
+
+
+$ $#CON alldiff_row "row {a[0]} must have all different elements"
+$ find alldiff_row : matrix indexed by [int(1..9)] of bool 
+$ $#CON alldiff_col "column {a[0]} must have all different elements"
+$ find alldiff_col : matrix indexed by [int(1..9)] of bool 
+$ $#CON alldiff_box "box {a[0]} must have all different elements"
+$ find alldiff_box : matrix indexed by [int(1..9)] of bool 
 
 $#CON clues_left_on "the sum of first X numbers on {['row','column','row','column'][int(a[0])-1]} {a[1]} {['from left','from top','from right','from bottom'][int(a[0])-1]} is {params['CLUES'][a[0]][a[1]]}"
 
@@ -107,17 +117,23 @@ forAll i : int(1..4) .
 
 
 $$ Normal sudoku constraints
-$ rows
-forAll i: int(1..9)  .
-    alldiff_row[i] -> allDiff(field[..,i]),
 
 $ columns
-forAll i: int(1..9)  .
-    alldiff_col[i] -> allDiff(field[i,..]),
+forAll i:RANGE.
+    forAll j1,j2:RANGE. j1 < j2 ->
+        forAll d:RANGE. col_alldiff[i,j1,j2,d] -> !(field[i,j1] = d /\ field[i,j2]=d),
+
+$ rows
+forAll j:RANGE.
+    forAll i1,i2:RANGE. i1 < i2 ->
+        forAll d:RANGE. row_alldiff[j,i1,i2,d] -> !(field[i1,j] = d /\ field[i2,j]=d),
 
 $ 3x3 boxes
-forAll i,j: int(0..2) .
-    alldiff_box[(i*3)+j+1] -> allDiff([field[r,c] | r: int(i*3+1..i*3+3), c: int(j*3+1..j*3+3)] ),
+forAll a,b,i1,j1,i2,j2:int(0..2). (i1*3+j1) < (i2*3+j2) ->
+    (
+        forAll d:RANGE. box_alldiff[a,b,i1,j1,i2,j2,d] ->
+            !(field[1+3*a+i1,1+3*b+j1] = d /\ field[1+3*a+i2,1+3*b+j2] = d)
+    ),
 
 
 $ port over hints grid to solution
