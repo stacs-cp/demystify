@@ -13,14 +13,15 @@ find x : matrix indexed by [int(1..9),int(1..9)] of int(1..9)
 $ all the reasoning
 $ -----------------
 
-$#CON alldiff_row "row {a[0]} must have all different elements"
-find alldiff_row : matrix indexed by [int(1..9)] of bool 
-$#CON alldiff_col "column {a[0]} must have all different elements"
-find alldiff_col : matrix indexed by [int(1..9)] of bool 
-$#CON alldiff_box "box {a[0]} must have all different elements"
-find alldiff_box : matrix indexed by [int(1..9)] of bool 
-$#CON alldiff_hint "hint {a[0]} must have all different elements"
-find alldiff_hint: matrix indexed by [int(1..n_hints)] of bool 
+$#CON col_alldiff "cells ({a[0]},{a[1]}) and ({a[0]},{a[2]}) cannot both be {a[3]} as they are in the same column"
+find col_alldiff: matrix indexed by [int(1..9),int(1..9),int(1..9),int(1..9)] of bool
+$#CON row_alldiff "cells ({a[0]},{a[1]}) and ({a[0]},{a[2]}) cannot both be {a[3]} as they are in the same row"
+find row_alldiff: matrix indexed by [int(1..9),int(1..9),int(1..9),int(1..9)] of bool
+$#CON box_alldiff "cells ({3*int(a[0])+int(a[2])},{3*int(a[1])+int(a[3])}) and ({3*int(a[0])+int(a[4])},{3*int(a[1])+int(a[5])}) cannot both be {a[6]} as they are in the same box"
+find box_alldiff: matrix indexed by [int(0..2),int(0..2),int(0..2),int(0..2),int(0..2),int(0..2),int(1..9)] of bool
+$#CON hint_alldiff "cells ({a[2]},{a[1]}) and ({a[4]},{a[3]}) cannot both be {a[5]} as they are in the same hint {a[0]}"
+find hint_alldiff: matrix indexed by [int(1..n_hints),int(1..9),int(1..9),int(1..9),int(1..9),int(1..9)] of bool
+$find hint_alldiff: matrix indexed by [int(1..n_hints)] of bool 
 $#CON sum_hint "hint {a[0]} must sum to {params['hints'][a[0]]}"
 find sum_hint    : matrix indexed by [int(1..n_hints)] of bool 
 
@@ -46,17 +47,22 @@ $ 3x3 boxes
 forAll i,j: int(0..2) .
     sum_box[(i*3)+j+1] -> sum([x[r,c] | r: int(i*3+1..i*3+3), c: int(j*3+1..j*3+3)]) = 45,
 
-$ rows
-forAll i: int(1..9)  .
-    alldiff_row[i] -> allDiff(x[..,i]),
-
 $ columns
-forAll i: int(1..9)  .
-    alldiff_col[i] -> allDiff(x[i,..]),
+forAll i:int(1..9).
+    forAll j1,j2:int(1..9). j1 < j2 ->
+        forAll d:int(1..9). col_alldiff[i,j1,j2,d] -> !(x[i,j1] = d /\ x[i,j2]=d),
+
+$ rows
+forAll j:int(1..9).
+    forAll i1,i2:int(1..9). i1 < i2 ->
+        forAll d:int(1..9). row_alldiff[j,i1,i2,d] -> !(x[i1,j] = d /\ x[i2,j]=d),
 
 $ 3x3 boxes
-forAll i,j: int(0..2) .
-    alldiff_box[(i*3)+j+1] -> allDiff([x[r,c] | r: int(i*3+1..i*3+3), c: int(j*3+1..j*3+3)] ),
+forAll a,b,i1,j1,i2,j2:int(0..2). (i1*3+j1) < (i2*3+j2) ->
+    (
+        forAll d:int(1..9). box_alldiff[a,b,i1,j1,i2,j2,d] ->
+            !(x[1+3*a+i1,1+3*b+j1] = d /\ x[1+3*a+i2,1+3*b+j2] = d)
+    ),
 
 $ hints must sum up to what its required
 forAll i: int(1..n_hints) .
@@ -64,7 +70,10 @@ forAll i: int(1..n_hints) .
 
 $ elements in a hint must be different
 forAll i: int(1..n_hints) .
-    alldiff_hint[i] -> allDiff([ x[r,c] | r: int(1..9), c: int(1..9), grid[r,c] = i]),
+    forAll c1,r1,c2,r2 : int(1..9) . ((c1 < c2 \/ r1 < r2) /\ grid[r1,c1] = i /\ grid[r2,c2] = i)  ->
+        forAll d:int(1..9). hint_alldiff[i,c1,r1,c2,r2,d] -> !( x[r1,c1] = d /\ x[r2,c2] = d),
+
+$    hint_alldiff[i] -> allDiff([ x[r,c] | r: int(1..9), c: int(1..9), grid[r,c] = i]),
 
 
 
