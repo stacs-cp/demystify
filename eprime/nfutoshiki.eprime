@@ -26,23 +26,27 @@ find      field  : matrix indexed by [RANGE, RANGE] of RANGE
 
 
 $ -------- Reified variables -----------------------------
-$#CON row_alldiff "all elements in row {a[0]} must be different"
-find row_alldiff : matrix indexed by [RANGE] of bool
 
-$#CON col_alldiff "all elements in column {a[0]} must be different"
-find col_alldiff : matrix indexed by [RANGE] of bool
+$#CON col_alldiff "cells ({a[0]},{a[1]}) and ({a[0]},{a[2]}) cannot both be {a[3]} as they are in the same column"
+find col_alldiff: matrix indexed by [RANGE,RANGE,RANGE,RANGE] of bool
+
+$#CON row_alldiff "cells ({a[0]},{a[1]}) and ({a[0]},{a[2]}) cannot both be {a[3]} as they are in the same row"
+find row_alldiff: matrix indexed by [RANGE,RANGE,RANGE,RANGE] of bool
 
 $#CON less_than "cell ({params['lt'][str(int(a[0]) + 1)]['1']},{params['lt'][str(int(a[0]) + 1)]['2']}), must be less than cell ({params['lt'][str(int(a[0]) + 1)]['3']},{params['lt'][str(int(a[0]) + 1)]['4']})"
 find less_than : matrix indexed by [NUMQD] of bool
 
 such that
-$ all rows have to be different
-    forAll row : RANGE .
-	row_alldiff[row] -> allDiff(field[row,..]),
 
 $ all columns have to be different
-    forAll col : RANGE .
-	col_alldiff[col] -> allDiff(field[..,col]),	 
+forAll i:RANGE.
+    forAll j1,j2:RANGE. j1 < j2 ->
+        forAll d:RANGE. col_alldiff[i,j1,j2,d] -> !(field[i,j1] = d /\ field[i,j2]=d),
+
+$ all rows have to be different
+forAll j:RANGE.
+    forAll i1,i2:RANGE. i1 < i2 ->
+        forAll d:RANGE. row_alldiff[j,i1,i2,d] -> !(field[i1,j] = d /\ field[i2,j]=d),
 
 $ all < constraints are satisfied
     forAll i : NUMQD .
