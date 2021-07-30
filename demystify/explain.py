@@ -112,6 +112,8 @@ class Explainer(object):
         else:
             mus_dict = self.mus_finder.smallestMUS(self.unexplained)
 
+        mus_dict.remove_duplicates()
+
         smallest = mus_dict.minimum()
 
         if smallest <= self.merge:
@@ -423,11 +425,6 @@ class Explainer(object):
                 mus_lits = SortedSet.union(
                     SortedSet(), *(SortedSet(m.lits()) for m in mus)
                 )
-
-                # TODO: Filter out duplicated MUSes
-                #if mus in checked:
-                #    continue
-                #checked.add(mus)
 
                 unexplained_in_mus = SortedSet(
                     p

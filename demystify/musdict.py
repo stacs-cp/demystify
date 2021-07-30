@@ -82,3 +82,25 @@ class MusDict(object):
 
         else:
             assert len(self.mus_dict[p][0]) < len(mus)
+
+    def remove_duplicates(self):
+        checked = set([])
+                        # TODO: Filter out duplicated MUSes
+                #if mus in checked:
+                #    continue
+                #checked.add(mus)
+        removed = 0
+        for k in sorted(self.mus_dict.keys()):
+            for v in sorted(list(self.mus_dict.get(k))):
+                # Empty MUSes arise from values implied by the problem, we do not filter them
+                if len(v) > 0:
+                    if v in checked:
+                        self.mus_dict.get(k).remove(v)
+                        removed += 1
+                    else:
+                        checked.add(v)
+            
+            if len(self.mus_dict.get(k)) == 0:
+                del self.mus_dict[k]
+        
+        logging.info("Remove dups: %s removed, %s left", removed, len(checked))

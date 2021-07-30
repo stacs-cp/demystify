@@ -592,7 +592,7 @@ class CascadeMUSFinder:
             logging.info("Early exit from checkSmall1")
             return musdict
 
-        logging.info("Checking cache")
+
 
         # Try looking for general tiny MUSes, to prime search
         logging.info("Looking for small")
@@ -614,6 +614,7 @@ class CascadeMUSFinder:
             self._bestcache = copy.deepcopy(musdict)
             return musdict
 
+        logging.info("Checking cache")
         if EXPCONFIG["useCache"]:
             checkMUS(self._solver, puzlits, self._bestcache, musdict, self.config)
 
