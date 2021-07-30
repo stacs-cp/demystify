@@ -278,6 +278,7 @@ def parse_essence(eprime, eprimeparam):
             alreadyparsed = demystify.utils.checkConstraintAlreadyParsed(formula, varmap[v][k][1], constraintname)
 
             if alreadyparsed:
+                logging.debug("Skipping constraint as already parsed (or trivial): %s", constraintname)
                 formula.append([-varmap[v][k][1]])
             else:
                 connected = SortedSet(
