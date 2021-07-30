@@ -4,6 +4,7 @@ import os
 import subprocess
 import re
 import logging
+import tempfile
 
 from sortedcontainers import SortedSet
 from pysat.formula import CNF
@@ -76,11 +77,31 @@ def parse_essence(eprime, eprimeparam):
         )
     params = json.loads(paramjson.stdout)
 
+    tdir = None
+
+    if eprime.endswith(".essence"):
+        tdir = tempfile.TemporaryDirectory()
+        conjure = subprocess.run(["conjure", "modelling", "-o", tdir.name, eprime],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,)
+        if conjure.returncode != 0:
+            raise ParseError(
+                "conjure failed"
+                + "\n"
+                + conjure.stdout.decode("utf-8")
+                + "\n"
+                + conjure.stderr.decode("utf-8")
+            )
+        eprimefilename = tdir.name + "/model000001.eprime"
+    else:
+        eprimefilename = eprime    
+
+
     makedimacs = subprocess.run(
         [
             "savilerow",
             "-in-eprime",
-            eprime,
+            eprimefilename,
             "-in-param",
             eprimeparam,
             "-sat-output-mapping",
@@ -331,5 +352,8 @@ def parse_essence(eprime, eprimeparam):
     solver = demystify.internal.Solver(
         puz, cnf=formula, litmap=litmap, conmap=constraintmap
     )
+
+    if tdir is not None:
+        tdir.cleanup()
 
     return puz, solver, params
