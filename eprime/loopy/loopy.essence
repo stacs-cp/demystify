@@ -19,7 +19,47 @@ letting cols0 be domain int(0..m)
 letting HV be new type enum {H,V}
 given grid : matrix indexed by [rows,cols] of int(0..4)
 
+$ 'x' is just here so we have something the current GUI can display
+
+$#VAR x
+find x: matrix indexed by [int(1..n*2+1), int(1..m*2+1)] of int(-1..4)
+
+$#AUX edges
 find edges : matrix indexed by [HV,rows0,cols0] of bool
+
+such that
+
+$ 'x' is formatted to show the whole program, treating it like a terminal.
+$ An example is given below, with the numeric output next to it (- means -1)
+$ '.' cells are always 0 (they are just there for padding)
+$ numbers are the number in the cell in the original problem
+$ lines are denoted '0' or '1' (in the picture below we use |,- or x for empty)
+$ .-.-.   -1-1-
+$ |2x2|   12021
+$ .x.x.   -0-0-
+$ |2x2|   12021
+$ .-.-.   -0-0-
+
+forAll i: int(1..n*2+1). forAll j: int(1..m*2+1).
+  ((i%2)=1 /\ (j%2)=1) <-> x[i,j]=-1,
+
+forAll i: rows0. forAll j: cols.
+(
+  (x[i*2+1,j*2] = toInt(edges[H,i,j]))
+),
+
+forAll i: rows. forAll j: cols0.
+(
+  (x[i*2,j*2+1] = toInt(edges[V,i,j]))
+),
+
+forAll i: rows. forAll j: cols.
+( x[i*2,j*2] = grid[i,j] )
+
+$,forAll i: rows. x[i*2,m*2+1] = 0
+$,forAll j: cols. x[n*2+1,j*2] = 0
+$, x[n*2+1,m*2+1] = 0
+
 $ edges[H,i,j] is the edge below cell i,j (south border)
 $ edges[V,i,j] is the edge right of cell i,j (east border)
 $ edges[H,i-1,j] is north border
@@ -28,68 +68,90 @@ such that true
 $ remove edges outside grid
 , (forAll i : rows0 . edges[H,i,0] = false)
 , (forAll j : cols0 . edges[V,0,j] = false)
+
+
+$#CON cellcount "cell ({int(a[0])*2},{int(a[1])*2}) has {params['grid'][a[0]][a[1]]} neighbours"
+find cellcount: matrix indexed by [rows, cols] of bool 
+
+such that
 $ each non-empty cell has the given number of borders (treat 4 as 0)
-, (forAll i : rows . forAll j : cols . grid[i,j] > 0 ->
-    (toInt(edges[H,i-1,j]) + toInt(edges[H,i,j])
-   + toInt(edges[V,i,j]) + toInt(edges[V,i,j-1]) = (grid[i,j] % 4))
+(forAll i : rows . forAll j : cols . grid[i,j] > 0 ->
+  (cellcount[i,j] ->
+      (toInt(edges[H,i-1,j]) + toInt(edges[H,i,j])
+       + toInt(edges[V,i,j]) + toInt(edges[V,i,j-1]) = (grid[i,j] % 4))
   )
+)
+
+
+
+$#CON neighbourcount "grid point ({int(a[0])*2+1},{int(a[1])*2+1}) has 0 or 2 connections"
+find neighbourcount: matrix indexed by [rows0, cols0] of bool
+such that
 $ enforce degree 2 or degree 0 for all grid corner points
-, forAll i : rows . forAll j : cols .
+ forAll i : rows . forAll j : cols . neighbourcount[i-1,j-1] ->
     ( toInt(edges[H,i-1,j-1]) + toInt(edges[H,i-1,j])
     + toInt(edges[V,i-1,j-1]) + toInt(edges[V,i,j-1]) ) in {0,2}
-, forAll j : cols .
+, forAll j : cols . neighbourcount[n,j-1] ->
     ( toInt(edges[H,n,j-1]) + toInt(edges[H,n,j])
     + toInt(edges[V,n,j-1]) ) in {0,2}
-, forAll i : rows .
+, forAll i : rows . neighbourcount[i-1,m] ->
     ( toInt(edges[H,i-1,m])
     + toInt(edges[V,i-1,m]) + toInt(edges[V,i,m]) ) in {0,2}
 
 $ there are 2*n*m + n + m edges in grid
 letting maxEdges be 2*n*m + n + m
+$#AUX q
 find q : int(4..maxEdges)
 such that
   q = sum([ toInt(edges[o,i,j]) | o : HV, i : rows0 , j : cols0 ])
 
+
+$#CON inLoop "grid point ({int(a[0]})*2-1,{int(a[1])*2-1}) is considered for the loop"
+find inLoop: matrix indexed by [rows0, cols0] of bool
+
 $ now enforce that borders form a single loop
 $ this is a labelling of the q border edges with 0..q-1 such that
 $ labels of adjacent edges differ by 1, modulo q
+$#AUX loop
 find loop : function (total) (HV,rows0,cols0) --> int(0..maxEdges)
 such that true
 $ can't use a computed domain bound, so enforce it explicitly instead
-, forAll o : HV . forAll i : rows0 . forAll j : cols0 .
-    loop((o,i,j)) <= q
+, forAll o : HV . forAll i : rows0 . forAll j : cols0 . inLoop[i,j]->(
+    loop((o,i,j)) <= q)
 $ edges not in the loop receive label q
-, forAll o : HV . forAll i : rows0 . forAll j : cols0 .
-    !edges[o,i,j] <-> loop((o,i,j)) = q
+, forAll o : HV . forAll i : rows0 . forAll j : cols0 . inLoop[i,j]->(
+    !edges[o,i,j] <-> loop((o,i,j)) = q)
 $ labelling is injective over the loop edges
 , allDiff([ loop((o,i,j)) | o : HV, i : rows0, j : cols0, edges[o,i,j] ])
 $ HH
-, forAll i : rows0 . forAll j : cols .
+, forAll i : rows0 . forAll j : cols . inLoop[i,j]->(
     (edges[H,i,j-1] /\ edges[H,i,j]) ->
       (|loop((H,i,j-1)) - loop((H,i,j))| in {1,q-1})
 $ VV
-, forAll i : rows . forAll j : cols0 .
+), forAll i : rows . forAll j : cols0 .inLoop[i,j]->(
     (edges[V,i-1,j] /\ edges[V,i,j]) ->
       (|loop((V,i-1,j)) - loop((V,i,j))| in {1,q-1})
 $ south-east borders
-, forAll i : rows . forAll j : cols .
+), forAll i : rows . forAll j : cols .inLoop[i,j]->(
     (edges[H,i,j] /\ edges[V,i,j]) ->
       (|loop((H,i,j)) - loop((V,i,j))| in {1,q-1})
 $ north-west borders
-, forAll i : rows . forAll j : cols .
+), forAll i : rows . forAll j : cols .inLoop[i,j]->(
     (edges[H,i-1,j] /\ edges[V,i,j-1]) ->
       (|loop((H,i-1,j)) - loop((V,i,j-1))| in {1,q-1})
 $ north-east borders
-, forAll i : rows . forAll j : cols .
+), forAll i : rows . forAll j : cols .inLoop[i,j]->(
     (edges[H,i-1,j] /\ edges[V,i,j]) ->
       (|loop((H,i-1,j)) - loop((V,i,j))| in {1,q-1})
 $ south-west borders
-, forAll i : rows . forAll j : cols .
+), forAll i : rows . forAll j : cols .inLoop[i,j]->(
     (edges[H,i,j] /\ edges[V,i,j-1]) ->
       (|loop((H,i,j)) - loop((V,i,j-1))| in {1,q-1})
-
+)
 $ symmetry breaking
+$#AUX tlr
 find tlr : rows
+$#AUX tlc
 find tlc : cols
 such that true
 $ find leftmost cell in first row touching the loop north or west
@@ -100,3 +162,4 @@ $ label west border 0, north border 1
 , loop((V,tlr,tlc-1)) = 0
 , loop((H,tlr-1,tlc)) = 1
 
+$,and(flatten([flatten(cellcount),flatten(inLoop),flatten(neighbourcount)]))
