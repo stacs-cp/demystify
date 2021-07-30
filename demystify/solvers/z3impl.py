@@ -42,7 +42,7 @@ class Z3Solver:
     def solveSingle(self, puzlits, lits):
         sol = self.solve(lits, getsol=True)
         if sol is None:
-            return None
+            return []
 
         # Save the state of the solver so we can add another constraint
         self._solver.push()
@@ -57,9 +57,9 @@ class Z3Solver:
 
         self.pop()
         if newsol:
-            return "Multiple"
+            return [sol,newsol]
         else:
-            return sol
+            return [sol]
 
     # Returns unsat_core from last solve
     def unsat_core(self):

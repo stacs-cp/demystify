@@ -147,15 +147,17 @@ class SATSolver:
         # We just brute force check all assignments to other variables
         sol = self.solve(lits, getsol=True)
         if sol is None:
-            return sol
+            return []
         for p in puzlits:
             if sol[p]:
                 extrasol = self.solve(chainlist(lits, [-p]), getsol=False)
+                if extrasol:
+                    return [sol, self.solve(chainlist(lits, [-p]), getsol=True)]
             else:
                 extrasol = self.solve(chainlist(lits, [p]), getsol=False)
-            if extrasol:
-                return "Multiple"
-        return sol
+                if extrasol:
+                    return [sol, self.solve(chainlist(lits, [p]), getsol=True)]
+        return [sol]
 
     def solveAll(self, puzlits, lits):
         # if multiprocessing.current_process().name == "MainProcess":

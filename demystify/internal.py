@@ -229,12 +229,17 @@ class Solver:
     def solveSingle(self, assume=tuple()):
         smtassume = [self._varlit2smtmap[l] for l in assume]
         sol = self._solveSingle(smtassume)
-        if sol is None:
+        if len(sol) == 0:
             return None
-        elif sol == self.Multiple:
-            return self.Multiple
+        elif len(sol) == 1:
+            return self.var_smt2lits(sol[0])
         else:
-            return self.var_smt2lits(sol)
+            print("Multiple solutions!")
+            sol1 = self.var_smt2lits(sol[0])
+            sol2 = self.var_smt2lits(sol[1])
+            print(SortedSet(sol1) - SortedSet(sol2))
+            print(SortedSet(sol2) - SortedSet(sol1))
+            return self.Multiple
 
     # This is the same as 'solve', but checks if there are many solutions,
     # returning Solver.Multiple if there is more than one solution
