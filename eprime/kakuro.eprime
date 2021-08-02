@@ -15,7 +15,8 @@ $#VAR grid
 find grid : matrix indexed by [X,Y] of int(0..9)
 
 $#CON vertalldiff "The vertical block starting at {a[0], a[1]} is all different"
-find vertalldiff: matrix indexed by [X,Y] of bool
+find vertalldiff: matrix indexed by [X,Y,Y,Y,int(1..9)] of bool
+$find vertalldiff: matrix indexed by [X,Y] of bool
 
 $#CON vertsum "The vertical block starting at {a[0], a[1]} sums to {params['vertsums'][a[0]][a[1]]}"
 find vertsum: matrix indexed by [X,Y] of bool
@@ -30,10 +31,24 @@ find horzsum: matrix indexed by [X,Y] of bool
 such that
 forAll x : X. forAll y : Y. blanks[x,y] = 0 <-> grid[x,y] = 0,
 
-forAll x: X. forAll y : Y.
-vertalldiff[x,y] ->
-(vertsums[x,y] != 0 ->
-( allDiff([ grid[i,y] | i : int(x+1..x_max), forAll q:int(x+1..i). blanks[q,y]=1]) )),
+
+$ Bad attempt of AllDiff decomp by Joan and RuthH. We cannot find a sensible way to define the 'stopping point' for i.
+forAll hx : X. 
+    forAll hy : Y.
+        forAll d : int(1..9).
+            vertsums[hx,hy] != 0 ->
+                exists i : int(hx+1..x_max). 
+                    (forAll q : int(hx+1..i). blanks[q,hy]=1) /\
+                        (forAll i1,i2 : int(hx+1..i). 
+                            i1 < i2 ->
+                                vertalldiff[hx,hy,i1,i2,d] -> !(grid[i1,hy] = d /\ grid[i2,hy]=d)),
+
+
+$ forAll x: X. forAll y : Y.
+$ vertalldiff[x,y] ->
+$ (vertsums[x,y] != 0 ->
+$ ( allDiff([ grid[i,y] | i : int(x+1..x_max), forAll q:int(x+1..i). blanks[q,y]=1]) )),
+
 
 forAll x: X. forAll y : Y.
 vertsum[x,y] -> (
@@ -50,4 +65,8 @@ horzalldiff[x,y] ->
 forAll x: X. forAll y : Y.
 horzsum[x,y] -> (
 horzsums[x,y] != 0 ->
-( horzsums[x,y] = sum([ grid[x,j] | j : int(y+1..y_max), forAll q:int(y+1..j). blanks[x,q]=1]) ))
+( horzsums[x,y] = sum([ grid[x,j] | j : int(y+1..y_max), forAll q:int(y+1..j). blanks[x,q]=1]) )),
+
+and([and(flatten(vertalldiff)),and(flatten(horzalldiff)),and(flatten(vertsum)),and(flatten(horzsum))]),
+
+true
