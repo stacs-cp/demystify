@@ -237,6 +237,8 @@ class Solver:
             print("Multiple solutions!")
             sol1 = self.var_smt2lits(sol[0])
             sol2 = self.var_smt2lits(sol[1])
+            print(SortedSet([s for s in sol1 if s.equal]))
+            print(SortedSet([s for s in sol2 if s.equal]))
             print(SortedSet(sol1) - SortedSet(sol2))
             print(SortedSet(sol2) - SortedSet(sol1))
             return self.Multiple
