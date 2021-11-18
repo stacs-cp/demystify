@@ -83,6 +83,8 @@ def get_cpu_time_with_children():
             + time_children.ru_utime
             + time_children.ru_stime
         )
+    else:
+        return time.process_time()
 
 def get_cpu_time():
     if os.name != 'nt':
