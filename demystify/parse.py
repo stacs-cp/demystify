@@ -82,8 +82,8 @@ def parse_essence(eprime, eprimeparam):
     if eprime.endswith(".essence"):
         tdir = tempfile.TemporaryDirectory()
         conjure = subprocess.run(["conjure", "modelling", "-o", tdir.name, eprime],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,)
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE, )
         if conjure.returncode != 0:
             raise ParseError(
                 "conjure failed"
@@ -94,8 +94,7 @@ def parse_essence(eprime, eprimeparam):
             )
         eprimefilename = tdir.name + "/model000001.eprime"
     else:
-        eprimefilename = eprime    
-
+        eprimefilename = eprime
 
     makedimacs = subprocess.run(
         [
@@ -115,6 +114,7 @@ def parse_essence(eprime, eprimeparam):
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
+        shell=True
     )
 
     if makedimacs.returncode != 0:
@@ -256,12 +256,12 @@ def parse_essence(eprime, eprimeparam):
 
             # assert 0 in varmap[v][k].keys()
             # -- Removed in place of the error below
-            
+
             if 0 not in varmap[v][k].keys():
                 raise ParseError(
                     f"ERROR: Constraint {v}{k} cannot be made false.."
                 )
-        
+
             if 1 not in varmap[v][k].keys():
                 raise ParseError(
                     f"ERROR: Constraint {v}{k} cannot be satisfied.."
@@ -333,7 +333,6 @@ def parse_essence(eprime, eprimeparam):
         elif dim == 2:
             varlist = []
             for index1 in SortedSet(k[0] for k in printvarmap[v].keys()):
-
                 index2 = SortedSet(
                     [k for k in printvarmap[v].keys() if k[0] == index1]
                 )

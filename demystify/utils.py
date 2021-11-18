@@ -1,9 +1,12 @@
 import math
 import itertools
-import resource
+import time
 import logging
-import sys
+import sys, os
 import copy
+
+if os.name != 'nt':
+    import resource
 
 from sortedcontainers import *
 
@@ -71,20 +74,22 @@ def shuffledcopy(r, l):
 
 
 def get_cpu_time_with_children():
-    time_self = resource.getrusage(resource.RUSAGE_SELF)
-    time_children = resource.getrusage(resource.RUSAGE_CHILDREN)
-    return (
-        time_self.ru_utime
-        + time_self.ru_stime
-        + time_children.ru_utime
-        + time_children.ru_stime
-    )
-
+    if os.name != 'nt':
+        time_self = resource.getrusage(resource.RUSAGE_SELF)
+        time_children = resource.getrusage(resource.RUSAGE_CHILDREN)
+        return (
+            time_self.ru_utime
+            + time_self.ru_stime
+            + time_children.ru_utime
+            + time_children.ru_stime
+        )
 
 def get_cpu_time():
-    time_self = resource.getrusage(resource.RUSAGE_SELF)
-    return time_self.ru_utime + time_self.ru_stime
-
+    if os.name != 'nt':
+        time_self = resource.getrusage(resource.RUSAGE_SELF)
+        return time_self.ru_utime + time_self.ru_stime
+    else:
+        return time.process_time()
 
 import numpy
 
