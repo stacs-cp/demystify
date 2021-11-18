@@ -114,7 +114,7 @@ def parse_essence(eprime, eprimeparam):
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        shell=True
+        shell=(os.name=='nt')
     )
 
     if makedimacs.returncode != 0:
