@@ -1,7 +1,7 @@
 import itertools
 import random
 import logging
-import sys
+import sys, os
 
 from multiprocessing import Pool, Process, get_start_method, Queue
 
@@ -60,7 +60,7 @@ _reuse_process_pool = None
 
 
 def getPool(cores):
-    if cores <= 1:
+    if cores <= 1 or os.name == 'nt':
         return FakePool()
     else:
         if EXPCONFIG["reusePool"]:
