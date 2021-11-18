@@ -2,7 +2,8 @@
 
 set -uxo pipefail
 
-rm -f outputs/*
+rm -rf outputs
+mkdir outputs
 
 ./run-cascade.sh
 ./run-forqes.sh
