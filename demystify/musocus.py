@@ -3,6 +3,7 @@ import logging
 import sys
 import math
 
+
 class OCUSMUSFinder:
     def __init__(self, solver):
         self._solver = solver
@@ -11,8 +12,9 @@ class OCUSMUSFinder:
         # Internals for OCUS
         p_clauses = solver._cnf.clauses
         p_ass = [[c] for c in solver._conlits]
-        p_weights = {c:20 for c in solver._conlits} # Demystify has no weighting so weight everything equally.
+        p_weights = {c: 20 for c in solver._conlits}  # Demystify has no weighting so weight everything equally.
         p_user_vars = solver._varsmt
 
     def smallestMUS(self, puzlits):
-        #TO DO
+        pass
+        # TO DO

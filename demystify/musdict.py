@@ -11,7 +11,7 @@ class MusDict(object):
 
     def contains(self, literal):
         return literal in self.mus_dict
-        
+
     def get(self, literal):
         return self.mus_dict[literal]
 
@@ -85,10 +85,10 @@ class MusDict(object):
 
     def remove_duplicates(self):
         checked = set([])
-                        # TODO: Filter out duplicated MUSes
-                #if mus in checked:
-                #    continue
-                #checked.add(mus)
+        # TODO: Filter out duplicated MUSes
+        # if mus in checked:
+        #    continue
+        # checked.add(mus)
         removed = 0
         for k in sorted(self.mus_dict.keys()):
             for v in sorted(list(self.mus_dict.get(k))):
@@ -99,8 +99,8 @@ class MusDict(object):
                         removed += 1
                     else:
                         checked.add(v)
-            
+
             if len(self.mus_dict.get(k)) == 0:
                 del self.mus_dict[k]
-        
+
         logging.info("Remove dups: %s removed, %s left", removed, len(checked))

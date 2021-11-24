@@ -22,6 +22,8 @@ from .parallel import (
     MUSForqes instruments the FORQES algorithm (see optux.py and optuxext.py) to
     find the smallest MUSs (as an alternative to CascadeMUSFinder).
 """
+
+
 class ForqesMUSFinder:
     def __init__(self, solver, *, config):
         self.config = config

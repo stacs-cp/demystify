@@ -1,7 +1,6 @@
 import itertools
 import functools
 
-
 from typing import Sequence
 
 from .utils import flatten
@@ -136,7 +135,7 @@ class Clause:
 
 class ClauseList:
     def __init__(
-        self, name, clauses, usedlits=None, namelits=None, fromClauses=False
+            self, name, clauses, usedlits=None, namelits=None, fromClauses=False
     ):
         self._name = name
         if fromClauses:

@@ -87,7 +87,6 @@ parser.add_argument(
     help="optional JSON file output",
 )
 
-
 parser.add_argument(
     "--forqes",
     action="store_true",
@@ -153,8 +152,7 @@ if args.force is None:
     forced_args = None
 else:
     parse_args = [int(i) for i in args.force.split(",")]
-    forced_args = { "row": parse_args[0], "column": parse_args[1], "value": parse_args[2] }
-
+    forced_args = {"row": parse_args[0], "column": parse_args[1], "value": parse_args[2]}
 
 output = explainer.explain_steps(num_steps=args.steps, lit_choice=forced_args)
 

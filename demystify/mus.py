@@ -12,6 +12,7 @@ from .config import EXPCONFIG
 from .parallel import getPool, setChildSolver, getChildSolver
 from .musdict import MusDict
 
+
 # This calculates Minimum Unsatisfiable Sets
 # It uses internals from solver, but is put in another file just for "neatness"
 
@@ -51,7 +52,7 @@ count = 0
 
 
 def MUS(
-    r, solver, assume, minsize, *, config, initial_cons=None, just_check=False
+        r, solver, assume, minsize, *, config, initial_cons=None, just_check=False
 ):
     smtassume = [solver._varlit2smtmap[a] for a in assume]
 
@@ -101,25 +102,25 @@ def MUS(
             newcore = solver.basicCore(smtassume + to_test)
             if newcore is not None:
                 assert len(newcore) < len(core)
-                logging.debug("prechop %s -> %s -> %s", len(core), len(core)-step, len(newcore))
+                logging.debug("prechop %s -> %s -> %s", len(core), len(core) - step, len(newcore))
                 core = newcore
                 break
             step = min(step // 2, len(core) // 2)
 
     if config["tryManyChopMUS"]:
         for squash in [
-            1 / 2,
-            1 / 4,
-            1 / 8,
-            1 / 16,
-            1 / 32,
-            1 / 64,
-            1 / 128,
-            1 / 256,
-            1 / 512,
-            1 / 1024,
-            1 / 2048,
-            1 / 4096,
+                    1 / 2,
+                    1 / 4,
+                    1 / 8,
+                    1 / 16,
+                    1 / 32,
+                    1 / 64,
+                    1 / 128,
+                    1 / 256,
+                    1 / 512,
+                    1 / 1024,
+                    1 / 2048,
+                    1 / 4096,
         ]:
             step = int(len(core) * squash)
             loopsize = safepow(1 / (1 - squash), minsize + 1)
@@ -162,7 +163,7 @@ def MUS(
             i = 0
             badcount = 0
             while i * step < len(core):
-                to_test = core[: (i * step)] + core[((i + 1) * step) :]
+                to_test = core[: (i * step)] + core[((i + 1) * step):]
                 solvable = solver._solver.solveLimited(smtassume + to_test)
                 logging.debug(
                     "minprecheck: %s %s %s %s %s %s %s",
@@ -196,7 +197,7 @@ def MUS(
             i = 0
             badcount = 0
             while i * step < len(core):
-                to_test = core[: (i * step)] + core[((i + 1) * step) :]
+                to_test = core[: (i * step)] + core[((i + 1) * step):]
                 solvable = solver._solver.solveLimited(smtassume + to_test)
                 logging.debug(
                     "minprecheckstep: %s %s %s %s %s %s %s",
@@ -255,7 +256,7 @@ def MUS(
                         solver._conmap[x] for x in core if x in solver._conmap
                     ]
 
-                to_test = core[:pos] + core[(pos + step) :]
+                to_test = core[:pos] + core[(pos + step):]
                 assert len(to_test) < len(core)
                 solvable = solver._solver.solve(
                     smtassume + to_test, getsol=False
@@ -272,7 +273,7 @@ def MUS(
                 logging.debug(
                     "Core Stage 2 step: %s %s %s", pos, len(core), step
                 )
-                to_test = core[:pos] + core[(pos + step) :]
+                to_test = core[:pos] + core[(pos + step):]
                 assert len(to_test) < len(core)
                 solvable = solver._solver.solve(
                     smtassume + to_test, getsol=False
@@ -283,7 +284,7 @@ def MUS(
 
             step = 1
             # Step
-            to_test = core[:pos] + core[(pos + step) :]
+            to_test = core[:pos] + core[(pos + step):]
             assert (
                 solver._solver.solve(smtassume + to_test, getsol=False) == True
             )
@@ -291,8 +292,8 @@ def MUS(
             if pos >= minsize:
                 to_test = core[:pos]
                 if (
-                    solver._solver.solve(smtassume + to_test, getsol=False)
-                    != False
+                            solver._solver.solve(smtassume + to_test, getsol=False)
+                            != False
                 ):
                     logging.debug(
                         "Core failed: %s %s %s", assume, minsize, calls
@@ -333,8 +334,8 @@ def MUS(
                     cutcore = core[:minsize]
                     # Check if the core is already minimal first
                     if cutcore != core and (
-                        solver._solver.solve(smtassume + cutcore, getsol=False)
-                        != False
+                                solver._solver.solve(smtassume + cutcore, getsol=False)
+                                != False
                     ):
                         logging.debug(
                             "Core failed: %s %s %s %s",
@@ -456,6 +457,7 @@ MUSSizeRequired = None
 
 MAX_MUS = 999999999
 
+
 def _findSmallestMUS_func(tup):
     (p, randstr, minsize, config) = tup
 
@@ -483,7 +485,6 @@ def _findSmallestMUS_func(tup):
     return (ret, mus)
 
 
-
 def cascadeMUS(solver, puzlits, repeats, musdict, config):
     # We need this to be accessible by the pool
     setChildSolver(solver)
@@ -492,7 +493,7 @@ def cascadeMUS(solver, puzlits, repeats, musdict, config):
         MUSSizeFound = multiprocessing.Value('l', musdict.minimum())
     else:
         MUSSizeFound = multiprocessing.Value('l', MAX_MUS)
- 
+
     MUSSizeRequired = multiprocessing.Value('l', 111)
 
     def inner_loop(minsize, pool):
@@ -538,7 +539,7 @@ def cascadeMUS(solver, puzlits, repeats, musdict, config):
                     )
                 )
             musdict.update(p, mus)
-        
+
         logging.info("Current best %s, looking for %s", musdict.minimum(), minsize)
         if musdict.minimum() <= minsize:
             return True
@@ -562,7 +563,6 @@ def cascadeMUS(solver, puzlits, repeats, musdict, config):
                 if ret:
                     return
                 loop = max(loop + config["MUSaddStep"], int(loop * config["MUSmultStep"]))
-    
 
 
 class CascadeMUSFinder:
@@ -592,18 +592,16 @@ class CascadeMUSFinder:
             logging.info("Early exit from checkSmall1")
             return musdict
 
-
-
         # Try looking for general tiny MUSes, to prime search
         logging.info("Looking for small")
         getTinyMUSes(
-                self._solver,
-                puzlits,
-                musdict,
-                repeats=self.config["smallRepeats"],
-                distance=999,
-                badlimit=self.config["baseSizeMUS"]*2,
-                config=self.config
+            self._solver,
+            puzlits,
+            musdict,
+            repeats=self.config["smallRepeats"],
+            distance=999,
+            badlimit=self.config["baseSizeMUS"] * 2,
+            config=self.config
         )
 
         logging.info("Smallest MUS B: %s ", musdict.minimum())
@@ -636,8 +634,7 @@ class CascadeMUSFinder:
             self._bestcache = copy.deepcopy(musdict)
             return musdict
 
-
-        logging.info("Running cascade algorithm")        
+        logging.info("Running cascade algorithm")
         cascadeMUS(self._solver, puzlits, self.config["repeats"], musdict, self.config)
 
         logging.info("Finished CascadeMUS: Found %s", musdict.minimum())

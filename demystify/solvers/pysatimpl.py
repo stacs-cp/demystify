@@ -12,6 +12,7 @@ import multiprocessing
 import traceback
 import random
 
+
 # print(inspect.getfile(pysat))
 
 
@@ -23,15 +24,15 @@ class SATSolver:
             self._clauses = []
         else:
             self._boolcount = cnf.nv
-            self._solver = Solver(name=EXPCONFIG["solver"], incr=EXPCONFIG["solverIncremental"],bootstrap_with=cnf.clauses)
+            self._solver = Solver(name=EXPCONFIG["solver"], incr=EXPCONFIG["solverIncremental"],
+                                  bootstrap_with=cnf.clauses)
             self._clauses = cnf.clauses
-                    
 
         self._stack = []
         self._boolnames = {}
         self._knownlits = SortedSet()
         if EXPCONFIG["dumpSAT"]:
-            assert(cnf is None)
+            assert (cnf is None)
             self._rawclauses = []
         self._lasttime = -1
 
@@ -68,25 +69,23 @@ class SATSolver:
         self._solver.delete()
         if EXPCONFIG["changeSolverSeed"]:
             import pysolvers
-            assert pysolvers.glucose41_set_argc(["-rnd-seed="+ str(seed)])
+            assert pysolvers.glucose41_set_argc(["-rnd-seed=" + str(seed)])
         self._solver = Solver(
             name=EXPCONFIG["solver"],
             incr=EXPCONFIG["solverIncremental"],
             bootstrap_with=randomFromSeed(seed).sample(self._clauses, len(self._clauses))
         )
-    
+
     def dumpSAT(self, filename, assume):
         assert len(assume) == 1
         known = SortedSet(list(self._knownlits) + assume)
         needed = [c for c in self._rawclauses if len(known.intersection(c)) == 0]
-        simplified = [ [x for x in c if (-x) not in known ] for c in needed ]
-        #simplified = SortedSet([ tuple(s) for s in simplified if len(s) > 0 ])
+        simplified = [[x for x in c if (-x) not in known] for c in needed]
+        # simplified = SortedSet([ tuple(s) for s in simplified if len(s) > 0 ])
         with open(filename, "w") as f:
-            print("p cnf {} {}".format(max(abs(x) for c in self._clauses for x in c), len(simplified) ), file=f)
+            print("p cnf {} {}".format(max(abs(x) for c in self._clauses for x in c), len(simplified)), file=f)
             for c in simplified:
                 print(" ".join(str(x) for x in c) + " 0", file=f)
-
-
 
     # SAT assignments look like a list of integers, where:
     # '5' means variable 5 is true
@@ -188,7 +187,7 @@ class SATSolver:
 
     def addLit(self, var):
         # We used to check this, but now one high-level variable can be named with multiple lits
-        #assert var not in self._knownlits
+        # assert var not in self._knownlits
         if var not in self._knownlits:
             self._knownlits.add(var)
 
