@@ -2,21 +2,19 @@ import logging
 import math
 
 
-class MusDict(object):
-    def __init__(self, mus_dict):
-        self.mus_dict = mus_dict
-
-    def __len__(self):
-        return len(self.mus_dict)
+class MusDict(dict):
+    def __init__(self, mus_dict={}):
+        for k, v in mus_dict.items():
+            self[k] = v
 
     def contains(self, literal):
-        return literal in self.mus_dict
+        return literal in self
 
     def get(self, literal):
-        return self.mus_dict[literal]
+        return self[literal]
 
     def get_first(self, literal):
-        return self.mus_dict[literal][0]
+        return self[literal][0]
 
     def get_all(self, literals):
         return [self.get_first(p) for p in literals]
@@ -24,64 +22,64 @@ class MusDict(object):
     def filter_literals_by_mus(self, condition):
         return [
             k
-            for k in sorted(self.mus_dict.keys())
+            for k in sorted(self.keys())
             if condition(self.get_first(k))
         ]
 
     def filter_literals(self, condition):
-        return [k for k in sorted(self.mus_dict.keys()) if condition(k)]
+        return [k for k in sorted(self.keys()) if condition(k)]
 
     def get_literals(self):
-        return [k for k in sorted(self.mus_dict.keys())]
+        return [k for k in sorted(self.keys())]
 
     def has_literal(self, literal):
         return (
             len(
                 list(
-                    k for k in sorted(self.mus_dict.keys()) if str(k) == literal
+                    k for k in sorted(self.keys()) if str(k) == literal
                 )
             )
             > 0
         )
 
     def minimum(self):
-        if len(self.mus_dict) == 0:
+        if len(self) == 0:
             return math.inf
 
-        return min(len(v[0]) for v in self.mus_dict.values())
+        return min(len(v[0]) for v in self.values())
 
     def update(self, p, mus):
         if mus is None:
             return
 
-        elif p not in self.mus_dict:
+        elif p not in self:
             logging.info("XX found first {} {}".format(p, len(mus)))
 
-            self.mus_dict[p] = [tuple(sorted(mus))]
+            self[p] = [tuple(sorted(mus))]
 
-        elif len(self.mus_dict[p][0]) > len(mus):
+        elif len(self[p][0]) > len(mus):
             logging.info(
                 "XX found new best {} {} {}".format(
-                    p, len(self.mus_dict[p][0]), len(mus)
+                    p, len(self[p][0]), len(mus)
                 )
             )
 
-            self.mus_dict[p] = [tuple(sorted(mus))]
+            self[p] = [tuple(sorted(mus))]
 
-        elif p in self.mus_dict and len(self.mus_dict[p][0]) == len(mus):
+        elif p in self and len(self[p][0]) == len(mus):
             newmus = tuple(sorted(mus))
-            if not (newmus in self.mus_dict[p]):
+            if not (newmus in self[p]):
                 logging.info(
                     "XX add another new best {} {} {}".format(
-                        p, len(self.mus_dict[p][0]), len(self.mus_dict[p])
+                        p, len(self[p][0]), len(self[p])
                     )
                 )
-                self.mus_dict[p].append(tuple(sorted(mus)))
+                self[p].append(tuple(sorted(mus)))
             else:
                 logging.info("XX find duplicate {}".format(p))
 
         else:
-            assert len(self.mus_dict[p][0]) < len(mus)
+            assert len(self[p][0]) < len(mus)
 
     def remove_duplicates(self):
         checked = set([])
@@ -90,17 +88,17 @@ class MusDict(object):
         #    continue
         # checked.add(mus)
         removed = 0
-        for k in sorted(self.mus_dict.keys()):
-            for v in sorted(list(self.mus_dict.get(k))):
+        for k in sorted(self.keys()):
+            for v in sorted(list(self.get(k))):
                 # Empty MUSes arise from values implied by the problem, we do not filter them
                 if len(v) > 0:
                     if v in checked:
-                        self.mus_dict.get(k).remove(v)
+                        self.get(k).remove(v)
                         removed += 1
                     else:
                         checked.add(v)
 
-            if len(self.mus_dict.get(k)) == 0:
-                del self.mus_dict[k]
+            if len(self.get(k)) == 0:
+                del self[k]
 
         logging.info("Remove dups: %s removed, %s left", removed, len(checked))
