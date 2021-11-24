@@ -150,14 +150,14 @@ def knightsMove(varmat):
     for i1 in range(x):
         for j1 in range(y):
             for knight in (
-                (1, 2),
-                (1, -2),
-                (-1, -2),
-                (-1, 2),
-                (2, 1),
-                (2, -1),
-                (-2, 1),
-                (-2, -1),
+                    (1, 2),
+                    (1, -2),
+                    (-1, -2),
+                    (-1, 2),
+                    (2, 1),
+                    (2, -1),
+                    (-2, 1),
+                    (-2, -1),
             ):
                 other = (i1 + knight[0], j1 + knight[1])
                 if 0 <= other[0] < x and 0 <= other[1] < y:
@@ -178,14 +178,14 @@ def kingsMove(varmat):
     for i1 in range(x):
         for j1 in range(y):
             for king in (
-                (-1, -1),
-                (-1, 0),
-                (-1, 1),
-                (0, -1),
-                (0, 1),
-                (1, -1),
-                (1, 0),
-                (1, 1),
+                    (-1, -1),
+                    (-1, 0),
+                    (-1, 1),
+                    (0, -1),
+                    (0, 1),
+                    (1, -1),
+                    (1, 0),
+                    (1, 1),
             ):
                 other = (i1 + king[0], j1 + king[1])
                 if 0 <= other[0] < x and 0 <= other[1] < y:
@@ -228,9 +228,9 @@ def diffByDist(varmat, dist, difference):
                 for diffj in range(-dist, dist + 1):
                     other = (i1 + diffi, j1 + diffj)
                     if (
-                        (abs(diffi) + abs(diffj) == dist)
-                        and 0 <= other[0] < x
-                        and 0 <= other[1] < y
+                                    (abs(diffi) + abs(diffj) == dist)
+                                and 0 <= other[0] < x
+                            and 0 <= other[1] < y
                     ):
                         constraints += buildDiffBy(
                             "dist {}".format(dist),
@@ -310,7 +310,7 @@ def buildJigsaw(varmat, jigsaw):
 
     size = 9
 
-    jigsawrows = [jigsaw[i : i + size] for i in range(0, size * size, size)]
+    jigsawrows = [jigsaw[i: i + size] for i in range(0, size * size, size)]
 
     for val in SortedSet(jigsaw):
         cells = []

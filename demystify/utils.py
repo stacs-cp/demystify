@@ -13,6 +13,7 @@ from sortedcontainers import *
 from typing import Iterable, List
 from multiprocessing import current_process
 
+
 # Some boring utility functions
 
 # Deal with y being too large, or x being a fraction
@@ -35,6 +36,7 @@ def flatten_internal(arr):
 
 def flatten(arr: List) -> List:
     return list(flatten_internal(arr))
+
 
 def in_flattened_internal(arr, x):
     for i in arr:
@@ -86,12 +88,14 @@ def get_cpu_time_with_children():
     else:
         return time.process_time()
 
+
 def get_cpu_time():
     if os.name != 'nt':
         time_self = resource.getrusage(resource.RUSAGE_SELF)
         return time_self.ru_utime + time_self.ru_stime
     else:
         return time.process_time()
+
 
 import numpy
 
@@ -123,7 +127,7 @@ def parseSavileRowName(vars, auxvars, n):
 
     varmatch = varmatch[0]
 
-    n = n[len(varmatch) + 1 :]
+    n = n[len(varmatch) + 1:]
 
     splits = n.split("_")
     args = []
@@ -152,6 +156,7 @@ def build_lit2conmap(clauses):
             lit2conmap[-c[0]] = SortedSet()
     return lit2conmap
 
+
 def build_lit2clausemap(clauses):
     litmap = dict()
     for c in clauses:
@@ -161,6 +166,7 @@ def build_lit2clausemap(clauses):
             litmap[-l].append(c)
 
     return litmap
+
 
 # Check if this constraint is already known
 # We classify a constraint as 'known' if the clauses
@@ -182,12 +188,12 @@ def checkConstraintAlreadyParsed(formula, con, name):
     logging.debug("Check: %s", lit2clausemap[con])
 
     # x*2 just to make sure we can use 1/-1 to normalise the constraint
-    concpy = tuple(SortedSet([tuple(SortedSet([1 if x == con else -1 if x == -con else x*2 for x in c])) for c in lit2clausemap[con]]))
-
+    concpy = tuple(SortedSet(
+        [tuple(SortedSet([1 if x == con else -1 if x == -con else x * 2 for x in c])) for c in lit2clausemap[con]]))
 
     logging.debug("Check2: %s", concpy)
 
-    if concpy == () or concpy==((-1,1),):
+    if concpy == () or concpy == ((-1, 1),):
         logging.debug("Constraint never used: %s", name)
         return True
 
@@ -197,7 +203,6 @@ def checkConstraintAlreadyParsed(formula, con, name):
     else:
         formula.concollection[concpy] = name
         return False
-
 
 
 def getConnectedVars(formula, con, varlits_in):

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 ##
 ## optux.py
 ##
@@ -86,7 +86,7 @@
 """
 
 #
-#==============================================================================
+# ==============================================================================
 from __future__ import print_function
 import getopt
 import os
@@ -99,7 +99,7 @@ import sys
 
 
 #
-#==============================================================================
+# ==============================================================================
 class OptUx(object):
     """
         A simple Python version of the implicit hitting set based optimal MUS
@@ -153,7 +153,7 @@ class OptUx(object):
     """
 
     def __init__(self, formula, solver='g3', adapt=False, exhaust=False,
-            minz=False, trim=False, verbose=0):
+                 minz=False, trim=False, verbose=0):
         """
             Constructor.
         """
@@ -180,21 +180,21 @@ class OptUx(object):
 
         # enumerating disjoint MCSes (including unit-size MCSes)
         to_hit, self.units = self._disjoint(unweighted, solver, adapt, exhaust,
-                minz, trim)
+                                            minz, trim)
 
         if self.verbose > 2:
             print('c mcses: {0} unit, {1} disj'.format(len(self.units),
-                len(to_hit) + len(self.units)))
+                                                       len(to_hit) + len(self.units)))
 
         # hitting set enumerator
         self.hitman = Hitman(bootstrap_with=to_hit, weights=self.weights,
-                solver=solver, htype='sorted', mxs_adapt=adapt,
-                mxs_exhaust=exhaust, mxs_minz=minz, mxs_trim=trim)
+                             solver=solver, htype='sorted', mxs_adapt=adapt,
+                             mxs_exhaust=exhaust, mxs_minz=minz, mxs_trim=trim)
 
         # SAT oracle bootstrapped with the hard clauses; note that
         # clauses of the unit-size MCSes are enforced to be enabled
         self.oracle = Solver(name=solver, bootstrap_with=unweighted.hard +
-                [[mcs] for mcs in self.units])
+                                                         [[mcs] for mcs in self.units])
 
     def __del__(self):
         """
@@ -319,7 +319,7 @@ class OptUx(object):
         to_hit, units = [], []
 
         with RC2(formula, solver=solver, adapt=adapt, exhaust=exhaust,
-                minz=minz, trim=trim, verbose=0) as oracle:
+                 minz=minz, trim=trim, verbose=0) as oracle:
 
             # iterating over MaxSAT solutions
             while True:
@@ -423,7 +423,7 @@ class OptUx(object):
 
 
 #
-#==============================================================================
+# ==============================================================================
 def parse_options():
     """
         Parses command-line options.
@@ -431,8 +431,8 @@ def parse_options():
 
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'ae:hms:t:vx',
-                ['adapt', 'enum=', 'exhaust', 'help', 'minimize', 'solver=',
-                    'trim=', 'verbose'])
+                                   ['adapt', 'enum=', 'exhaust', 'help', 'minimize', 'solver=',
+                                    'trim=', 'verbose'])
     except getopt.GetoptError as err:
         sys.stderr.write(str(err).capitalize() + '\n')
         usage()
@@ -473,7 +473,7 @@ def parse_options():
 
 
 #
-#==============================================================================
+# ==============================================================================
 def usage():
     """
         Prints help message.
@@ -495,7 +495,7 @@ def usage():
 
 
 #
-#==============================================================================
+# ==============================================================================
 if __name__ == '__main__':
     adapt, exhaust, minz, trim, to_enum, solver, verbose, files = parse_options()
 
@@ -509,7 +509,7 @@ if __name__ == '__main__':
 
         # creating an object of OptUx
         with OptUx(formula, solver=solver, adapt=adapt, exhaust=exhaust,
-                minz=minz, trim=trim, verbose=verbose) as optux:
+                   minz=minz, trim=trim, verbose=verbose) as optux:
 
             # iterating over the necessary number of optimal MUSes
             for i, mus in enumerate(optux.enumerate()):
@@ -527,4 +527,3 @@ if __name__ == '__main__':
             # reporting the total oracle time
             if verbose > 1:
                 print('c oracle time: {0:.4f}'.format(optux.oracle_time()))
-

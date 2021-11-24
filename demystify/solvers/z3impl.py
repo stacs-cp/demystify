@@ -57,7 +57,7 @@ class Z3Solver:
 
         self.pop()
         if newsol:
-            return [sol,newsol]
+            return [sol, newsol]
         else:
             return [sol]
 
@@ -85,7 +85,7 @@ class Z3Solver:
     # TODO: In SAT we do this to flush learned clauses
     def reboot(self, seed):
         pass
- 
+
     def reset_stats(self):
         self._stats = {
             "solveCount": 0,

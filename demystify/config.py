@@ -80,13 +80,16 @@ CONFIG_MORE_MUS["prechopMUSes12"] = True
 CONFIG_MORE_MUS["tryManyChopMUS"] = False
 CONFIG_MORE_MUS["findLarger"] = True
 
+
 def getDefaultConfig():
     global CONFIG_FAST
     return copy.deepcopy(CONFIG_FAST)
 
+
 def getMoreMusConfig():
     global CONFIG_MORE_MUS
     return copy.deepcopy(CONFIG_MORE_MUS)
+
 
 def LoadConfigFromDict(dict):
     global CONFIG_FAST
@@ -95,6 +98,7 @@ def LoadConfigFromDict(dict):
             print("Invalid CONFIG option: " + k)
             sys.exit(1)
         CONFIG_FAST[k] = v
+
 
 def LoadConfigFromFile(file):
     with open(file) as f:

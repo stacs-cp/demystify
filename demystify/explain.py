@@ -64,6 +64,13 @@ class Explainer(object):
         self.unexplained = self.solution
         self._set_mus_finder()
 
+    """
+    Pass in no arguments to solve the puzzle until finished.
+    lit_choice: explain the step required to get this value (allows any size of mus) form: {'row':-, 'col':-, 'value':-}
+    num_steps: explain a specified number of steps
+    mus_choice: specify the mus to be used, for debugging. form: ?
+    """
+
     def explain_steps(self, lit_choice=None, mus_choice=None, num_steps=None):
         if not self.puzzle or not self.solver or not self.solution:
             raise ExplainError("Puzzle has not been correctly initialised.")
@@ -99,7 +106,12 @@ class Explainer(object):
 
         return {"name": self.name, "params": self.params, "steps": steps}
 
-    def explain_step(self, lit_choice=None, mus_choice=None, update=True):
+    """
+    lit_choice: explain what would be needed to work out this literal. form: {'row':-, 'col':-, 'value':-}
+    mus_choice: specify the mus to be used, for debugging. form: ?
+    """
+
+    def explain_step(self, lit_choice=None, mus_choice=None):
         step_dict = {}
         step_dict["stepNumber"] = self.steps_explained + 1
 
@@ -149,8 +161,8 @@ class Explainer(object):
         else:
             if self.config["findLarger"]:
                 lit_choices = mus_dict.filter_literals_by_mus(
-                    lambda mus: 
-                        len(mus) >= smallest and len(mus) <= 3*smallest
+                    lambda mus:
+                    len(mus) >= smallest and len(mus) <= 3 * smallest
                 )
             else:
                 lit_choices = mus_dict.filter_literals_by_mus(
@@ -197,10 +209,10 @@ class Explainer(object):
 
         if smallest <= self.merge:
             return {"name": self.name, "params": self.params, "steps": []}
-            
+
         choices_explanations, _ = self._choices_list(mus_dict)
         return {"name": self.name, "params": self.params, "steps": [choices_explanations]}
-    
+
     def get_current_state(self):
         step_dict = {}
         step_dict["stepNumber"] = 0
@@ -228,8 +240,8 @@ class Explainer(object):
         else:
             if self.config["findLarger"]:
                 lit_choices = mus_dict.filter_literals_by_mus(
-                    lambda mus: 
-                        len(mus) >= smallest and len(mus) <= 3*smallest
+                    lambda mus:
+                    len(mus) >= smallest and len(mus) <= 3 * smallest
                 )
             else:
                 lit_choices = mus_dict.filter_literals_by_mus(
@@ -247,7 +259,7 @@ class Explainer(object):
                 for mus in tuple(SortedSet(mus_dict.get(p))):
                     choices.append(self._get_step_dict(proven_dict[p][mus], mus))
                     proven_lit_choices.append(proven_dict[p][mus])
-        
+
         return choices, proven_lit_choices
 
     def _add_known(self, lits):
@@ -366,7 +378,6 @@ class Explainer(object):
                 for i, clause in enumerate(involved):
 
                     if in_flattened(clause, poslit) or in_flattened(clause, neglit):
-
                         explanations.append(str(i))
                         # We want this to be "the" explanation that makes d
                         # postlit or neglit in targets
@@ -399,7 +410,6 @@ class Explainer(object):
             raise SolveError("Your problem has no solution!")
 
         if solution == "Multiple" and not allow_incomplete:
-
             raise SolveError("Your problem has multiple solutions!")
 
         if no_domains:

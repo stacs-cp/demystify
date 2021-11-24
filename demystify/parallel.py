@@ -36,7 +36,7 @@ def split(a, n):
     k, m = divmod(len(a), n)
     # Listify this so we check the lengths here
     return list(
-        list(a[i * k + min(i, m) : (i + 1) * k + min(i + 1, m)])
+        list(a[i * k + min(i, m): (i + 1) * k + min(i + 1, m)])
         for i in range(n)
     )
 
@@ -70,7 +70,7 @@ def getPool(cores):
             return _reuse_process_pool
         else:
             return ProcessPool(processes=cores)
-    #    return Pool(processes=cores)
+            #    return Pool(processes=cores)
 
 
 global_process_counter = 0
