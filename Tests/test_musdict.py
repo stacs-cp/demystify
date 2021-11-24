@@ -37,6 +37,7 @@ class MusDictTester(unittest.TestCase):
         self.assertEqual(test.get_first('b'), expected_b)
 
     def test_remove_duplicates(self):
-        test = MusDict({'a': [1, 2, 3], 'b': [4, 5, 6], 'c':[4,5,6]})
+        test = MusDict({'a': ['test1', 'dibble', 'contains x,y,z'], 'b': ['test1', 'dibble', 'contains x,y,z'], 'c':['4','5','6']})
         test.remove_duplicates()
-        print(test)
+        self.assertEqual(len(test),2)
+        self.assertFalse('b' in test)
