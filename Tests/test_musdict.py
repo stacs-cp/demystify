@@ -1,8 +1,6 @@
 import unittest
 from demystify.musdict import MusDict
 from demystify.base import DummyClause, Lit, Var
-from sortedcontainers import SortedSet
-
 
 class MusDictTester(unittest.TestCase):
     def test_initialisation_empty(self):
