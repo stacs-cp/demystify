@@ -1,5 +1,7 @@
 import unittest
 from demystify.musdict import MusDict
+from demystify.base import DummyClause, Lit, Var
+from sortedcontainers import SortedSet
 
 
 class MusDictTester(unittest.TestCase):
@@ -37,23 +39,44 @@ class MusDictTester(unittest.TestCase):
         self.assertEqual(test.get_first('b'), expected_b)
 
     def test_remove_duplicates(self):
-        test = MusDict({'a': ['test1', 'dibble', 'contains x,y,z'], 'b': ['test1', 'dibble', 'contains x,y,z'], 'c':['4','5','6']})
+        test = MusDict({'a': ['test1', 'dibble', 'contains x,y,z'], 'b': ['test1', 'dibble', 'contains x,y,z'],
+                        'c': ['4', '5', '6']})
         test.remove_duplicates()
-        self.assertEqual(len(test),2)
+        self.assertEqual(len(test), 2)
         self.assertFalse('b' in test)
 
     def test_remove_duplicates_not_adjacent(self):
-        test = MusDict({'a': ['test1', 'dibble', 'contains x,y,z'], 'b': ['4','5','6'], 'c': ['test1', 'dibble', 'contains x,y,z']})
+        test = MusDict({'a': ['test1', 'dibble', 'contains x,y,z'], 'b': ['4', '5', '6'],
+                        'c': ['test1', 'dibble', 'contains x,y,z']})
         test.remove_duplicates()
-        self.assertEqual(len(test),2)
+        self.assertEqual(len(test), 2)
         self.assertFalse('c' in test)
 
     def test_has_literal(self):
-        #TODO change this to use literals
+        # TODO change this to use literals
         test = MusDict({'grid[1,9] is 0': 7, 'grid[9,2] is 0': 8, 'grid[9,2] is not 1': 9})
         self.assertTrue(test.has_literal('grid[1,9] is 0'))
         self.assertFalse(test.has_literal('grid[9,2] is 1'))
 
     def test_minimum_0(self):
-        test = MusDict({'grid[1,3] is 0': [()], 'grid[1,6] is 1': [()], 'grid[1,8] is 0': [()], 'grid[1,9] is 0': [('col 9 cannot have three white starting at 1!',)], 'grid[1,9] is not 1': [('col 9 cannot have three white starting at 1!',)], 'grid[2,1] is 0': [()], 'grid[2,5] is 1': [()], 'grid[2,6] is 0': [('row 2 cannot have three white starting at 5!',)], 'grid[2,6] is not 1': [('row 2 cannot have three white starting at 5!',)], 'grid[2,7] is 1': [()], 'grid[2,8] is 0': [('row 2 cannot have three white starting at 7!',)], 'grid[2,8] is not 1': [('row 2 cannot have three white starting at 7!',)], 'grid[2,9] is 1': [()], 'grid[2,10] is 0': [()]})
-        self.assertEqual(test.minimum(),0)
+        test = MusDict({'grid[1,3] is 0': [()], 'grid[1,6] is 1': [()], 'grid[1,8] is 0': [()],
+                        'grid[1,9] is 0': [('col 9 cannot have three white starting at 1!',)],
+                        'grid[1,9] is not 1': [('col 9 cannot have three white starting at 1!',)],
+                        'grid[2,1] is 0': [()], 'grid[2,5] is 1': [()],
+                        'grid[2,6] is 0': [('row 2 cannot have three white starting at 5!',)],
+                        'grid[2,6] is not 1': [('row 2 cannot have three white starting at 5!',)],
+                        'grid[2,7] is 1': [()], 'grid[2,8] is 0': [('row 2 cannot have three white starting at 7!',)],
+                        'grid[2,8] is not 1': [('row 2 cannot have three white starting at 7!',)],
+                        'grid[2,9] is 1': [()], 'grid[2,10] is 0': [()]})
+        self.assertEqual(test.minimum(), 0)
+
+    def test_minimum_2(self):
+        testdict = MusDict()
+        for i in range(10):
+            lits = []
+            for j in range(10):
+                lits.append(Lit(Var(f'grid[{i},{j}]', [i, j], (i, j)), j, False))
+            testdict[f'grid[{i},2] is not 0'] = [(DummyClause('cols 1 and 2 must be different',
+                                                              lits), DummyClause('cols 1 and 2 must be different',
+                                                                                 lits))]
+        self.assertEqual(testdict.minimum(), 2)
