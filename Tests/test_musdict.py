@@ -41,3 +41,19 @@ class MusDictTester(unittest.TestCase):
         test.remove_duplicates()
         self.assertEqual(len(test),2)
         self.assertFalse('b' in test)
+
+    def test_remove_duplicates_not_adjacent(self):
+        test = MusDict({'a': ['test1', 'dibble', 'contains x,y,z'], 'b': ['4','5','6'], 'c': ['test1', 'dibble', 'contains x,y,z']})
+        test.remove_duplicates()
+        self.assertEqual(len(test),2)
+        self.assertFalse('c' in test)
+
+    def test_has_literal(self):
+        #TODO change this to use literals
+        test = MusDict({'grid[1,9] is 0': 7, 'grid[9,2] is 0': 8, 'grid[9,2] is not 1': 9})
+        self.assertTrue(test.has_literal('grid[1,9] is 0'))
+        self.assertFalse(test.has_literal('grid[9,2] is 1'))
+
+    def test_minimum_0(self):
+        test = MusDict({'grid[1,3] is 0': [()], 'grid[1,6] is 1': [()], 'grid[1,8] is 0': [()], 'grid[1,9] is 0': [('col 9 cannot have three white starting at 1!',)], 'grid[1,9] is not 1': [('col 9 cannot have three white starting at 1!',)], 'grid[2,1] is 0': [()], 'grid[2,5] is 1': [()], 'grid[2,6] is 0': [('row 2 cannot have three white starting at 5!',)], 'grid[2,6] is not 1': [('row 2 cannot have three white starting at 5!',)], 'grid[2,7] is 1': [()], 'grid[2,8] is 0': [('row 2 cannot have three white starting at 7!',)], 'grid[2,8] is not 1': [('row 2 cannot have three white starting at 7!',)], 'grid[2,9] is 1': [()], 'grid[2,10] is 0': [()]})
+        self.assertEqual(test.minimum(),0)
