@@ -16,10 +16,40 @@ class MusDictTester(unittest.TestCase):
         self.assertEqual(test['b'], 8)
         self.assertEqual(test['c'], 9)
 
-    def classic_update(self):
+    def test_initialisation_intended_types(self):
+        testin = {}
+        for i in range(2):
+            lits = []
+            for j in range(2):
+                lits.append(Lit(Var(f'grid[{i},{j}]', [i, j], (i, j)), j, False))
+            testin[Lit(Var(f'grid[{i},{j}]', [i, j], (i, j)), j, False)] = [
+                (DummyClause('cols 1 and 2 must be different',
+                             lits),)]
+        test = MusDict(testin)
+        self.assertEqual(len(test), 2)
+        self.assertEqual(test[Lit(Var('grid[1,1]', [1, 1], (1, 1)), 1, False)],
+                         [(DummyClause('cols 1 and 2 must be different',
+                                       lits),)])
+
+    def test_classic_update(self):
         test = MusDict({'a': 7, 'b': 8, 'c': 9})
         test['testing'] = 123
         self.assertEqual(test['testing'], 123)
+
+    def test_implemented_update(self):
+        test = MusDict()
+        self.assertEqual(len(test), 0)
+        for i in range(2):
+            lits = []
+            for j in range(2):
+                lits.append(Lit(Var(f'grid[{i},{j}]', [i, j], (i, j)), j, False))
+            test.update(Lit(Var(f'grid[{i},{j}]', [i, j], (i, j)), j, False), [
+                DummyClause('cols 1 and 2 must be different',
+                            lits)])
+        self.assertEqual(len(test), 2)
+        self.assertEqual(test[Lit(Var(f'grid[{i},{j}]', [i, j], (i, j)), j, False)], [(
+            DummyClause('cols 1 and 2 must be different',
+                        lits),)])
 
     def test_get(self):
         test = MusDict({'a': 7, 'b': 8, 'c': 9})
@@ -76,7 +106,8 @@ class MusDictTester(unittest.TestCase):
             lits = []
             for j in range(10):
                 lits.append(Lit(Var(f'grid[{i},{j}]', [i, j], (i, j)), j, False))
-            testdict[f'grid[{i},2] is not 0'] = [(DummyClause('cols 1 and 2 must be different',
-                                                              lits), DummyClause('cols 1 and 2 must be different',
-                                                                                 lits))]
+            testdict[Lit(Var(f'grid[{i},{j}]', [i, j], (i, j)), j, False)] = [
+                (DummyClause('cols 1 and 2 must be different',
+                             lits), DummyClause('cols 1 and 2 must be different',
+                                                lits))]
         self.assertEqual(testdict.minimum(), 2)

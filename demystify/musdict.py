@@ -1,8 +1,9 @@
 import logging
 import math
-
+from demystify.base import Lit, DummyClause
 
 class MusDict(dict):
+    # Expects dict of form {Lit:[(DummyClause,)}
     def __init__(self, mus_dict={}):
         for k, v in mus_dict.items():
             self[k] = v
@@ -48,7 +49,7 @@ class MusDict(dict):
 
         return min(len(v[0]) for v in self.values())
 
-    def update(self, p, mus):
+    def update(self, p:Lit, mus:[DummyClause]):
         if mus is None:
             return
 
