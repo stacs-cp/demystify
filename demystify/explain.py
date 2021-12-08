@@ -71,7 +71,7 @@ class Explainer(object):
     mus_choice: specify the mus to be used, for debugging. form: ?
     """
 
-    def explain_steps(self, lit_choice=None, mus_choice=None, num_steps=None):
+    def explain_steps(self, *, lit_choice=None, mus_choice=None, num_steps=None):
         if not self.puzzle or not self.solver or not self.solution:
             raise ExplainError("Puzzle has not been correctly initialised.")
 
