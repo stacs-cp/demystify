@@ -81,6 +81,11 @@ CONFIG_MORE_MUS["tryManyChopMUS"] = False
 CONFIG_MORE_MUS["findLarger"] = True
 
 
+CONFIG_HINT = copy.deepcopy(CONFIG_FAST)
+
+CONFIG_HINT["earlyExit"] = False
+CONFIG_HINT["baseSizeMUS"] = 10
+
 def getDefaultConfig():
     global CONFIG_FAST
     return copy.deepcopy(CONFIG_FAST)
@@ -90,6 +95,10 @@ def getMoreMusConfig():
     global CONFIG_MORE_MUS
     return copy.deepcopy(CONFIG_MORE_MUS)
 
+
+def getHintConfig():
+    global CONFIG_HINT
+    return copy.deepcopy(CONFIG_HINT)
 
 def LoadConfigFromDict(dict):
     global CONFIG_FAST

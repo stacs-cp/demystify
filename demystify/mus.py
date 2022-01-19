@@ -558,8 +558,8 @@ def cascadeMUS(solver, puzlits, repeats, musdict, config):
             loop = max(loop + config["MUSaddStep"], int(loop * config["MUSmultStep"]))
     else:
         with getPool(config["cores"]) as my_pool:
-            while loop <= loopend:
-                ret = inner_loop(loop, my_pool)
+            while loop <= loopend: #loop represents the size of mus we are currently looking for
+                ret = inner_loop(loop, my_pool) # each time we go into inner loop we try to find a mus of size at least loop
                 if ret:
                     return
                 loop = max(loop + config["MUSaddStep"], int(loop * config["MUSmultStep"]))
@@ -588,7 +588,7 @@ class CascadeMUSFinder:
         logging.info("Smallest MUS A: %s ", musdict.minimum())
 
         # Early exit for trivial case
-        if musdict.minimum() <= 1:
+        if musdict.minimum() <= 1 and self.config["earlyExit"]:
             logging.info("Early exit from checkSmall1")
             return musdict
 
@@ -607,7 +607,7 @@ class CascadeMUSFinder:
         logging.info("Smallest MUS B: %s ", musdict.minimum())
 
         # Early exit for trivial case
-        if musdict.minimum() <= self.config["baseSizeMUS"]:
+        if musdict.minimum() <= self.config["baseSizeMUS"] and self.config["earlyExit"]:
             logging.info("Early exit from checkSmall general")
             self._bestcache = copy.deepcopy(musdict)
             return musdict
@@ -629,7 +629,7 @@ class CascadeMUSFinder:
             )
 
         # Early exit for trivial case
-        if musdict.minimum() <= self.config["baseSizeMUS"]:
+        if musdict.minimum() <= self.config["baseSizeMUS"] and self.config["earlyExit"]:
             logging.info("Early exit from checkSmall2 general")
             self._bestcache = copy.deepcopy(musdict)
             return musdict
