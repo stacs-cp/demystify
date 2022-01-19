@@ -3,7 +3,7 @@ import math
 from demystify.base import Lit, DummyClause
 
 class MusDict(dict):
-    # Expects dict of form {Lit:[(DummyClause,)}
+    # Expects dict of form {Lit:[(DummyClause,)]}
     def __init__(self, mus_dict={}):
         for k, v in mus_dict.items():
             self[k] = v

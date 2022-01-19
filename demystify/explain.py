@@ -8,7 +8,7 @@ from .musforqes import ForqesMUSFinder
 from .utils import flatten, in_flattened, intsqrt, lowsqrt
 from .base import EqVal, NeqVal
 
-from .config import getDefaultConfig, getMoreMusConfig
+from .config import getDefaultConfig, getMoreMusConfig, getHintConfig
 
 from sortedcontainers import SortedSet
 
@@ -24,9 +24,10 @@ class ExplainError(Exception):
 
 
 class Explainer(object):
-    def __init__(self, mus_finder=None, merge=1, skip=0, debug=False, steps_explained=0):
+    def __init__(self, mus_finder=None, merge=1, skip=0, debug=False, steps_explained=0, hint_setup=False):
         self.steps_explained = steps_explained
         self.mus_finder_name = mus_finder
+        self.hint_setup = hint_setup
         self.merge = merge
         self.skip = skip
 
@@ -44,7 +45,9 @@ class Explainer(object):
         self.config = self.get_config()
 
     def get_config(self):
-        if self.mus_finder_name == "cascade-more":
+        if self.hint_setup:
+            return getHintConfig()
+        elif self.mus_finder_name == "cascade-more":
             return getMoreMusConfig()
         else:
             return getDefaultConfig()
@@ -69,9 +72,10 @@ class Explainer(object):
     lit_choice: explain the step required to get this value (allows any size of mus) form: {'row':-, 'col':-, 'value':-}
     num_steps: explain a specified number of steps
     mus_choice: specify the mus to be used, for debugging. form: ?
+        allow_update: allows the update of known values and step count
     """
 
-    def explain_steps(self, *, lit_choice=None, mus_choice=None, num_steps=None):
+    def explain_steps(self, *, lit_choice=None, mus_choice=None, num_steps=None, allow_update=True):
         if not self.puzzle or not self.solver or not self.solution:
             raise ExplainError("Puzzle has not been correctly initialised.")
 
@@ -83,7 +87,7 @@ class Explainer(object):
                 if i == 1:
                     steps.append(
                         self.explain_step(
-                            lit_choice=lit_choice, mus_choice=mus_choice
+                            lit_choice=lit_choice, mus_choice=mus_choice, allow_update=allow_update
                         )
                     )
                 else:
@@ -107,11 +111,12 @@ class Explainer(object):
         return {"name": self.name, "params": self.params, "steps": steps}
 
     """
-    lit_choice: explain what would be needed to work out this literal. form: {'row':-, 'col':-, 'value':-}
+    lit_choice: explain what would be needed to work out this literal. form: {'row':-, 'column':-, 'value':-}
     mus_choice: specify the mus to be used, for debugging. form: ?
+    allow_update: allows the update of known values and step count
     """
 
-    def explain_step(self, lit_choice=None, mus_choice=None):
+    def explain_step(self, lit_choice=None, mus_choice=None, allow_update=True):
         step_dict = {}
         step_dict["stepNumber"] = self.steps_explained + 1
 
@@ -138,8 +143,8 @@ class Explainer(object):
                     self._get_deduction([p], mus_dict.get_first(p))
                     for p in sorted(skipped)
                 ]
-
-                self._add_known(skipped)
+                if allow_update:
+                    self._add_known(skipped)
 
                 mus_dict = self.mus_finder.smallestMUS(self.unexplained)
                 smallest = mus_dict.minimum()
@@ -156,8 +161,8 @@ class Explainer(object):
                 self._get_deduction([p], mus_dict.get_first(p))
                 for p in sorted(merged)
             ]
-
-            self._add_known(merged)
+            if allow_update:
+                self._add_known(merged)
         else:
             if self.config["findLarger"]:
                 lit_choices = mus_dict.filter_literals_by_mus(
@@ -191,9 +196,9 @@ class Explainer(object):
 
             step_dict = self._get_step_dict(best_proven_lits, best_mus)
             step_dict["otherChoices"] = choices
-            self._add_known(best_proven_lits)
-
-        self.steps_explained += 1
+            if allow_update:
+                self._add_known(best_proven_lits)
+                self.steps_explained += 1
 
         return step_dict
 
