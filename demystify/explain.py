@@ -198,7 +198,9 @@ class Explainer(object):
             step_dict["otherChoices"] = choices
             if allow_update:
                 self._add_known(best_proven_lits)
-                self.steps_explained += 1
+        
+        if allow_update:
+            self.steps_explained += 1
 
         return step_dict
 
