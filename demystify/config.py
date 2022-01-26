@@ -8,8 +8,6 @@ EXPCONFIG = {
     # Dump out SAT instances, for other MUS solvers
     # WHen using this, set cores=0 and repeats=1
     "dumpSAT": False,
-    # Change glucose's random seed at each solver reboot (requires chris' patched python-sat)
-    "changeSolverSeed": False,
     # TO CHECK: Does this help?
     "setPhases": False,
     # Cache MUSes between steps
