@@ -103,8 +103,6 @@ class SATSolver:
         # if multiprocessing.current_process().name == "MainProcess":
         #    print("!! solving in the main thread")
         #    traceback.print_stack()
-        if EXPCONFIG["resetSolverFull"]:
-            self.reboot()
 
         start_time = get_cpu_time()
         x = self._solver.solve(assumptions=chainlist(lits, self._knownlits))
@@ -125,8 +123,6 @@ class SATSolver:
         # if multiprocessing.current_process().name == "MainProcess":
         #    print("!! solveLimited in the main thread")
         #    traceback.print_stack()
-        if EXPCONFIG["resetSolverFull"]:
-            self.reboot()
 
         start_time = get_cpu_time()
         start_stats = self._solver.accum_stats()
