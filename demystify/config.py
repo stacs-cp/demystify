@@ -7,8 +7,6 @@ import copy
 EXPCONFIG = {
     # Reset solver for each size of MUS
     "resetSolverMUS": False,
-    # Reset solver for every call (VERY slow)
-    "resetSolverFull": False,
     # Dump out SAT instances, for other MUS solvers
     # WHen using this, set cores=0 and repeats=1
     "dumpSAT": False,
