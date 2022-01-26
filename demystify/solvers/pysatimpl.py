@@ -64,16 +64,21 @@ class SATSolver:
                 assert len(clauses) == 1
                 self._rawclauses.append(c)
 
-    # Recreate solver, throwing away all learned clauses
-    def reboot(self, seed):
+    def __getstate__(self):
         self._solver.delete()
-        if EXPCONFIG["changeSolverSeed"]:
-            import pysolvers
-            assert pysolvers.glucose41_set_argc(["-rnd-seed=" + str(seed)])
+        return self.__dict__.copy()
+
+    def __setstate__(self, d):
+        self.__dict__ = d
+        self.reboot()
+
+    # Recreate solver
+    def reboot(self):
+        self._solver.delete()
         self._solver = Solver(
             name=EXPCONFIG["solver"],
             incr=EXPCONFIG["solverIncremental"],
-            bootstrap_with=randomFromSeed(seed).sample(self._clauses, len(self._clauses))
+            bootstrap_with=self._clauses
         )
 
     def dumpSAT(self, filename, assume):
