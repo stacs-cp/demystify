@@ -8,8 +8,6 @@ EXPCONFIG = {
     # Dump out SAT instances, for other MUS solvers
     # WHen using this, set cores=0 and repeats=1
     "dumpSAT": False,
-    # TO CHECK: Does this help?
-    "setPhases": False,
     # Cache MUSes between steps
     "useCache": True,
     # Use same pool of solvers throughout
