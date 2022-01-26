@@ -192,12 +192,6 @@ class SATSolver:
         if var not in self._knownlits:
             self._knownlits.add(var)
 
-    def set_phases(self, positive, negative):
-        # TODO: Ignore the positive ones seems to be best
-        if EXPCONFIG["setPhases"]:
-            l = [-x for x in negative]
-            self._solver.set_phases(l)
-
     def reset_stats(self):
         self._stats = {
             "solveCount": 0,
