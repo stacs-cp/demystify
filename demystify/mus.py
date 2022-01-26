@@ -548,21 +548,12 @@ def cascadeMUS(solver, puzlits, repeats, musdict, config):
     loop = config["baseSizeMUS"]
     loopend = max(loop + 1, 100000)
 
-    # Have to duplicate code, to swap loops around
-    if EXPCONFIG["resetSolverMUS"]:
-        while loop <= loopend:
-            with getPool(config["cores"]) as my_pool:
-                ret = inner_loop(loop, my_pool)
-                if ret:
-                    return
+    with getPool(config["cores"]) as my_pool:
+        while loop <= loopend: #loop represents the size of mus we are currently looking for
+            ret = inner_loop(loop, my_pool) # each time we go into inner loop we try to find a mus of size at least loop
+            if ret:
+                return
             loop = max(loop + config["MUSaddStep"], int(loop * config["MUSmultStep"]))
-    else:
-        with getPool(config["cores"]) as my_pool:
-            while loop <= loopend: #loop represents the size of mus we are currently looking for
-                ret = inner_loop(loop, my_pool) # each time we go into inner loop we try to find a mus of size at least loop
-                if ret:
-                    return
-                loop = max(loop + config["MUSaddStep"], int(loop * config["MUSmultStep"]))
 
 
 class CascadeMUSFinder:
