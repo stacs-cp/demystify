@@ -49,8 +49,7 @@ Demystify also has a visual interface, which you can find in a separate reposito
 * Tents and Trees
 * Thermometers
 
-All the models can be found in the [eprime
-directory](https://github.com/stacs-cp/demystify/tree/master/eprime). If you
+All the models can be found in the [eprime directory](https://github.com/stacs-cp/demystify/tree/master/eprime). If you
 are interested in a puzzle that is not implemented, there is a guide for
 modelling your own puzzles
 [here](https://github.com/stacs-cp/demystify/blob/master/modelling-guide.md).

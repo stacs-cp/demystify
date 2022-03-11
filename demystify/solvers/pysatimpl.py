@@ -64,16 +64,21 @@ class SATSolver:
                 assert len(clauses) == 1
                 self._rawclauses.append(c)
 
-    # Recreate solver, throwing away all learned clauses
-    def reboot(self, seed):
+    def __getstate__(self):
         self._solver.delete()
-        if EXPCONFIG["changeSolverSeed"]:
-            import pysolvers
-            assert pysolvers.glucose41_set_argc(["-rnd-seed=" + str(seed)])
+        return self.__dict__.copy()
+
+    def __setstate__(self, d):
+        self.__dict__ = d
+        self.reboot()
+
+    # Recreate solver
+    def reboot(self):
+        self._solver.delete()
         self._solver = Solver(
             name=EXPCONFIG["solver"],
             incr=EXPCONFIG["solverIncremental"],
-            bootstrap_with=randomFromSeed(seed).sample(self._clauses, len(self._clauses))
+            bootstrap_with=self._clauses
         )
 
     def dumpSAT(self, filename, assume):
@@ -98,8 +103,6 @@ class SATSolver:
         # if multiprocessing.current_process().name == "MainProcess":
         #    print("!! solving in the main thread")
         #    traceback.print_stack()
-        if EXPCONFIG["resetSolverFull"]:
-            self.reboot()
 
         start_time = get_cpu_time()
         x = self._solver.solve(assumptions=chainlist(lits, self._knownlits))
@@ -120,8 +123,6 @@ class SATSolver:
         # if multiprocessing.current_process().name == "MainProcess":
         #    print("!! solveLimited in the main thread")
         #    traceback.print_stack()
-        if EXPCONFIG["resetSolverFull"]:
-            self.reboot()
 
         start_time = get_cpu_time()
         start_stats = self._solver.accum_stats()
@@ -190,12 +191,6 @@ class SATSolver:
         # assert var not in self._knownlits
         if var not in self._knownlits:
             self._knownlits.add(var)
-
-    def set_phases(self, positive, negative):
-        # TODO: Ignore the positive ones seems to be best
-        if EXPCONFIG["setPhases"]:
-            l = [-x for x in negative]
-            self._solver.set_phases(l)
 
     def reset_stats(self):
         self._stats = {

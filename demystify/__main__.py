@@ -6,6 +6,7 @@ import os
 import logging
 import json
 import time
+import pickle
 
 # Let me import demystify
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
@@ -94,14 +95,26 @@ parser.add_argument(
     help="Use the FORQES algorithm for MUS finding",
 )
 
+parser.add_argument(
+    '--pickle',
+    type=str,
+    default=None,
+    help="After building puzzle, save as a Pickled Python object (for future loading)"
+)
+
+parser.add_argument(
+    '--unpickle',
+    type=str,
+    default=None,
+    help="Use a previously picked solver"
+)
+
+
 args = parser.parse_args()
 
-if args.puzzle is None and args.eprime is None:
-    print("Must give a --puzzle or --eprime")
-    sys.exit(1)
 
-if args.puzzle is not None and args.eprime is not None:
-    print("Can only give one of --puzzle or --eprime")
+if sum([args.puzzle is not None, args.eprime is not None, args.unpickle is not None]) != 1:
+    print("Must give exactly one of --puzzle or --eprime or --unpickle")
     sys.exit(1)
 
 if args.eprime is not None and args.eprimeparam is None:
@@ -137,9 +150,18 @@ explainer = demystify.explain.Explainer(mus_finder, skip=args.skip)
 if args.puzzle is not None:
     name = os.path.basename(args.puzzle)
     explainer.init_from_json(args.puzzle)
-else:
+elif args.eprime is not None:
     name = os.path.basename(args.eprime)
     explainer.init_from_essence(args.eprime, args.eprimeparam, allow_incomplete=args.incomplete)
+else: # unpickle
+    with open(args.unpickle, 'rb') as f:
+        explainer = pickle.load(f)
+
+if args.pickle is not None:
+    print("Picking solver to : {}".format(args.pickle))
+    with open(args.pickle, 'wb') as f:
+        pickle.dump(explainer, f)
+    sys.exit(0)
 
 if args.json is not None:
     output_path = args.json[0]

@@ -5,17 +5,9 @@ import copy
 # This config contains variables whose values we never expect to change,
 # they are used in some experiments.
 EXPCONFIG = {
-    # Reset solver for each size of MUS
-    "resetSolverMUS": False,
-    # Reset solver for every call (VERY slow)
-    "resetSolverFull": False,
     # Dump out SAT instances, for other MUS solvers
     # WHen using this, set cores=0 and repeats=1
     "dumpSAT": False,
-    # Change glucose's random seed at each solver reboot (requires chris' patched python-sat)
-    "changeSolverSeed": False,
-    # TO CHECK: Does this help?
-    "setPhases": False,
     # Cache MUSes between steps
     "useCache": True,
     # Use same pool of solvers throughout
