@@ -327,7 +327,7 @@ def MUS(
                 core = newcore
                 lens.append((lit, len(core)))
             else:
-                logging.debug("Failed to remove: %s (%d of %d)", lit, badcount, minsize)
+                logging.debug("Failed to remove: %s (%s of %s)", lit, badcount, minsize)
                 badcount += 1
 
                 if badcount == minsize:
