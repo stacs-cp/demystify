@@ -75,7 +75,14 @@ def parse_essence(eprime, eprimeparam):
             + "\n"
             + paramjson.stderr.decode("utf-8")
         )
-    params = json.loads(paramjson.stdout)
+
+    try:
+        params = json.loads(paramjson.stdout)
+    except Exception as e:
+        print("Failed JSON parsing of Conjure output:")
+        print(paramjson.stdout.decode("utf-8"))
+        print(e)
+        raise
 
     tdir = None
 
