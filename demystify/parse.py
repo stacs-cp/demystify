@@ -77,7 +77,12 @@ def parse_essence(eprime, eprimeparam):
         )
 
     try:
-        params = json.loads(paramjson.stdout)
+        paramstr = paramjson.stdout.decode("utf-8")
+        # Remove message printed by some versions of conjure
+        if paramstr.startswith("Parsing"):
+            paramstr = paramstr[paramstr.index("\n") + 1:]
+        
+        params = json.loads(paramstr)
     except Exception as e:
         print("Failed JSON parsing of Conjure output:")
         print(paramjson.stdout.decode("utf-8"))
