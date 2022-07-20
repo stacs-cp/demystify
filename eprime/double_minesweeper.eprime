@@ -1,0 +1,61 @@
+language ESSENCE' 1.0
+
+$ Double minesweeper is a game where a grid with numbers, sets of mines and empty spaces is given.
+$ The objective is to place mines in boxes so that each box with a number, has that number of mines neighbouring it
+$ Mines may only exist in boxes where there is not a number, and every box with a mine in it must have a neighbouring number
+
+given height: int(1..)
+given length: int(1..)
+given mines_per_box: int(1..)   $ Maximum number of mines in a box
+
+letting heightdim be domain int (1..height)
+letting lengthdim be domain int (1..length)
+
+$ Mines are represented by negative numbers (-1 for 1 mine, -2 for 2 mines etc)
+$ 0..8*mines_per_box represents numbers which represent the number of neighbouring mines
+letting D be domain int(-mines_per_box..8*mines_per_box+1)
+
+$ this value was chosen as the empty value, as 0 is being used to represent that there are no neighbouring mines
+letting empty be 8*mines_per_box+1
+
+given fixed : matrix indexed by [heightdim,lengthdim] of D
+
+$#VAR grid
+find grid: matrix indexed by [heightdim, lengthdim] of D
+
+$#CON mine_sum "grid[{a[0]},{a[1]}] must have {params['fixed'][a[0]][a[1]]} mines surrounding it"
+$ Check number of mines are consistent with numbers in the grid
+find mine_sum: matrix indexed by [heightdim, lengthdim] of bool
+
+$#CON mine_has_no "grid[{a[0]},{a[1]}] must have a neighbouring integer, if it is a mine"
+$ Check each mine has a mine number specifier as a neighbour
+find mine_has_no: matrix indexed by [heightdim, lengthdim] of bool
+
+such that
+
+$ Transfer non empty boxes in the input grid to the output grid
+forAll x: heightdim.
+    forAll y: lengthdim.
+        fixed[x,y] != empty -> grid[x,y]=fixed[x,y],
+
+$ If a box is empty in the input grid, it must be negative (have a mine) or be empty in the output grid
+forAll x: heightdim.
+    forAll y: lengthdim.
+        fixed[x,y] = empty -> grid[x,y] < 0 \/ grid[x,y] = empty,
+
+$ Ensure each box specifying the number of neighbouring mines, has that many mines neighbouring it
+forAll x: heightdim.
+    forAll y: lengthdim.
+        mine_sum[x,y] -> 
+            (fixed[x,y] >= 0 /\ fixed[x,y] < empty -> 
+                sum([(grid[x+i,y+j] < 0) * grid[x+i,y+j] | i,j:int(-1..1), 
+                    (x+i>=1 /\ x+i <= height /\ y+j >=1 /\ y+j <= length) /\ !(i=0 /\ j=0)]) 
+                =-grid[x,y]),
+        
+$ Ensure each mine (negative number) has a number specifying the number of mines neighbouring it as a neighbour
+forAll x: heightdim.
+    forAll y: lengthdim.
+        mine_has_no[x,y] -> 
+            (grid[x,y] < 0 -> 
+                exists i, j : int(-1..1). 
+                    (x+i>=1 /\ x+i <= height /\ y+j >=1 /\ y+j <= length) /\ !(i=0 /\ j=0) /\ grid[x+i, y+j] >= 0 /\ grid[x+i, y+j] < empty)
