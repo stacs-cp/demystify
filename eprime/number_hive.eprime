@@ -1,0 +1,43 @@
+language ESSENCE' 1.0
+
+given height: int(1..)
+letting heightdim be domain int(1..height)
+given length: int(1..)
+letting lengthdim be domain int(1..length)
+given numblocks: int
+given blocks: matrix indexed by [heightdim, lengthdim] of int(0..numblocks)
+given fixed: matrix indexed by [heightdim, lengthdim] of int(0..)
+
+
+$#VAR grid
+find grid: matrix indexed by [heightdim, lengthdim] of int(0..height*length)
+
+
+
+such that
+
+$ Transfer non empty boxes in the input grid to the output grid
+forAll x: heightdim.
+    forAll y: lengthdim.
+        fixed[x,y] != 0 -> grid[x,y]=fixed[x,y],
+
+
+forAll x: heightdim.
+    forAll y: lengthdim.
+        blocks[x,y] = 0 -> grid[x,y]=0,
+
+forAll i: int(1..numblocks).
+    forAll j: int(1..sum([1 | x:heightdim, y:lengthdim, blocks[x,y]=i])).
+        exists x:heightdim. exists y:lengthdim.
+            grid[x,y]=j /\ blocks[x,y]=i,
+
+forAll x: heightdim.
+    forAll y: lengthdim.
+            (
+                !(x+1 <= height /\ grid[x,y]=grid[x+1,y]) /\
+                !(y+1 <= length /\ grid[x,y]=grid[x,y+1]) /\
+                (y % 2 = 1 -> !(x-1 >= 0 /\ y+1 <=length /\ grid[x,y]=grid[x-1,y+1])) /\
+                (x % 2 = 1 -> !(x+1 <= height /\ y+1 <= length /\ grid[x,y]=grid[x+1,y+1]))
+            )
+            \/
+            grid[x,y]=0
