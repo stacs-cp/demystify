@@ -23,7 +23,15 @@ $#CON all_diff_neighbours "grid[{a[0]},{a[1]}] and grid[{a[2]},{a[3]}] cannot bo
 $ Check neighbours do not contain the same number
 find all_diff_neighbours: matrix indexed by [lengthdim, heightdim, lengthdim, heightdim, int(1..(height * length))] of bool
 
+$#AUX block_sizes
+$ Matrix containing the number of cells in each block
+find block_sizes: matrix indexed by [int(1..numblocks)] of int(1..height*length)
+
 such that
+
+$ Calculate the number of cells in each block
+forAll i: int(1..numblocks).
+    block_sizes[i]=sum([1 | x:lengthdim, y:heightdim, blocks[x,y]=i]),
 
 $ Transfer non empty boxes in the input grid to the output grid
 forAll x: lengthdim.
@@ -35,10 +43,18 @@ forAll x: lengthdim.
     forAll y: heightdim.
         blocks[x,y] = 0 -> grid[x,y]=0,
 
+$ For cells in blocks, remove all possibilities which are not between 1 and the number of cells in that block inclusive
+forAll x: lengthdim.
+    forAll y: heightdim.
+        blocks[x,y] = 0 \/ grid[x,y] <= block_sizes[blocks[x,y]] /\ grid[x,y] > 0,
+
 $ Ensure that each block contains each of the numbers 1-the size of that block exactly once
 forAll i: int(1..numblocks).
     forAll j: int(1..sum([1 | x:lengthdim, y:heightdim, blocks[x,y]=i])).
-        block_sum[i,j] -> (exists x:lengthdim. exists y:heightdim. (grid[x,y]=j /\ blocks[x,y]=i)),
+        block_sum[i,j] -> (
+            exists x:lengthdim. 
+                exists y:heightdim. 
+                    (grid[x,y]=j /\ blocks[x,y]=i)),
 
 $ Ensures that no neighbours contain the same number
 forAll x: lengthdim.
