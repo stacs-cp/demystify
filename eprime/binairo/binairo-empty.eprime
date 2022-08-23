@@ -1,0 +1,80 @@
+language ESSENCE' 1.0
+
+given n: int
+letting half = n/2
+letting ndim be int(1..n)
+letting ndim2 be int(1..n-2)
+given initial: matrix indexed by [ndim, ndim] of int(0,1,2)
+$ 0: black, 1: white, 2=empty
+
+
+$#VAR grid
+find grid: matrix indexed by [ndim, ndim] of bool
+
+$#CON rowwhite "row {a[0]} must be at least half white"
+find rowwhite: matrix indexed by [ndim] of bool
+$#CON rowblack "row {a[0]} must be at least half black"
+find rowblack: matrix indexed by [ndim] of bool
+$#CON colwhite "col {a[0]} must be at least half white"
+find colwhite: matrix indexed by [ndim] of bool
+$#CON colblack "col {a[0]} must be at least half black"
+find colblack: matrix indexed by [ndim] of bool
+
+$#CON rowmatchwhite "row {a[0]} cannot have three white starting at {a[1]}"
+find rowmatchwhite: matrix indexed by [ndim, ndim2] of bool
+$#CON rowmatchblack "row {a[0]} cannot have three black starting at {a[1]}"
+find rowmatchblack: matrix indexed by [ndim, ndim2] of bool
+$#CON colmatchwhite "col {a[0]} cannot have three white starting at {a[1]}"
+find colmatchwhite: matrix indexed by [ndim, ndim2] of bool
+$#CON colmatchblack "col {a[0]} cannot have three black starting at {a[1]}"
+find colmatchblack: matrix indexed by [ndim, ndim2] of bool
+
+
+$#CON alldiffrow "rows {a[0]} and {a[1]} must be different"
+find alldiffrow: matrix indexed by [ndim, ndim] of bool
+$#CON alldiffcol "cols {a[0]} and {a[1]} must be different"
+find alldiffcol: matrix indexed by [ndim, ndim] of bool
+
+such that
+
+forAll i,j: ndim.(
+(initial[i,j] = 1 -> grid[i,j]) /\
+(initial[i,j] = 0 -> !grid[i,j]) 
+),
+
+forAll i: ndim.
+rowwhite[i] -> sum([toInt(grid[i,j]) | j : ndim]) >= half,
+
+forAll i: ndim.
+rowblack[i] -> sum([toInt(!grid[i,j]) | j : ndim]) >= half,
+
+forAll i: ndim.
+colwhite[i] -> sum([toInt(grid[j,i]) | j : ndim]) >= half,
+
+forAll i: ndim.
+colblack[i] -> sum([toInt(!grid[j,i]) | j : ndim]) >= half,
+
+
+forAll i:ndim. forAll j: ndim2.
+(rowmatchwhite[i,j] -> !(grid[i,j] /\ grid[i,j+1] /\ grid[i,j+2])),
+
+forAll i:ndim. forAll j: ndim2.
+(rowmatchblack[i,j] -> !(!grid[i,j] /\ !grid[i,j+1] /\ !grid[i,j+2])),
+
+forAll i:ndim. forAll j: ndim2.
+(colmatchwhite[i,j] -> !(grid[j,i] /\ grid[j+1,i] /\ grid[j+2,i])),
+
+forAll i:ndim. forAll j: ndim2.
+(colmatchblack[i,j] -> !(!grid[j,i] /\ !grid[j+1,i] /\ !grid[j+2,i])),
+
+forAll i,j: ndim. (i!=j) ->
+(alldiffrow[i,j] -> exists k : ndim. grid[i,k] != grid[j,k]),
+
+forAll i,j: ndim. (i!=j) ->
+(alldiffcol[i,j] -> exists k : ndim. grid[k,i] != grid[k,j])
+
+
+,true->and(flatten([and(flatten(rowwhite)), and(flatten(rowblack)), and(flatten(colwhite)), and(flatten(colblack)), 
+and(flatten(rowmatchwhite)), and(flatten(rowmatchblack)), and(flatten(colmatchwhite)), and(flatten(colmatchblack)),
+and(flatten(alldiffrow)),and(flatten(alldiffcol))
+]))
