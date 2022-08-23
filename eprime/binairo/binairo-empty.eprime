@@ -4,7 +4,6 @@ given n: int
 letting half = n/2
 letting ndim be int(1..n)
 letting ndim2 be int(1..n-2)
-given initial: matrix indexed by [ndim, ndim] of int(0,1,2)
 $ 0: black, 1: white, 2=empty
 
 
@@ -37,10 +36,6 @@ find alldiffcol: matrix indexed by [ndim, ndim] of bool
 
 such that
 
-forAll i,j: ndim.(
-(initial[i,j] = 1 -> grid[i,j]) /\
-(initial[i,j] = 0 -> !grid[i,j]) 
-),
 
 forAll i: ndim.
 rowwhite[i] -> sum([toInt(grid[i,j]) | j : ndim]) >= half,
