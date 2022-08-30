@@ -4,10 +4,13 @@ given height: int(1..)
 letting heightdim be domain int(0..height-1)
 given length: int(1..)
 letting lengthdim be domain int(0..length-1)
+
+$ Defines which elements of the 2d matrix map to triangles
 given present: matrix indexed by [lengthdim, heightdim] of int(0..1)
 given fixed: matrix indexed by [lengthdim, heightdim] of int(0..6)
-given board_type: int(5..6)
-letting g be [1,2,3]
+given board_type: int(5..)
+
+$ Defines sets of coordinates which form a hexagon around a given triangle
 letting down_hex_coords be [[[-1,0],[1,0],[-1,1],[0,1],[1,1]],[[0,-1],[1,-1],[2,-1],[1,0],[2,0]],[[-2,-1],[-1,-1],[0,-1],[-2,0],[-1,0]]]
 letting up_hex_coords be [[[-1,1],[0,1],[1,1],[-1,0],[1,0]],[[1,0],[2,0],[0,1],[1,1],[2,1]],[[-2,0],[-1,0],[-2,1],[-1,1],[0,1]]]
 
@@ -29,15 +32,28 @@ forAll x: lengthdim.
     forAll y: heightdim.
         present[x,y] = 0 <-> grid[x,y]=0,
 
+$ Ensure that the same number cannot occur in a hexagon of triangles
 forAll x: lengthdim.
     forAll y: heightdim.
         ((x+y)%2=0->
             (forAll i: int(1..3).
                 forAll j: int(1..5).
                     forAll num: int(1..6).
-                        (x+down_hex_coords[i,j,1]>=0 /\ x+down_hex_coords[i,j,1]<length /\ y+down_hex_coords[i,j,2]>=0 /\ y+down_hex_coords[i,j,2]<height /\ present[x+down_hex_coords[i,j,1], y+down_hex_coords[i,j,2]]=1) -> (norepeat_hex[x,y,x+down_hex_coords[i,j,1],y+down_hex_coords[i,j,2],num] -> !(grid[x,y]=num /\ grid[x+down_hex_coords[i,j,1], y+down_hex_coords[i,j,2]]=num)))) /\
+                        (x+down_hex_coords[i,j,1]>=0 /\ 
+                        x+down_hex_coords[i,j,1]<length /\ 
+                        y+down_hex_coords[i,j,2]>=0 /\ 
+                        y+down_hex_coords[i,j,2]<height /\ 
+                        present[x+down_hex_coords[i,j,1], y+down_hex_coords[i,j,2]]=1) -> 
+                            (norepeat_hex[x,y,x+down_hex_coords[i,j,1],y+down_hex_coords[i,j,2],num] -> 
+                                !(grid[x,y]=num /\ grid[x+down_hex_coords[i,j,1], y+down_hex_coords[i,j,2]]=num)))) /\
        ((x+y)%2=1->
             (forAll i: int(1..3).
                 forAll j: int(1..5).
                     forAll num: int(1..6).
-                        (x+up_hex_coords[i,j,1]>=0 /\ x+up_hex_coords[i,j,1]<length /\ y+up_hex_coords[i,j,2]>=0 /\ y+up_hex_coords[i,j,2]<height /\ present[x+up_hex_coords[i,j,1], y+up_hex_coords[i,j,2]]=1) -> (norepeat_hex[x,y,x+up_hex_coords[i,j,1],y+up_hex_coords[i,j,2],num] -> !(grid[x,y]=num /\ grid[x+up_hex_coords[i,j,1], y+up_hex_coords[i,j,2]]=num))))
+                        (x+up_hex_coords[i,j,1]>=0 /\ 
+                        x+up_hex_coords[i,j,1]<length /\ 
+                        y+up_hex_coords[i,j,2]>=0 /\ 
+                        y+up_hex_coords[i,j,2]<height /\ 
+                        present[x+up_hex_coords[i,j,1], y+up_hex_coords[i,j,2]]=1) -> 
+                            (norepeat_hex[x,y,x+up_hex_coords[i,j,1],y+up_hex_coords[i,j,2],num] -> 
+                                !(grid[x,y]=num /\ grid[x+up_hex_coords[i,j,1], y+up_hex_coords[i,j,2]]=num))))
