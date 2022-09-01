@@ -75,8 +75,11 @@ CONFIG_MORE_MUS["findLarger"] = True
 
 CONFIG_HINT = copy.deepcopy(CONFIG_FAST)
 
-CONFIG_HINT["earlyExit"] = False
-CONFIG_HINT["baseSizeMUS"] = 10
+CONFIG_HINT["earlyExit"] = True
+CONFIG_HINT["baseSizeMUS"] = 2
+CONFIG_HINT["cores"] = 0
+CONFIG_HINT["repeats"] = 3
+CONFIG_HINT["smallRepeats"] = 2
 
 def getDefaultConfig():
     global CONFIG_FAST
