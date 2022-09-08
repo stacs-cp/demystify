@@ -209,7 +209,7 @@ class Var:
     def __init__(self, name: str, dom: Sequence[int], location):
         self._dom = dom
         self._name = str(name)
-        self._location = location
+        self._location = location  #[row, col]
 
     def dom(self):
         return self._dom

@@ -287,6 +287,8 @@ class Explainer(object):
             # Tell we solver we know this
             self.solver.addLit(p)
             # Remove from the things we have to calculate
+            assert (p in self.unexplained) or (p in self.explained)
+            assert p in self.unexplained
             self.explained.append(p)
             self.unexplained.remove(p)
 

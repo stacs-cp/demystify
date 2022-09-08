@@ -294,8 +294,7 @@ def parse_essence(eprime, eprimeparam):
                 connected = connected.union(
                     SortedSet(lit.neg() for lit in connected)
                 )
-
-                assert len(connected) > 0
+                # assert len(connected) > 0
 
                 # Skip constraints which do not include any variables
                 if len(connected) > 0:
