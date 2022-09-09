@@ -65,8 +65,9 @@ class SATSolver:
                 self._rawclauses.append(c)
 
     def __getstate__(self):
-        self._solver.delete()
-        return self.__dict__.copy()
+        ret = self.__dict__.copy()
+        del ret['_solver']
+        return ret
 
     def __setstate__(self, d):
         self.__dict__ = d
@@ -74,7 +75,6 @@ class SATSolver:
 
     # Recreate solver
     def reboot(self):
-        self._solver.delete()
         self._solver = Solver(
             name=EXPCONFIG["solver"],
             incr=EXPCONFIG["solverIncremental"],

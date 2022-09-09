@@ -296,6 +296,7 @@ def parse_essence(eprime, eprimeparam):
                 )
                 # assert len(connected) > 0
 
+
                 # Skip constraints which do not include any variables
                 if len(connected) > 0:
                     logging.debug("Adding: " + constraintname)
