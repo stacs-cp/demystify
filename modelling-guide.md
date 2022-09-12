@@ -84,3 +84,33 @@ Where the English description describes the constraint. This can include Python 
 * Background: A map from integers to pictures, showing alternative images when a cell is assigned a value.
 
 * 
+
+## Triangular and hexagonal grid puzzles
+
+Triangular and hexagonal grid puzzles should be modelled using a 2D matrix to represent the grid.
+
+The .param file should contain a variable called board_type which instructs the visualiser and the eprime model how to interpret the 2d grid.
+
+board_value values maps to the following board types:
+
+1: Hexagonal board with odd-q offset coordinates
+
+2: Hexagonal board with odd-r offset coordinates
+
+3: Hexagonal board with even-q offset coordinates
+
+4: Hexagonal board with even-r offset coordinates
+
+5: Triangular grid where the triangle at [0,0] points down
+
+The hexagonal grids use offset coordinate systems in a 2d matrix as described here: https://www.redblobgames.com/grids/hexagons/
+
+Since the board_type is defined in the param file, it is possible to write essence prime models which behave differently for different board types.
+
+An example of this is the number_hive.eprime model which can correctly check which hexagons neighbour each other for every hexagonal board type
+
+The param file must also contain a variable called present which is a 2D matrix of the same dimensions as the board. 
+
+If an element of present contains a 0, the corresponding element in the board is not considered part of the board and will not be visualised. Otherwise, it will be
+
+Note that when creating custom board components, it is possible to take a different variable from the param file and pass that as the 'present' attribute, as is done with the 'blocks' attribute in the number_hive model

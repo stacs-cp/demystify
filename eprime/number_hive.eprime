@@ -1,0 +1,89 @@
+$ Description of puzzle: https://teachinglondoncomputing.org/cut-hive-puzzles/
+$ Puzzle guide: https://teachinglondoncomputing.files.wordpress.com/2016/02/booklet-cuthivelogicpuzzles.pdf
+
+language ESSENCE' 1.0
+
+$ Number Hive is a game with a hexagonal grid split into blocks. 
+$ Each block must contain each of the numbers 1-the size of that block exactly once, 
+$ and no neighbours may contain the same number
+
+given height: int(1..)
+letting heightdim be domain int(0..height-1)
+given length: int(1..)
+letting lengthdim be domain int(0..length-1)
+given numblocks: int(1..12)
+given blocks: matrix indexed by [lengthdim, heightdim] of int(0..numblocks)
+given fixed: matrix indexed by [lengthdim, heightdim] of int(0..height*length)
+given board_type: int(1..4)
+
+$#VAR grid
+find grid: matrix indexed by [lengthdim, heightdim] of int(0..height*length)
+
+$#CON block_sum "Block {a[0]} must contain the number {a[1]} exactly once"
+$ Check each block has each of the numbers 1-{size of that block} exactly once
+find block_sum: matrix indexed by [int(1..numblocks), int(1..(height * length))] of bool
+
+$#CON all_diff_neighbours "grid[{a[0]},{a[1]}] and grid[{a[2]},{a[3]}] cannot both be {a[4]} as they are neighbours"
+$ Check neighbours do not contain the same number
+find all_diff_neighbours: matrix indexed by [lengthdim, heightdim, lengthdim, heightdim, int(1..(height * length))] of bool
+
+$#AUX block_sizes
+$ Matrix containing the number of cells in each block
+find block_sizes: matrix indexed by [int(1..numblocks)] of int(1..height*length)
+
+such that
+
+$ Calculate the number of cells in each block
+forAll i: int(1..numblocks).
+    block_sizes[i]=sum([1 | x:lengthdim, y:heightdim, blocks[x,y]=i]),
+
+$ Transfer non empty boxes in the input grid to the output grid
+forAll x: lengthdim.
+    forAll y: heightdim.
+        fixed[x,y] != 0 -> grid[x,y]=fixed[x,y],
+
+$ If a box in the 2d grid does not represent a hexagon in the hexagonal grid, its value is 0 and it will not be shown
+forAll x: lengthdim.
+    forAll y: heightdim.
+        blocks[x,y] = 0 -> grid[x,y]=0,
+
+$ For cells in blocks, remove all possibilities which are not between 1 and the number of cells in that block inclusive
+forAll x: lengthdim.
+    forAll y: heightdim.
+        blocks[x,y] = 0 \/ grid[x,y] <= block_sizes[blocks[x,y]] /\ grid[x,y] > 0,
+
+$ Ensure that each block contains each of the numbers 1-the size of that block exactly once
+forAll i: int(1..numblocks).
+    forAll j: int(1..sum([1 | x:lengthdim, y:heightdim, blocks[x,y]=i])).
+        block_sum[i,j] -> (
+            exists x:lengthdim. 
+                exists y:heightdim. 
+                    (grid[x,y]=j /\ blocks[x,y]=i)),
+
+$ Ensures that no neighbours contain the same number
+forAll x: lengthdim.
+    forAll y: heightdim.
+            (
+                (all_diff_neighbours[x,y,x+1,y,grid[x,y]] -> !(x+1 < length /\ grid[x,y]=grid[x+1,y])) /\
+                (all_diff_neighbours[x,y,x,y+1,grid[x,y]] -> !(y+1 < height /\ grid[x,y]=grid[x,y+1])) /\
+                
+                $ Generalise the neighbours constraints for each type of hexagon offset coordinate system (oddq, oddr, evenq, evenr): https://www.redblobgames.com/grids/hexagons/
+                (board_type=1  ->
+                ((all_diff_neighbours[x,y,x+1,y-1,grid[x,y]] -> (x % 2 = 0 -> !(x+1 < length /\ y-1 >= 0/\ grid[x,y]=grid[x+1,y-1]))) /\
+                (all_diff_neighbours[x,y,x+1,y+1,grid[x,y]] -> (x % 2 = 1 -> !(x+1 < length /\ y+1 < height /\ grid[x,y]=grid[x+1,y+1]))))) /\
+
+                (board_type=2  ->
+                ((all_diff_neighbours[x,y,x-1,y+1,grid[x,y]] -> (y % 2 = 0 -> !(x-1 >= 0 /\ y+1 < height /\ grid[x,y]=grid[x-1,y+1]))) /\
+                (all_diff_neighbours[x,y,x+1,y+1,grid[x,y]] -> (y % 2 = 1 -> !(x+1 < length /\ y+1 < height /\ grid[x,y]=grid[x+1,y+1]))))) /\
+
+                (board_type=3  ->
+                ((all_diff_neighbours[x,y,x+1,y+1,grid[x,y]] -> (x % 2 = 0 -> !(x+1 < length /\ y+1 < height /\ grid[x,y]=grid[x+1,y+1]))) /\
+                (all_diff_neighbours[x,y,x+1,y-1,grid[x,y]] -> (x % 2 = 1 -> !(x+1 < length /\ y-1 >=0 /\ grid[x,y]=grid[x+1,y-1]))))) /\
+
+                (board_type=4  ->
+                ((all_diff_neighbours[x,y,x+1,y+1,grid[x,y]] -> (y % 2 = 0 -> !(x+1 < length /\ y+1 < height /\ grid[x,y]=grid[x+1,y+1]))) /\
+                (all_diff_neighbours[x,y,x-1,y+1,grid[x,y]] -> (y % 2 = 1 -> !(x-1 >= 0 /\ y+1 < height /\ grid[x,y]=grid[x-1,y+1]))))) 
+            )
+            $Boxes which are not part of the hexagonal grid are exempt
+            \/
+            grid[x,y]=0 

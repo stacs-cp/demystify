@@ -48,6 +48,9 @@ Demystify also has a visual interface, which you can find in a separate reposito
 * Star Battle
 * Tents and Trees
 * Thermometers
+* Number Hive
+* Double Minesweeper
+* Tridoku
 
 All the models can be found in the [eprime directory](https://github.com/stacs-cp/demystify/tree/master/eprime). If you
 are interested in a puzzle that is not implemented, there is a guide for

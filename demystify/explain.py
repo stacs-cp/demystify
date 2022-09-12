@@ -195,7 +195,19 @@ class Explainer(object):
                 ) = self._choose_mus(lit_choices, mus_dict)
 
             step_dict = self._get_step_dict(best_proven_lits, best_mus)
-            step_dict["otherChoices"] = choices
+
+            step_dict_copy = dict(step_dict)
+
+            step_dict["otherChoices"] = []
+
+            for choice in choices:
+                
+                if choice not in step_dict["otherChoices"] and choice != step_dict_copy:
+                    step_dict["otherChoices"].append(choice)
+
+            if len(step_dict["otherChoices"]) == 0:
+                del step_dict["otherChoices"]
+
             if allow_update:
                 self._add_known(best_proven_lits)
         
