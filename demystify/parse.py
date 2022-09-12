@@ -314,7 +314,7 @@ def parse_essence(eprime, eprimeparam):
                         demystify.base.DummyClause(constraintname, connected)
                     ] = varmap[v][k][1]
                 else:
-                    logging.debug("Skipping: " + constraintname)
+                    logging.debug(f"There are no VAR attached to {v}[{k}] (varmap: {varmap[v][k]})")
                     formula.append([varmap[v][k][1]])
 
     printvarlist = []

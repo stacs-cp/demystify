@@ -192,5 +192,6 @@ class ProcessPool:
     def cleanup(self):
         for q in self._inqueues:
             q.put((None, None))
+            q.close()
         for p in self._processes:
             p.join()

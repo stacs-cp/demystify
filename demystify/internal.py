@@ -13,8 +13,7 @@ from .base import EqVal, NeqVal
 from .config import EXPCONFIG
 
 # A variable is a dictionary mapping values to their SAT variable
-
-from .solvers.z3impl import Z3Solver
+# from .solvers.z3impl import Z3Solver
 from .solvers.pysatimpl import SATSolver
 
 

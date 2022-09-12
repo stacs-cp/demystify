@@ -1,6 +1,7 @@
 import logging
 import math
 import os
+import copy
 
 from .parse import parse_json, parse_essence
 from .mus import CascadeMUSFinder, checkWhichLitsAMUSProves
@@ -55,7 +56,7 @@ class Explainer(object):
     def init_from_json(self, puzzle_json):
         self.puzzle, self.solver = parse_json(puzzle_json)
         self.solution = self._get_puzzle_solution()
-        self.unexplained = self.solution
+        self.unexplained = copy.deepcopy(self.solution)
         self._set_mus_finder()
 
     def init_from_essence(self, eprime, eprimeparam, *, allow_incomplete=False):
@@ -64,7 +65,7 @@ class Explainer(object):
         )
         self.name = os.path.basename(eprime)
         self.solution = self._get_puzzle_solution(allow_incomplete=allow_incomplete)
-        self.unexplained = self.solution
+        self.unexplained = copy.deepcopy(self.solution)
         self._set_mus_finder()
 
     """
@@ -91,19 +92,19 @@ class Explainer(object):
                         )
                     )
                 else:
-                    steps.append(self.explain_step())
+                    steps.append(self.explain_step(allow_update=allow_update))
         else:
             first_step = True
             while len(self.unexplained) > 0:
                 if first_step:
                     steps.append(
                         self.explain_step(
-                            lit_choice=lit_choice, mus_choice=mus_choice
+                            lit_choice=lit_choice, mus_choice=mus_choice, allow_update=allow_update
                         )
                     )
                     first_step = False
                 else:
-                    steps.append(self.explain_step())
+                    steps.append(self.explain_step(allow_update=allow_update))
 
         if len(self.unexplained) == 0:
             steps.append(self.get_solved_step())
@@ -125,6 +126,7 @@ class Explainer(object):
             if l is not None:
                 mus_dict = self.mus_finder.smallestMUS([l])
             else:
+                print("we got here!?!?")
                 mus_dict = self.mus_finder.smallestMUS(self.unexplained)
         else:
             mus_dict = self.mus_finder.smallestMUS(self.unexplained)
@@ -215,6 +217,17 @@ class Explainer(object):
             self.steps_explained += 1
 
         return step_dict
+
+    def explain_lit(self, lit_choice):
+        l = self.find_lit(lit_choice["row"], lit_choice["column"], lit_choice["value"])
+
+        if l is not None:
+            mus_dict = self.mus_finder.smallestMUS([l])
+        else:
+            return None
+
+        mus_dict.remove_duplicates()
+        return mus_dict
 
     def find_lit(self, row, column, value):
         for l in self.unexplained:
