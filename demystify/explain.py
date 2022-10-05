@@ -118,6 +118,7 @@ class Explainer(object):
     """
 
     def explain_step(self, lit_choice=None, mus_choice=None, allow_update=True):
+        assert len(self.unexplained)>0
         step_dict = {}
         step_dict["stepNumber"] = self.steps_explained + 1
 
@@ -219,7 +220,7 @@ class Explainer(object):
 
     def find_lit(self, row, column, value):
         for l in self.unexplained:
-            if str(l.var._location[0]) == str(row) and l.var._location[1] == str(column) and str(l.val) == str(value):
+            if str(l.var._location[0]) == str(row) and str(l.var._location[1]) == str(column) and str(l.val) == str(value):
                 return l
         return None
 
