@@ -42,6 +42,9 @@ class Lit:
     def neg(self):
         return Lit(self.var, self.val, not self.equal)
 
+    def as_dict(self):
+        return {'var' : self.var.as_dict(), 'val' : self.val, 'equal' : self.equal}
+
 
 def EqVal(var, val: int) -> Lit:
     return Lit(var, val, True)
@@ -264,6 +267,9 @@ class Var:
 
     def __hash__(self):
         return self._name.__hash__()
+    
+    def as_dict(self):
+        return {'dom' : self._dom, 'name' : self._name, 'location' : self._location }
 
 
 class VarMatrix:

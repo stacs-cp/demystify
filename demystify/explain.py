@@ -304,6 +304,7 @@ class Explainer(object):
 
     def _get_deduction(self, lits, mus):
         exp = {}
+        exp['lits'] = list(l.as_dict() for l in lits)
         exp["decision"] = (
             "Setting " + ", ".join(str(l) for l in lits) + " because:"
         )
