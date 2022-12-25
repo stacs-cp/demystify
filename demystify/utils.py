@@ -18,7 +18,10 @@ from multiprocessing import current_process
 
 # Deal with y being too large, or x being a fraction
 def safepow(x, y):
-    p = math.pow(float(x), float(y))
+    try:
+        p = math.pow(float(x), float(y))
+    except OverflowError:
+        return math.inf
     if p < 1000000:
         return int(p)
     else:
