@@ -43,22 +43,22 @@ forAll i,j: griddim. forAll k: int(0..1). forAll l: int(-1..1). $ We only need t
 
 
 forAll i: griddim.
-rowup[i] -> (sum(stars[i,..]) >= starcount),
+rowup[i] -> (sum([toInt(stars[i,j]) | j : griddim]) >= starcount),
 
 forAll i: griddim.
-rowdown[i] -> (sum(stars[i,..]) <= starcount),
+rowdown[i] -> (sum([toInt(stars[i,j]) | j : griddim]) <= starcount),
 
 forAll i: griddim.
-colup[i] -> (sum(stars[..,i]) >= starcount),
+colup[i] -> (sum([toInt(stars[j,i]) | j : griddim]) >= starcount),
 
 forAll i: griddim.
-coldown[i] -> (sum(stars[..,i]) <= starcount),
+coldown[i] -> (sum([toInt(stars[j,i]) | j : griddim]) <= starcount),
 
 forAll i: griddim.
-blockup[i] -> (sum([stars[x,y] /\ blocks[x,y]=i | x,y:griddim]) >= starcount),
+blockup[i] -> (sum([toInt(stars[x,y] /\ blocks[x,y]=i) | x,y:griddim]) >= starcount),
 
-forAll i: int(1..numblocks).
-blockdown[i] -> (sum([stars[x,y] /\ blocks[x,y]=i | x,y:griddim]) <= starcount),
+forAll i: griddim.
+blockdown[i] -> (sum([toInt(stars[x,y] /\ blocks[x,y]=i) | x,y:griddim]) <= starcount),
 
 $ Check problem is solvable!
 $and([and(flatten(adj)), and(rowup),and(rowdown),and(colup),and(coldown),and(blockup),and(blockdown)]),
