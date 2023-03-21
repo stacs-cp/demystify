@@ -16,7 +16,7 @@ from .musdict import MusDict
 # This calculates Minimum Unsatisfiable Sets
 # It uses internals from solver, but is put in another file just for "neatness"
 
-def tinyMUS(solver, assume, distance, badlimit, config):
+def tinyMUS(r, solver, assume, distance, badlimit, config):
     smtassume = [solver._varlit2smtmap[l] for l in assume]
     if distance == 1:
         cons = flatten([solver._varlit2con[l] for l in assume])
@@ -24,13 +24,17 @@ def tinyMUS(solver, assume, distance, badlimit, config):
         cons = flatten([solver._varlit2con2[l] for l in assume])
     else:
         cons = list(solver._conlits)
+    
+    if config["tinyChop"]:
+        r.shuffle(cons)
+        cons = cons[:int(-len(cons)/2)]
 
     core = solver.basicCore(smtassume + cons)
     if core is None:
         return None
 
     corecpy = list(core)
-    badcount = 1
+    badcount = 0
     for lit in corecpy:
         if lit in core and len(core) > 2:
             to_test = list(core)
@@ -375,7 +379,7 @@ def MUS(
 
 def _parfunc_dotinymus(args):
     (p, distance, badlimit, config) = args
-    return (p, tinyMUS(getChildSolver(), [p.neg()], distance, badlimit, config))
+    return (p, tinyMUS(randomFromSeed("X"), getChildSolver(), [p.neg()], distance, badlimit, config))
 
 
 def getTinyMUSes(solver, puzlits, musdict, *, distance, repeats, badlimit, config):
@@ -553,7 +557,10 @@ def cascadeMUS(solver, puzlits, repeats, musdict, config):
             ret = inner_loop(loop, my_pool) # each time we go into inner loop we try to find a mus of size at least loop
             if ret:
                 return
-            loop = max(loop + config["MUSaddStep"], int(loop * config["MUSmultStep"]))
+            if loop >= config["MUSdoMultStep"]:
+                loop = max(loop + config["MUSaddStep"], int(loop * config["MUSmultStep"]))
+            else:
+                loop = loop + config["MUSaddStep"]
 
 
 class CascadeMUSFinder:
@@ -583,26 +590,6 @@ class CascadeMUSFinder:
             logging.info("Early exit from checkSmall1")
             return musdict
 
-        # Try looking for general tiny MUSes, to prime search
-        logging.info("Looking for small")
-        getTinyMUSes(
-            self._solver,
-            puzlits,
-            musdict,
-            repeats=self.config["smallRepeats"],
-            distance=999,
-            badlimit=self.config["baseSizeMUS"] * 2,
-            config=self.config
-        )
-
-        logging.info("Smallest MUS B: %s ", musdict.minimum())
-
-        # Early exit for trivial case
-        if musdict.minimum() <= self.config["baseSizeMUS"] and self.config["earlyExit"]:
-            logging.info("Early exit from checkSmall general")
-            self._bestcache = copy.deepcopy(musdict)
-            return musdict
-
         logging.info("Checking cache")
         if EXPCONFIG["useCache"]:
             checkMUS(self._solver, puzlits, self._bestcache, musdict, self.config)
@@ -622,7 +609,7 @@ class CascadeMUSFinder:
         # Early exit for trivial case
         if musdict.minimum() <= self.config["baseSizeMUS"] and self.config["earlyExit"]:
             logging.info("Early exit from checkSmall2 general")
-            self._bestcache = copy.deepcopy(musdict)
+            #self._bestcache = copy.deepcopy(musdict)
             return musdict
 
         logging.info("Running cascade algorithm")
@@ -630,6 +617,6 @@ class CascadeMUSFinder:
 
         logging.info("Finished CascadeMUS: Found %s", musdict.minimum())
 
-        self._bestcache = copy.deepcopy(musdict)
+        #self._bestcache = copy.deepcopy(musdict)
 
         return musdict

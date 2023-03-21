@@ -1,6 +1,7 @@
 import json
 import sys
 import copy
+import logging
 
 # This config contains variables whose values we never expect to change,
 # they are used in some experiments.
@@ -54,12 +55,15 @@ CONFIG_FAST = {
     "tryManyChopMUS": True,
     "minPrecheckMUS": False,
     "minPrecheckStepsMUS": False,
+    
+    "tinyChop": True,
 
     # Include larger MUSes in choices
     "findLarger": False,
 
     "MUSaddStep": 4,
     "MUSmultStep": 2,
+    "MUSdoMultStep": 2
 }
 
 CONFIG_MORE_MUS = copy.deepcopy(CONFIG_FAST)
@@ -75,11 +79,36 @@ CONFIG_MORE_MUS["findLarger"] = True
 
 CONFIG_HINT = copy.deepcopy(CONFIG_FAST)
 
-CONFIG_HINT["earlyExit"] = True
+#CONFIG_HINT["prechopMUSes12"] = True
+#CONFIG_HINT["tryManyChopMUS"] = False
+
+
+CONFIG_HINT["earlyExit"] = False
 CONFIG_HINT["baseSizeMUS"] = 2
+CONFIG_HINT["MUSaddStep"] = 2
+CONFIG_HINT["MUSmultStep"] = 8
+CONFIG_HINT["MUSdoMultStep"] = 5
 CONFIG_HINT["cores"] = 0
-CONFIG_HINT["repeats"] = 3
-CONFIG_HINT["smallRepeats"] = 2
+CONFIG_HINT["repeats"] = 1
+CONFIG_HINT["smallRepeats"] = 4
+CONFIG_HINT["checkSmall2"] = True
+CONFIG_HINT["tinyChop"] = True
+
+#CONFIG_HINT["earlyExit"] = False
+#CONFIG_HINT["cores"] = 0
+#CONFIG_HINT["repeats"] = 100
+#CONFIG_HINT["smallRepeats"] = 100
+#CONFIG_HINT["MUSaddStep"] = 1
+#CONFIG_HINT["MUSmultStep"] = 0
+#CONFIG_HINT["baseSizeMUS"] = 1
+#CONFIG_HINT["prechopMUSes12"] = True
+
+if False:
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(levelname)s:%(pathname)s:%(lineno)d:%(name)s:%(message)s",
+    )
+
 
 def getDefaultConfig():
     global CONFIG_FAST
