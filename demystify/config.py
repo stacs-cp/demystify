@@ -89,10 +89,11 @@ CONFIG_HINT["MUSaddStep"] = 2
 CONFIG_HINT["MUSmultStep"] = 8
 CONFIG_HINT["MUSdoMultStep"] = 5
 CONFIG_HINT["cores"] = 0
-CONFIG_HINT["repeats"] = 1
+CONFIG_HINT["repeats"] = 5
 CONFIG_HINT["smallRepeats"] = 4
 CONFIG_HINT["checkSmall2"] = True
 CONFIG_HINT["tinyChop"] = True
+CONFIG_HINT["MUSGiveUP"] = 10
 
 #CONFIG_HINT["earlyExit"] = False
 #CONFIG_HINT["cores"] = 0

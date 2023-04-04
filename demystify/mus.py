@@ -555,7 +555,7 @@ def cascadeMUS(solver, puzlits, repeats, musdict, config):
     with getPool(config["cores"]) as my_pool:
         while loop <= loopend: #loop represents the size of mus we are currently looking for
             ret = inner_loop(loop, my_pool) # each time we go into inner loop we try to find a mus of size at least loop
-            if ret:
+            if ret or ("MUSGiveUP" in config and loop >= config["MUSGiveUP"]):
                 return
             if loop >= config["MUSdoMultStep"]:
                 loop = max(loop + config["MUSaddStep"], int(loop * config["MUSmultStep"]))
