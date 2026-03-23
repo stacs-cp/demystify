@@ -1,3 +1,8 @@
+**You probably actually want the Demystify visualiser, at https://github.com/stacs-cp/demystify-visualiser , as it gives a much better GUI to Demystify**
+
+**Important: The Python version of Demystify is no long being extended, please consider https://github.com/stacs-cp/demystify-rs (although it is not feature complete yet)**
+
+
 # Demystify
 
 Pen and paper puzzles like Sudoku, Futoshiki and Skyscrapers are hugely
